@@ -19,7 +19,7 @@ RUN corepack enable && corepack prepare pnpm@11 --activate && pnpm approve-build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+RUN apk add --no-cache curl && addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
