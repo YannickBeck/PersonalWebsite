@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { HtmlLang } from "@/components/html-lang";
 import { Analytics } from "@/components/analytics";
+import { PortalScript } from "@/components/portal-script";
 
 const figtree = Figtree({
   variable: "--font-family-body",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <main id="main">{children}</main>
           <SiteFooter />
           <Analytics />
+          <PortalScript />
         </Providers>
       </body>
     </html>
