@@ -34,6 +34,8 @@ const de = {
     'Persönliche Website im Aufbau — Projekte, Blog und Kontakt. Inhalte kommen aus Ghost, das Designsystem ist Astryx.',
   viewProjects: 'Projekte ansehen',
   contact: 'Kontakt',
+  searchLabel: 'Beiträge durchsuchen',
+  searchPlaceholder: 'Suchen …',
   footer: '© 2026 Yannick Beck — im Aufbau mit Next.js, Astryx und Ghost.',
   pages: {
     projekte: {
@@ -102,6 +104,8 @@ const en: Dictionary = {
     'Personal website under construction — projects, blog and contact. Content comes from Ghost, the design system is Astryx.',
   viewProjects: 'View projects',
   contact: 'Contact',
+  searchLabel: 'Search posts',
+  searchPlaceholder: 'Search …',
   footer: '© 2026 Yannick Beck — under construction with Next.js, Astryx and Ghost.',
   pages: {
     projekte: {

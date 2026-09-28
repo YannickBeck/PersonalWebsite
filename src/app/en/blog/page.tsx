@@ -1,18 +1,22 @@
 import { PageHero } from '@/components/page-hero';
 import { Section } from '@astryxdesign/core/Section';
-import { Card } from '@astryxdesign/core/Card';
-import { Text } from '@astryxdesign/core/Text';
+import { PostList } from '@/components/post-list';
 import { getDictionary } from '@/i18n/dictionaries';
+import { getPosts } from '@/lib/ghost';
 
-export default function Page() {
-  const page = getDictionary('en').pages.blog;
+export default async function BlogPageEn() {
+  const dict = getDictionary('en');
+  const posts = await getPosts('en');
   return (
     <>
-      <PageHero title={page.title} lede={page.lede} />
+      <PageHero title={dict.pages.blog.title} lede={dict.pages.blog.lede} />
       <Section variant="muted">
-        <Card variant="muted">
-          <Text>{page.placeholder}</Text>
-        </Card>
+        <PostList
+          lang="en"
+          posts={posts}
+          searchLabel={dict.searchLabel}
+          searchPlaceholder={dict.searchPlaceholder}
+        />
       </Section>
     </>
   );
