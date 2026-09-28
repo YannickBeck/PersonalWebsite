@@ -3,8 +3,9 @@ import { Figtree } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { SiteHeader } from "@/components/site-header";
-import { Section } from "@astryxdesign/core/Section";
-import { Text } from "@astryxdesign/core/Text";
+import { SiteFooter } from "@/components/site-footer";
+import { HtmlLang } from "@/components/html-lang";
+import { Analytics } from "@/components/analytics";
 
 const figtree = Figtree({
   variable: "--font-family-body",
@@ -12,8 +13,12 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
-  title: "Yannick Beck",
-  description: "Persönliche Website von Yannick Beck — Projekte, Blog und Kontakt.",
+  title: {
+    default: "Yannick Beck",
+    template: "%s · Yannick Beck",
+  },
+  description:
+    "Persönliche Website von Yannick Beck — Projekte, Blog und Kontakt.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -21,11 +26,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="de" className={figtree.variable}>
       <body>
         <Providers>
+          <HtmlLang />
+          <a href="#main" className="skip-link">
+            Zum Inhalt springen
+          </a>
           <SiteHeader />
-          {children}
-          <Section variant="muted">
-            <Text>© 2026 Yannick Beck — im Aufbau mit Next.js, Astryx und Ghost.</Text>
-          </Section>
+          <main id="main">{children}</main>
+          <SiteFooter />
+          <Analytics />
         </Providers>
       </body>
     </html>

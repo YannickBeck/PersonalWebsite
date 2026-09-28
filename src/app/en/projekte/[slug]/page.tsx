@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { detailOr404 } from '@/components/detail-page';
 import { getBySlug, getProjectSlugs } from '@/lib/ghost';
 
@@ -5,9 +6,24 @@ export async function generateStaticParams() {
   return (await getProjectSlugs('en')).map((slug) => ({ slug }));
 }
 
-export default async function ProjektDetailEn({
-  params,
-}: {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getBySlug(slug, 'en');
+  if (!post) {
+    return {};
+  }
+  return {
+    title: post.title,
+    description: post.custom_excerpt || post.excerpt || undefined,
+    openGraph: {
+      title: post.title,
+      description: post.custom_excerpt || post.excerpt || undefined,
+      images: post.feature_image ? [post.feature_image] : undefined,
+    },
+  };
+}
+
+export default async function ProjektDetailEn({ params }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;

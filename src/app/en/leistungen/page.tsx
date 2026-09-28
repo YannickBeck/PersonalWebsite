@@ -4,6 +4,10 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Heading';
 import { getDictionary } from '@/i18n/dictionaries';
+import type { Metadata } from "next";
+const meta = getDictionary('en').pages.leistungen;
+export const metadata: Metadata = { title: meta.title, description: meta.lede };
+
 
 export default function Page() {
   const page = getDictionary('en').pages.leistungen;

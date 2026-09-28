@@ -5,3 +5,18 @@
 body {
   font-family: var(--font-family-body, "Figtree", system-ui, sans-serif);
 }
+
+.skip-link {
+  position: absolute;
+  left: var(--spacing-4);
+  top: calc(-1 * var(--spacing-10));
+  z-index: 100;
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-element);
+}
+
+.skip-link:focus {
+  top: var(--spacing-2);
+}
