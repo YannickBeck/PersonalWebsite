@@ -36,28 +36,36 @@ function langOk(item: GhostItem, lang: Lang): boolean {
   return (item.tags ?? []).some((t) => t.slug === LANG_TAG[lang]);
 }
 
-/** Projekte einer Sprache (Tag project + Sprach-Tag). */
+/** Projekte einer Sprache (Tag project + Sprach-Tag). [] bei Fehler (Build-Resilienz). */
 export async function getProjects(lang: Lang): Promise<GhostItem[]> {
-  const posts = (await getApi().posts.browse({
-    limit: 'all',
-    include: 'tags',
-    fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
-    filter: `tag:project+tag:${LANG_TAG[lang]}`,
-    order: 'published_at DESC',
-  })) as unknown as GhostItem[];
-  return posts.filter((p) => langOk(p, lang));
+  try {
+    const posts = (await getApi().posts.browse({
+      limit: 'all',
+      include: 'tags',
+      fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
+      filter: `tag:project+tag:${LANG_TAG[lang]}`,
+      order: 'published_at DESC',
+    })) as unknown as GhostItem[];
+    return posts.filter((p) => langOk(p, lang));
+  } catch {
+    return [];
+  }
 }
 
-/** Blogposts einer Sprache (Sprach-Tag, ohne Projekte). */
+/** Blogposts einer Sprache (Sprach-Tag, ohne Projekte). [] bei Fehler (Build-Resilienz). */
 export async function getPosts(lang: Lang): Promise<GhostItem[]> {
-  const posts = (await getApi().posts.browse({
-    limit: 'all',
-    include: 'tags',
-    fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
-    filter: `tag:${LANG_TAG[lang]}+tag:-project`,
-    order: 'published_at DESC',
-  })) as unknown as GhostItem[];
-  return posts.filter((p) => langOk(p, lang));
+  try {
+    const posts = (await getApi().posts.browse({
+      limit: 'all',
+      include: 'tags',
+      fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
+      filter: `tag:${LANG_TAG[lang]}+tag:-project`,
+      order: 'published_at DESC',
+    })) as unknown as GhostItem[];
+    return posts.filter((p) => langOk(p, lang));
+  } catch {
+    return [];
+  }
 }
 
 /** Einzelner Beitrag per Slug (nur wenn Sprach-Tag passt). */

@@ -1,3 +1,4 @@
+export const revalidate = 60;
 import { PageHero } from '@/components/page-hero';
 import { Section } from '@astryxdesign/core/Section';
 import { ProjectList } from '@/components/project-list';
