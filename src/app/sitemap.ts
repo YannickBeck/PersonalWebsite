@@ -25,10 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
   for (const lang of ['de', 'en'] as const) {
     const base = lang === 'en' ? `${SITE}/en` : SITE;
-    for (const slug of await getPostSlugs(lang)) {
+    const [postSlugs, projectSlugs] = await Promise.all([
+      getPostSlugs(lang),
+      getProjectSlugs(lang),
+    ]);
+    for (const slug of postSlugs) {
       entries.push({ url: `${base}/blog/${slug}`, lastModified: new Date() });
     }
-    for (const slug of await getProjectSlugs(lang)) {
+    for (const slug of projectSlugs) {
       entries.push({ url: `${base}/projekte/${slug}`, lastModified: new Date() });
     }
   }

@@ -36,16 +36,27 @@ function langOk(item: GhostItem, lang: Lang): boolean {
   return (item.tags ?? []).some((t) => t.slug === LANG_TAG[lang]);
 }
 
+function timeout<T>(p: Promise<T>, ms = 10000): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Ghost timeout')), ms),
+    ),
+  ]);
+}
+
 /** Projekte einer Sprache (Tag project + Sprach-Tag). [] bei Fehler (Build-Resilienz). */
 export async function getProjects(lang: Lang): Promise<GhostItem[]> {
   try {
-    const posts = (await getApi().posts.browse({
-      limit: 'all',
-      include: 'tags',
-      fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
-      filter: `tag:project+tag:${LANG_TAG[lang]}`,
-      order: 'published_at DESC',
-    })) as unknown as GhostItem[];
+    const posts = (await timeout(
+      getApi().posts.browse({
+        limit: 'all',
+        include: 'tags',
+        fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
+        filter: `tag:project+tag:${LANG_TAG[lang]}`,
+        order: 'published_at DESC',
+      }),
+    )) as unknown as GhostItem[];
     return posts.filter((p) => langOk(p, lang));
   } catch {
     return [];
@@ -55,13 +66,15 @@ export async function getProjects(lang: Lang): Promise<GhostItem[]> {
 /** Blogposts einer Sprache (Sprach-Tag, ohne Projekte). [] bei Fehler (Build-Resilienz). */
 export async function getPosts(lang: Lang): Promise<GhostItem[]> {
   try {
-    const posts = (await getApi().posts.browse({
-      limit: 'all',
-      include: 'tags',
-      fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
-      filter: `tag:${LANG_TAG[lang]}+tag:-project`,
-      order: 'published_at DESC',
-    })) as unknown as GhostItem[];
+    const posts = (await timeout(
+      getApi().posts.browse({
+        limit: 'all',
+        include: 'tags',
+        fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
+        filter: `tag:${LANG_TAG[lang]}+tag:-project`,
+        order: 'published_at DESC',
+      }),
+    )) as unknown as GhostItem[];
     return posts.filter((p) => langOk(p, lang));
   } catch {
     return [];
@@ -74,9 +87,8 @@ export async function getBySlug(
   lang: Lang,
 ): Promise<GhostItem | undefined> {
   try {
-    const post = (await getApi().posts.read(
-      { slug },
-      { include: ['tags', 'authors'] },
+    const post = (await timeout(
+      getApi().posts.read({ slug }, { include: ['tags', 'authors'] }),
     )) as unknown as GhostItem;
     return langOk(post, lang) ? post : undefined;
   } catch {
