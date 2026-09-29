@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { HtmlLang } from "@/components/html-lang";
 import { Analytics } from "@/components/analytics";
 import { PortalScript } from "@/components/portal-script";
+import { Layout } from "@astryxdesign/core/Layout";
 
 const figtree = Figtree({
   variable: "--font-family-body",
@@ -31,9 +32,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <a href="#main" className="skip-link">
             Zum Inhalt springen
           </a>
-          <SiteHeader />
-          <main id="main">{children}</main>
-          <SiteFooter />
+          <Layout
+            contentWidth={960}
+            header={<SiteHeader />}
+            footer={<SiteFooter />}
+          >
+            <main id="main">{children}</main>
+          </Layout>
           <Analytics />
           <PortalScript />
         </Providers>
