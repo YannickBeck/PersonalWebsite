@@ -7,7 +7,9 @@ import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
 import { Card } from '@astryxdesign/core/Card';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
+import { CoverArt } from '@/components/cover-art';
 import { StatusDot } from '@astryxdesign/core/StatusDot';
+import { Avatar } from '@astryxdesign/core/Avatar';
 import { getDictionary } from '@/i18n/dictionaries';
 import { withLang, type Lang } from '@/i18n/dictionaries';
 import { getPosts, getProjects } from '@/lib/ghost';
@@ -26,6 +28,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
       <Section>
         <VStack gap={4}>
           <HStack gap={2}>
+            <Avatar name="Yannick Beck" size="md" tooltip={false} />
             <StatusDot variant="accent" label={dict.homeEyebrow} isPulsing />
             <Text type="label">{dict.homeEyebrow}</Text>
           </HStack>

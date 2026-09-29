@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
+import { Fustat, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { SiteHeader } from "@/components/site-header";
@@ -9,8 +9,13 @@ import { Analytics } from "@/components/analytics";
 import { PortalScript } from "@/components/portal-script";
 import { Layout } from "@astryxdesign/core/Layout";
 
-const figtree = Figtree({
+const fustat = Fustat({
   variable: "--font-family-body",
+  subsets: ["latin"],
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-family-code",
   subsets: ["latin"],
 });
 
@@ -25,7 +30,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="de" className={figtree.variable}>
+    <html lang="de" className={`${fustat.variable} ${jetbrains.variable}`}>
       <body>
         <Providers>
           <HtmlLang />

@@ -1,6 +1,6 @@
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
-@import "@astryxdesign/theme-gothic/theme.css";
+@import "../theme/yb.css";
 
 body {
   font-family: var(--font-family-body, "Figtree", system-ui, sans-serif);

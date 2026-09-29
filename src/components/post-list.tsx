@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { VStack } from '@astryxdesign/core/VStack';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
+import { CoverArt } from '@/components/cover-art';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { TextInput } from '@astryxdesign/core/TextInput';
@@ -49,6 +50,7 @@ export function PostList({
           elevation="low"
         >
           <VStack gap={2}>
+            <CoverArt seed={p.slug} />
             <Heading level={2}>{p.title}</Heading>
             {(p.custom_excerpt || p.excerpt) && (
               <Text color="secondary">{p.custom_excerpt || p.excerpt}</Text>

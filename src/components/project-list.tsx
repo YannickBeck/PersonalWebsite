@@ -1,5 +1,6 @@
 import { VStack } from '@astryxdesign/core/VStack';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
+import { CoverArt } from '@/components/cover-art';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import type { Lang } from '@/i18n/dictionaries';
@@ -21,6 +22,7 @@ export async function ProjectList({ lang }: { lang: Lang }) {
           elevation="low"
         >
           <VStack gap={2}>
+            <CoverArt seed={p.slug} />
             <Heading level={2}>{p.title}</Heading>
             {(p.custom_excerpt || p.excerpt) && (
               <Text color="secondary">{p.custom_excerpt || p.excerpt}</Text>
