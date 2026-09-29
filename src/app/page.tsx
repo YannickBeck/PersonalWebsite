@@ -76,6 +76,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
                   elevation="low"
                 >
                   <VStack gap={2}>
+                    <CoverArt seed={p.slug} />
                     <Heading level={3}>{p.title}</Heading>
                     {(p.custom_excerpt || p.excerpt) && (
                       <Text color="secondary">
@@ -110,6 +111,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
                   elevation="low"
                 >
                   <VStack gap={2}>
+                    <CoverArt seed={p.slug} />
                     <Heading level={3}>{p.title}</Heading>
                     {(p.custom_excerpt || p.excerpt) && (
                       <Text color="secondary">
