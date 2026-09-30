@@ -1,0 +1,32 @@
+.desktop {
+  display: block;
+}
+
+.mobileBar {
+  display: none;
+}
+
+.mobilePanel {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .desktop {
+    display: none;
+  }
+
+  .mobileBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobilePanel {
+    display: block;
+    padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+}

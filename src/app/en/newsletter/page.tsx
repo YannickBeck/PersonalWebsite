@@ -1,11 +1,17 @@
 import { PageHero } from '@/components/page-hero';
 import { Section } from '@astryxdesign/core/Section';
-import { Button } from '@astryxdesign/core/Button';
+import { NewsletterForm } from '@/components/newsletter-form';
 import { getDictionary } from '@/i18n/dictionaries';
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
+import { pageMeta } from '@/lib/seo';
 
 const meta = getDictionary('en').pages.newsletter;
-export const metadata: Metadata = { title: meta.title, description: meta.lede };
+export const metadata: Metadata = pageMeta({
+  lang: 'en',
+  path: '/newsletter',
+  title: meta.title,
+  description: meta.lede,
+});
 
 export default function Page() {
   const page = getDictionary('en').pages.newsletter;
@@ -13,9 +19,7 @@ export default function Page() {
     <>
       <PageHero title={page.title} lede={page.lede} />
       <Section variant="muted">
-        <span data-portal="signup">
-          <Button label="Subscribe to newsletter" variant="primary" />
-        </span>
+        <NewsletterForm lang="en" />
       </Section>
     </>
   );

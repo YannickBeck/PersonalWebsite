@@ -41,7 +41,7 @@ export async function DetailBody({ lang, item }: { lang: Lang; item: GhostItem }
         <Section variant="muted">
           <VStack gap={3}>
             <Heading level={2}>{dict.relatedTitle}</Heading>
-            <Grid columns={{ minWidth: 320 }} gap={3}>
+            <Grid columns={{ minWidth: 260 }} gap={3}>
               {related.map((p) => (
                 <ClickableCard
                   key={p.slug}

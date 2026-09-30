@@ -6,7 +6,6 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { HtmlLang } from "@/components/html-lang";
 import { Analytics } from "@/components/analytics";
-import { PortalScript } from "@/components/portal-script";
 import { Layout } from "@astryxdesign/core/Layout";
 
 const fustat = Fustat({
@@ -26,6 +25,15 @@ export const metadata: Metadata = {
   },
   description:
     "Persönliche Website von Yannick Beck — Projekte, Blog und Kontakt.",
+  metadataBase: new URL("https://yannick-beck.de"),
+  alternates: {
+    canonical: "https://yannick-beck.de/",
+    languages: {
+      de: "https://yannick-beck.de/",
+      en: "https://yannick-beck.de/en",
+      "x-default": "https://yannick-beck.de/",
+    },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -37,15 +45,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <a href="#main" className="skip-link">
             Zum Inhalt springen
           </a>
-          <Layout
-            contentWidth={960}
-            header={<SiteHeader />}
-            footer={<SiteFooter />}
-          >
-            <main id="main">{children}</main>
-          </Layout>
+          <div className="print-area">
+            <Layout
+              contentWidth={1120}
+              header={
+                <div className="print-hide">
+                  <SiteHeader />
+                </div>
+              }
+              footer={
+                <div className="print-hide">
+                  <SiteFooter />
+                </div>
+              }
+            >
+              <main id="main">{children}</main>
+            </Layout>
+          </div>
           <Analytics />
-          <PortalScript />
         </Providers>
       </body>
     </html>

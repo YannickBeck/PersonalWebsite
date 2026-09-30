@@ -4,7 +4,9 @@
 
 body {
   font-family: var(--font-family-body, "Figtree", system-ui, sans-serif);
-  color-scheme: dark;
+  color-scheme: dark light;
+  background: var(--color-background-body, #0a0e1a);
+  color: var(--color-text-primary, #e4e1ea);
 }
 
 .skip-link {
@@ -20,4 +22,24 @@ body {
 
 .skip-link:focus {
   top: var(--spacing-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+
+  .print-area {
+    background: #fff;
+    color: #000;
+  }
 }

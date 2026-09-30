@@ -1,7 +1,7 @@
 /**
  * YB brand theme — Astryx custom theme für yannick-beck.de.
  *
- * Basis: gothic (dark editorial) + Electric-Blue-Akzent + Dracula-Syntax.
+ * Dunkles Tech-Design: tiefes Nachtblau, Electric-Violet-Akzent, Fustat + JetBrains Mono.
  * Bauen nach jeder Änderung: pnpm exec astryx theme build src/theme/yb-theme.ts
  */
 import {defineTheme} from '@astryxdesign/core/theme';
@@ -11,9 +11,11 @@ import {gothicTheme} from '@astryxdesign/theme-gothic';
 export const ybTheme = defineTheme({
   name: 'yb',
   extends: gothicTheme,
-  color: {accent: '#2F81F7', neutralStyle: 'cool', contrast: 'standard'},
+  color: {accent: '#7C5CF0', neutralStyle: 'cool', contrast: 'standard'},
   syntax: dracula,
   tokens: {
+    '--color-background-body': ['#F5F3FA', '#0A0E1A'],
+    '--color-background-surface': ['#FFFFFF', '#101624'],
     '--focus-outline-color': 'var(--color-accent)',
   },
   components: {
