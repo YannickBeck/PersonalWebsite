@@ -5,7 +5,6 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Heading } from '@astryxdesign/core/Heading';
 import { GhostHtml } from '@/components/ghost-html';
-import { Text } from '@astryxdesign/core/Text';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
 import { CoverArt } from '@/components/cover-art';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';

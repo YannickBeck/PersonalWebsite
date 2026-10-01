@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@astryxdesign/core": "^0.6.3",
-    "@astryxdesign/theme-gothic": "^0.6.3",
-    "@astryxdesign/theme-neutral": "^0.6.3",
     "@stylexjs/stylex": "^0.19.1",
     "@tryghost/content-api": "^1.12.12",
     "next": "16.3.6",
@@ -29,5 +27,11 @@
     "eslint-config-next": "16.3.6",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@11.28.1"
+  "packageManager": "pnpm@11.28.1",
+  "browserslist": [
+    "chrome 123",
+    "edge 123",
+    "firefox 120",
+    "safari 17.5"
+  ]
 }

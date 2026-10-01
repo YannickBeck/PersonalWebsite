@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Von `astryx theme build` generiert (nicht von Hand bearbeiten)
+    "src/theme/yb.js",
+    "src/theme/yb.d.ts",
+    "src/theme/yb.variants.d.ts",
   ]),
 ]);
 

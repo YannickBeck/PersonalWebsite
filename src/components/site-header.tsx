@@ -9,7 +9,7 @@ import { Button } from '@astryxdesign/core/Button';
 import { HStack } from '@astryxdesign/core/HStack';
 import { VStack } from '@astryxdesign/core/VStack';
 import { Link } from '@astryxdesign/core/Link';
-import { MODE_LABEL, MODE_LABEL_EN, useThemeMode } from '@/app/providers';
+import { ThemeToggle } from '@/components/theme-toggle';
 import {
   getDictionary,
   langFromPath,
@@ -44,14 +44,13 @@ export function SiteHeader() {
   const pathname = usePathname();
   const lang = langFromPath(pathname);
   const dict = getDictionary(lang);
-  const { mode, cycleMode } = useThemeMode();
-  const [menuOpen, setMenuOpen] = useState(false);
+  // Menü gilt nur für den Pfad, auf dem es geöffnet wurde: ein Routenwechsel schließt es
+  // ohne Effekt (kein setState im Effekt, react-hooks/set-state-in-effect).
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const menuOpen = menuPath === pathname;
+  const setMenuOpen = (open: boolean) => setMenuPath(open ? pathname : null);
   const panelRef = useRef<HTMLDivElement>(null);
   const homeHref = lang === 'en' ? '/en' : '/';
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) {
@@ -59,15 +58,13 @@ export function SiteHeader() {
     }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setMenuOpen(false);
+        setMenuPath(null);
       }
     };
     document.addEventListener('keydown', onKey);
     panelRef.current?.querySelector('a')?.focus();
     return () => document.removeEventListener('keydown', onKey);
   }, [menuOpen]);
-
-  const modeLabel = (lang === 'en' ? MODE_LABEL_EN : MODE_LABEL)[mode];
 
   return (
     <header>
@@ -91,7 +88,7 @@ export function SiteHeader() {
                 label={dict.switcherLabel}
                 href={switchTarget(pathname, dict.switcherTarget)}
               />
-              <Button variant="ghost" label={modeLabel} onClick={cycleMode} />
+              <ThemeToggle lang={lang} />
             </HStack>
           }
         />
@@ -104,10 +101,11 @@ export function SiteHeader() {
             label={dict.switcherLabel}
             href={switchTarget(pathname, dict.switcherTarget)}
           />
+          <ThemeToggle lang={lang} />
           <Button
             variant="ghost"
             label={menuOpen ? dict.menuClose : dict.menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
+            onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
           >
@@ -129,7 +127,6 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Button variant="ghost" label={modeLabel} onClick={cycleMode} />
           </VStack>
         </div>
       )}

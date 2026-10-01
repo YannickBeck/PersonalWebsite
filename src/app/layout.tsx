@@ -7,14 +7,17 @@ import { SiteFooter } from "@/components/site-footer";
 import { HtmlLang } from "@/components/html-lang";
 import { Analytics } from "@/components/analytics";
 import { Layout } from "@astryxdesign/core/Layout";
+import { THEME_BOOT } from "@/theme/theme-boot";
 
+// Eigene Variablennamen: --font-family-body/-code gehören dem Theme (yb.css) und
+// nennen dort "Fustat"/"JetBrains Mono" samt metrisch angepasster Fallbacks (V5).
 const fustat = Fustat({
-  variable: "--font-family-body",
+  variable: "--font-fustat",
   subsets: ["latin"],
 });
 
 const jetbrains = JetBrains_Mono({
-  variable: "--font-family-code",
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
@@ -38,7 +41,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="de" className={`${fustat.variable} ${jetbrains.variable}`}>
+    <html
+      lang="de"
+      data-astryx-theme="yb"
+      suppressHydrationWarning
+      className={`${fustat.variable} ${jetbrains.variable}`}
+    >
+      <head>
+        {/* Blockierend vor dem ersten Paint: gespeichertes Farbschema setzen (theme-boot.ts) */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+      </head>
       <body>
         <Providers>
           <HtmlLang />

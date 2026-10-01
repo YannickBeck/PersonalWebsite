@@ -26,8 +26,16 @@
   line-height: 1.7;
 }
 
+/* Links im Fließtext unterstrichen: nur Farbe reicht nicht (WCAG 1.4.1, VV2) */
 .prose a {
   color: var(--color-text-accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.prose a:hover {
+  text-decoration-thickness: 2px;
 }
 
 .prose ul {

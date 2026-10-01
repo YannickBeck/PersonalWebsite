@@ -39,7 +39,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
             description={
               <>
                 {dict.demoBannerText}{' '}
-                <Link href={withLang('/content-status', lang)}>{dict.statusTitle}</Link>
+                <Link hasUnderline href={withLang('/content-status', lang)}>{dict.statusTitle}</Link>
               </>
             }
           />

@@ -21,7 +21,8 @@ Zwei Quellen, klar getrennt:
 - **Übersetzungszuordnung:** `src/i18n/translations.ts` (Slug-Paare beider Richtungen).
 - **Platzhalter-Bilder:** `public/placeholders/*.svg` (neutral, 16:10 bzw. Portrait).
 - **Brand-Theme:** `src/theme/yb-theme.ts` — nach jeder Änderung
-  `pnpm exec astryx theme build src/theme/yb-theme.ts` ausführen (erzeugt `yb.css`/`yb.js`).
+  `pnpm exec astryx theme build src/theme/yb-theme.ts` ausführen (erzeugt `yb.css`/`yb.js`/`yb.d.ts`/`yb.variants.d.ts`, alle committen).
+  Farb-, Typo- und Motion-Entscheidungen stehen im Kopfkommentar der Theme-Datei.
 
 ## 3. Übersicht aller Lücken
 

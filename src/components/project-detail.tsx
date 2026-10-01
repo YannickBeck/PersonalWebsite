@@ -5,7 +5,6 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
-import { Button } from '@astryxdesign/core/Button';
 import { Card } from '@astryxdesign/core/Card';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
 import { Link } from '@astryxdesign/core/Link';

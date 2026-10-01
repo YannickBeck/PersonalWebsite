@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation';
 import { Section } from '@astryxdesign/core/Section';
 import { VStack } from '@astryxdesign/core/VStack';
-import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';

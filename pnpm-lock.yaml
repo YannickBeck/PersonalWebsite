@@ -11,12 +11,6 @@ importers:
       '@astryxdesign/core':
         specifier: ^0.6.3
         version: 0.6.3(@stylexjs/stylex@0.19.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@astryxdesign/theme-gothic':
-        specifier: ^0.6.3
-        version: 0.6.3(@astryxdesign/core@0.6.3(@stylexjs/stylex@0.19.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@astryxdesign/theme-neutral':
-        specifier: ^0.6.3
-        version: 0.6.3(@astryxdesign/core@0.6.3(@stylexjs/stylex@0.19.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       '@stylexjs/stylex':
         specifier: ^0.19.1
         version: 0.19.1
@@ -86,12 +80,6 @@ packages:
       '@stylexjs/stylex': ^0.19.0
       react: '>=19.0.0'
       react-dom: '>=19.0.0'
-
-  '@astryxdesign/theme-gothic@0.6.3':
-    resolution: {integrity: sha512-ctglZ06RxvvvhHR3BFldgdbVtlZ3HeCeR0ZLplIdBoYiCIHfttFCwny6Rj6+fliaGsKaNWsm4zoKtd8u50Tg3Q==}
-    peerDependencies:
-      '@astryxdesign/core': 0.6.3
-      react: '>=19'
 
   '@astryxdesign/theme-neutral@0.6.3':
     resolution: {integrity: sha512-6l2u3qVcs5TkN4YUMUrSlMdmRmzt+/nB1pJqZopn3/nylVZcxSql+wzeD7T1VyinM+wHAokoaRD6xmCa2abNDg==}
@@ -2256,17 +2244,12 @@ snapshots:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
-  '@astryxdesign/theme-gothic@0.6.3(@astryxdesign/core@0.6.3(@stylexjs/stylex@0.19.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@astryxdesign/core': 0.6.3(@stylexjs/stylex@0.19.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      lucide-react: 1.48.0(react@19.2.8)
-      react: 19.2.8
-
   '@astryxdesign/theme-neutral@0.6.3(@astryxdesign/core@0.6.3(@stylexjs/stylex@0.19.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@astryxdesign/core': 0.6.3(@stylexjs/stylex@0.19.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       lucide-react: 1.48.0(react@19.2.8)
       react: 19.2.8
+    optional: true
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -4029,6 +4012,7 @@ snapshots:
   lucide-react@1.48.0(react@19.2.8):
     dependencies:
       react: 19.2.8
+    optional: true
 
   make-dir@2.1.0:
     dependencies:

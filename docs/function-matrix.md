@@ -2,7 +2,7 @@
 
 ## Funktioniert echt
 - Navigation (Desktop + mobiles Menü mit Escape/Fokus), Sprachwechsel mit
-  Übersetzungszuordnung, Theme-Wechsel (System/Hell/Dunkel, gespeichert)
+  Übersetzungszuordnung, Theme-Schalter (Icon hell ↔ dunkel, gespeichert; ohne Wahl folgt System; kein Flash dank Boot-Script)
 - Projekt-/Artikel-Listen aus Ghost + Demo (Filter, Suche, Leer-Zustand, Reset)
 - Detailseiten (Ghost-HTML + Demo-Blöcke mit TOC, Code-Kopie, Tabellen, Galerie)
 - Related-Content, Zurück-Links, Redirects alter Ghost-URLs

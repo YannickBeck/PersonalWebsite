@@ -1,0 +1,71 @@
+/* =====================================================================
+ * yb Motion-Layer – die EINE Stelle für eigene Keyframes, ::view-transition-*
+ * und scroll-getriebene Animationen (X3, X8, W8).
+ *
+ * Abweichung von AGENTS.md (dokumentiert): globales CSS, weil ::view-transition-*
+ * und @keyframes nicht in CSS-Module passen und Astryx dafür keine Props hat.
+ * Werte ausschließlich aus Tokens (src/theme/yb-theme.ts → yb.css):
+ *
+ *   Token                   hell/dunkel       Verwendung
+ *   --yb-motion-micro       150ms             Hover, Press, Fokus, Icon-Wechsel
+ *   --yb-motion-exit        150ms             alte Seite/Element raus (kürzer als enter)
+ *   --yb-motion-enter       350ms             neue Seite rein, Slides, Einblenden
+ *   --yb-motion-emphasis    465ms             Hero-Choreografie, Theme-Reveal
+ *   --yb-motion-stagger      60ms             Versatz zwischen Geschwistern
+ *   --yb-motion-distance     24px             Slide-/Rise-Weg
+ *   --yb-ease-enter         cubic-bezier(.24,1,.4,1)   Eintritte (= --ease-standard)
+ *   --yb-ease-exit          cubic-bezier(.4,0,1,1)     Austritte
+ *   --yb-ease-move          cubic-bezier(.65,0,.35,1)  Positionswechsel (Morph, Karussell)
+ *
+ * Regeln
+ * 1. Eigene Bewegung nur innerhalb @media (prefers-reduced-motion: no-preference)
+ *    deklarieren – oder ausschließlich über --yb-motion-distance/-stagger bewegen:
+ *    die Theme-Adaptation setzt beide unter "reduce" auf 0 und kürzt die Dauern,
+ *    Slides werden dann automatisch zu kurzen Überblendungen.
+ * 2. animation-timeline (Scroll-Reveal) nur in
+ *    @supports (animation-timeline: view()) + @media (prefers-reduced-motion: no-preference).
+ * 3. Exits kürzer als Entrances, nichts blockiert Interaktion.
+ * 4. Keine globale *-Keule (0.01ms): sie bricht Astryx-Spinner/MobileNav (X3).
+ * ===================================================================== */
+
+/* ---------- 1. Basis-Keyframes (von Abschnitt 4 und B3 genutzt) ---------- */
+@keyframes yb-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes yb-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------- 2. View Transitions (B3: Seiten-Slides, Theme-Reveal) ---------- */
+/* Platz für ::view-transition-old/new(.yb-page) usw. */
+
+/* ---------- 3. Scroll-getriebene Animationen (B3) ---------- */
+/* @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) { … } } */
+
+/* ---------- 4. Reduced Motion: zentrale Absicherung ---------- */
+@media (prefers-reduced-motion: reduce) {
+  /* Geteilte Elemente springen an ihr Ziel statt zu wandern … */
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+  }
+
+  /* … und alte/neue Ansicht blenden nur kurz über, ohne Weg und Verzögerung. */
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: var(--duration-fast-min) !important;
+    animation-delay: 0s !important;
+  }
+
+  ::view-transition-new(*) {
+    animation-name: yb-fade-in !important;
+  }
+
+  ::view-transition-old(*) {
+    animation-name: yb-fade-out !important;
+  }
+}

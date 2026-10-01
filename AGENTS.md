@@ -37,3 +37,12 @@ MORE CLI:
   swizzle <Name>     eject component source for deep customization
   upgrade --apply    run after any Astryx or integration dependency bump
 <!-- ASTRYX:END -->
+
+## Projektregeln yannick-beck.de (ergänzen die Astryx-Regeln oben)
+
+- **Theme:** `src/theme/yb-theme.ts` ist eigenständig (kein `extends: gothicTheme`). Farb-, Typo- und Motion-Entscheidungen stehen im Kopfkommentar. Nach jeder Änderung `pnpm exec astryx theme build src/theme/yb-theme.ts`; die generierten `yb.css`, `yb.js`, `yb.d.ts`, `yb.variants.d.ts` mitcommitten (in ESLint ignoriert).
+- **Farbschema ohne Flash:** `<html data-astryx-theme="yb">` plus Boot-Script aus `src/theme/theme-boot.ts` im `<head>` (layout.tsx); `providers.tsx` übernimmt die gespeicherte Wahl per `useLayoutEffect`. Nicht auf `useEffect`/Lazy-State umbauen, kein `color-scheme` am `body`. Natives `light-dark()` über `browserslist` in package.json (Chrome/Edge 123, Firefox 120, Safari 17.5): Targets nicht absenken, sonst polyfillt Lightning CSS und die Wrapper-Regel in globals.css greift nicht mehr.
+- **Theme-Schalter:** zwei Zustände (hell ↔ dunkel) über `ThemeToggle`; ohne gespeicherte Wahl folgt die Seite dem System.
+- **Erlaubte Abweichung von „kein eigenes CSS“:** CSS-Module bzw. `src/app/motion.css` für Motion, `::view-transition-*`, Keyframes, Hover-Effekte, fremdes HTML (Ghost) und wenige Layout-Hilfen, wo Astryx keine Prop bietet. Nur Tokens (`--yb-motion-*`, `--duration-*`, `--ease-standard`, `--spacing-*`, `--color-*`, `--radius-*`); strukturelle Breiten wie `68ch` sind erlaubt.
+- **Reduced Motion:** keine globale `*`-Regel (bricht Astryx-Spinner und MobileNav). Eigene Bewegung nur über `--yb-motion-distance`/`--yb-motion-stagger` (unter `reduce` vom Theme auf 0 gesetzt) oder innerhalb `@media (prefers-reduced-motion: no-preference)`; `animation-timeline` zusätzlich hinter `@supports`.
+- **Screenshot-Gate vor jedem UI-Commit:** Build mit Ghost-Mock-Inhalten, Aufnahmen 390–1920 px × hell/dunkel, dabei linke Kanten (Marke/Inhalt/Footer), Grid-Belegung, horizontalen Überlauf und Konsolenfehler prüfen.

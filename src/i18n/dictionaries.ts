@@ -135,6 +135,9 @@ const de = {
   processTitle: 'Ablauf',
   menuOpen: 'Menü öffnen',
   menuClose: 'Menü schließen',
+  themeToDark: 'Dunkles Farbschema einschalten',
+  themeToLight: 'Helles Farbschema einschalten',
+  themeToggle: 'Farbschema wechseln',
   pages: {
     projekte: {
       title: 'Projekte',
@@ -303,6 +306,9 @@ const en: Dictionary = {
   processTitle: 'Process',
   menuOpen: 'Open menu',
   menuClose: 'Close menu',
+  themeToDark: 'Switch to dark colour scheme',
+  themeToLight: 'Switch to light colour scheme',
+  themeToggle: 'Change colour scheme',
   pages: {
     projekte: {
       title: 'Projects',

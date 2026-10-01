@@ -1,12 +1,32 @@
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
 @import "../theme/yb.css";
+@import "./motion.css";
 
+/*
+ * Body liegt innerhalb von <html data-astryx-theme="yb"> (layout.tsx), bekommt also die
+ * yb-Tokens schon im SSR-HTML. Kein eigenes color-scheme hier: es wird von
+ * html[data-theme] bzw. :root (System) vererbt (XV3).
+ */
 body {
-  font-family: var(--font-family-body, "Figtree", system-ui, sans-serif);
-  color-scheme: dark light;
-  background: var(--color-background-body, #0a0e1a);
-  color: var(--color-text-primary, #e4e1ea);
+  font-family: var(--font-family-body);
+  background: var(--color-background-body);
+  color: var(--color-text-primary);
+}
+
+/*
+ * Theme-Flash (X1/T2/VV1): Vor der Hydration trägt der Astryx-Theme-Wrapper noch
+ * color-scheme "light dark" (Modus system) und würde ein vom Boot-Script gesetztes
+ * <html data-theme> überstimmen. Unlayered schlägt diese Regel @layer astryx-base.
+ * Nach der Hydration hat der Wrapper selbst data-theme, die Regel greift nicht mehr.
+ * Setzt natives light-dark() voraus (package.json browserslist, kein Lightning-CSS-Polyfill).
+ */
+html[data-theme="light"] [data-astryx-theme="yb"]:not([data-theme]) {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] [data-astryx-theme="yb"]:not([data-theme]) {
+  color-scheme: dark;
 }
 
 .skip-link {
@@ -24,14 +44,8 @@ body {
   top: var(--spacing-2);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+/* Reduced Motion: keine globale 0.01ms-Regel mehr (X3). Astryx regelt seine Komponenten
+   selbst; eigene Animationen und View Transitions zentral in ./motion.css. */
 
 @media print {
   .print-hide {

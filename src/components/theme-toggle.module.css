@@ -1,0 +1,60 @@
+/*
+ * Theme-Schalter: Sonne = hell, Mond = dunkel (aktuelles Schema).
+ * Abweichung von AGENTS.md (dokumentiert): SVG-Teil-Sichtbarkeit und Mikro-Animation
+ * hängen am <html data-theme>-Attribut bzw. an prefers-color-scheme – dafür hat Astryx
+ * keine Prop. Nur Tokens, keine Rohwerte außer Winkeln/Skalierung.
+ */
+.icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.sun,
+.moon {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Grundzustand hell: Sonne sichtbar */
+.moon {
+  opacity: 0;
+  rotate: 90deg;
+  scale: 0.5;
+}
+
+:global(html[data-theme='dark']) .sun {
+  opacity: 0;
+  rotate: -90deg;
+  scale: 0.5;
+}
+
+:global(html[data-theme='dark']) .moon {
+  opacity: 1;
+  rotate: 0deg;
+  scale: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(html:not([data-theme])) .sun {
+    opacity: 0;
+    rotate: -90deg;
+    scale: 0.5;
+  }
+
+  :global(html:not([data-theme])) .moon {
+    opacity: 1;
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sun,
+  .moon {
+    transition-property: opacity, rotate, scale;
+    transition-duration: var(--yb-motion-enter);
+    transition-timing-function: var(--yb-ease-enter);
+  }
+}

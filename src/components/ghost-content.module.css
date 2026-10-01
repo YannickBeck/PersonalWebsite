@@ -1,6 +1,13 @@
+/*
+ * Ghost-HTML (Koenig) – Fließtext-Typografie.
+ * Abweichung von AGENTS.md (dokumentiert): fremdes HTML ohne Astryx-Komponenten,
+ * daher CSS-Modul; nur Tokens.
+ */
 .content {
   color: var(--color-text-primary);
-  max-width: 100%;
+  /* Lesebreite wie Demo-Artikel (article-body.module.css), V5 */
+  max-width: 68ch;
+  min-width: 0;
 }
 
 .content > :first-child {
@@ -11,8 +18,9 @@
 .content h2,
 .content h3 {
   color: var(--color-text-primary);
-  margin-top: var(--spacing-6);
+  margin-top: var(--spacing-8);
   margin-bottom: var(--spacing-3);
+  scroll-margin-top: var(--spacing-6);
 }
 
 .content p {
@@ -21,14 +29,79 @@
   line-height: 1.7;
 }
 
+/* Links im Fließtext unterstrichen: nur Farbe reicht nicht (WCAG 1.4.1, VV2) */
 .content a {
   color: var(--color-text-accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.content a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Astryx-Reset entfernt Listenpunkte; im Fließtext wieder einschalten */
+.content ul,
+.content ol {
+  margin-top: var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+  padding-left: var(--spacing-6);
+  line-height: 1.7;
+}
+
+.content ul {
+  list-style: disc;
+}
+
+.content ol {
+  list-style: decimal;
+}
+
+.content li + li {
+  margin-top: var(--spacing-1);
+}
+
+/* Code-Blöcke scrollen in sich statt die Seite zu verbreitern (Reflow, WCAG 1.4.10) */
+.content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-container);
+  background: var(--color-syntax-background);
+  color: var(--color-syntax-variable);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.content pre code {
+  font-size: inherit;
+}
+
+.content :not(pre) > code {
+  font-size: 0.9em;
+  padding: 0 var(--spacing-1);
+  border-radius: var(--radius-inner);
+  background: var(--color-background-muted);
+}
+
+.content figure {
+  margin-top: var(--spacing-6);
+  margin-bottom: var(--spacing-6);
 }
 
 .content img {
   max-width: 100%;
   height: auto;
   border-radius: var(--radius-container);
+}
+
+.content figcaption {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-2);
 }
 
 .content blockquote {
