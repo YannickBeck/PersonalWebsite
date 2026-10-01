@@ -1,9 +1,7 @@
-import { PageHero } from '@/components/page-hero';
-import { Section } from '@astryxdesign/core/Section';
-import { NewsletterForm } from '@/components/newsletter-form';
-import { getDictionary } from '@/i18n/dictionaries';
 import type { Metadata } from 'next';
 import { pageMeta } from '@/lib/seo';
+import { getDictionary } from '@/i18n/dictionaries';
+import { NewsletterContent } from '@/components/pages/newsletter-content';
 
 const meta = getDictionary('en').pages.newsletter;
 export const metadata: Metadata = pageMeta({
@@ -14,13 +12,5 @@ export const metadata: Metadata = pageMeta({
 });
 
 export default function Page() {
-  const page = getDictionary('en').pages.newsletter;
-  return (
-    <>
-      <PageHero title={page.title} lede={page.lede} />
-      <Section variant="muted">
-        <NewsletterForm lang="en" />
-      </Section>
-    </>
-  );
+  return <NewsletterContent lang="en" />;
 }

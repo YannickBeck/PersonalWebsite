@@ -1,152 +1,176 @@
 import Image from 'next/image';
-import { PageHero } from '@/components/page-hero';
 import { Section } from '@astryxdesign/core/Section';
 import { VStack } from '@astryxdesign/core/VStack';
+import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Card } from '@astryxdesign/core/Card';
-import { ClickableCard } from '@astryxdesign/core/ClickableCard';
-import { Link } from '@astryxdesign/core/Link';
-import { DemoBadge } from '@/components/demo-badge';
+import { Token } from '@astryxdesign/core/Token';
+import { List, ListItem } from '@astryxdesign/core/List';
+import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
+import { PageHero } from '@/components/page-hero';
 import { ItemCover } from '@/components/item-cover';
+import { CARD_COLUMNS, ContentCard, coverMeta } from '@/components/content-card';
+import { SectionHeader } from '@/components/section-header';
+import { BackLink, ReadingLayout } from '@/components/reading-layout';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
-import { demoProjectsByLang, type DemoProject } from '@/content/demo';
+import { getProjectCards } from '@/lib/items';
+import { realImage } from '@/lib/images';
+import type { DemoProject } from '@/content/demo';
 
-export function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProject }) {
+function Block({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <VStack gap={3}>
+      <Heading level={2}>{title}</Heading>
+      {children}
+    </VStack>
+  );
+}
+
+/**
+ * Demo-Projekt als Fallstudie: Lesespalte mit Abschnitten, Fakten in der Randspalte
+ * (mobil vor dem Text). Statt Card je Schritt/Entscheidung echte Listen (L7/VV4).
+ * Galerie nur mit echten Bildern – Platzhalter-SVGs gelten als „kein Bild“ (V6).
+ */
+export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProject }) {
   const dict = getDictionary(lang);
-  const related = demoProjectsByLang(lang)
-    .filter((p) => p.slug !== item.slug)
-    .slice(0, 2);
+  const related = (await getProjectCards(lang)).filter((p) => p.slug !== item.slug).slice(0, 3);
+  const cover = coverMeta(
+    { kind: 'project', slug: item.slug, title: item.title, href: '', category: item.category, categoryLabel: item.categoryLabel },
+    lang,
+  );
+  const gallery = item.gallery.filter((g) => realImage(g.src));
 
   return (
     <>
-      <PageHero title={item.title} lede={item.excerpt} />
-      <Section>
-        <VStack gap={4}>
-          <DemoBadge lang={lang} />
-          <Image
-            src={item.cover}
-            alt={item.title}
-            width={1280}
-            height={800}
-            sizes="(max-width: 768px) 100vw, 960px"
-            style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-container)' }}
-          />
-          <Grid columns={{ minWidth: 220 }} gap={3}>
-            <VStack gap={1}>
-              <Text type="label">{dict.factsRole}</Text>
-              <Text>{item.role}</Text>
-            </VStack>
-            <VStack gap={1}>
-              <Text type="label">{dict.factsTimeframe}</Text>
-              <Text>{item.timeframe}</Text>
-            </VStack>
-            <VStack gap={1}>
-              <Text type="label">{dict.factsStack}</Text>
-              <Text>{item.technologies.join(' · ')}</Text>
-            </VStack>
-          </Grid>
-        </VStack>
-      </Section>
+      <PageHero
+        eyebrow={<BackLink href={withLang('/projekte', lang)} label={dict.backToProjects} />}
+        title={item.title}
+        lede={item.excerpt}
+        meta={
+          <HStack gap={1.5} wrap="wrap">
+            <Token label={dict.demoToken} size="sm" className="print-hide" />
+            <Token label={item.categoryLabel} size="sm" />
+          </HStack>
+        }
+      />
+      <ReadingLayout
+        tocTitle={dict.tocTitle}
+        aside={
+          <Card>
+            <MetadataList label={{ position: 'top' }}>
+              <MetadataListItem label={dict.factsRole}>
+                <Text>{item.role}</Text>
+              </MetadataListItem>
+              <MetadataListItem label={dict.factsTimeframe}>
+                <Text>{item.timeframe}</Text>
+              </MetadataListItem>
+              <MetadataListItem label={dict.factsStack}>
+                <HStack gap={1.5} wrap="wrap">
+                  {item.technologies.map((t) => (
+                    <Token key={t} label={t} size="sm" />
+                  ))}
+                </HStack>
+              </MetadataListItem>
+            </MetadataList>
+          </Card>
+        }
+      >
+        <ItemCover src={item.cover} seed={item.slug} label={cover.label} motif={cover.motif} variant="hero" priority />
+        <Block title={dict.sectionSituation}>
+          {item.situation.map((p, i) => (
+            <Text key={i} as="p" textWrap="pretty">
+              {p}
+            </Text>
+          ))}
+        </Block>
+        <Block title={dict.sectionGoal}>
+          <List listStyle="disc" density="compact">
+            {item.goal.map((g) => (
+              <ListItem key={g} label={<Text>{g}</Text>} />
+            ))}
+          </List>
+        </Block>
+        <Block title={dict.sectionApproach}>
+          <Card padding={2}>
+            <List hasDividers density="spacious">
+              {item.approach.map((a) => (
+                <ListItem
+                  key={a.title}
+                  label={<Text weight="semibold">{a.title}</Text>}
+                  description={<Text color="secondary">{a.text}</Text>}
+                />
+              ))}
+            </List>
+          </Card>
+        </Block>
+        <Block title={dict.sectionDecisions}>
+          <Card padding={2}>
+            <List hasDividers density="spacious">
+              {item.decisions.map((d) => (
+                <ListItem
+                  key={d.decision}
+                  label={<Text weight="semibold">{d.decision}</Text>}
+                  description={<Text color="secondary">{d.reason}</Text>}
+                />
+              ))}
+            </List>
+          </Card>
+        </Block>
+        <Block title={dict.sectionChallenges}>
+          <List listStyle="disc" density="compact">
+            {item.challenges.map((c) => (
+              <ListItem key={c} label={<Text>{c}</Text>} />
+            ))}
+          </List>
+        </Block>
+        <Block title={dict.sectionOutcome}>
+          {item.outcomeOpen ? (
+            <HStack>
+              <Token label={dict.outcomeOpenLabel} size="sm" className="print-hide" />
+            </HStack>
+          ) : null}
+          <Text as="p" textWrap="pretty">
+            {item.outcome}
+          </Text>
+        </Block>
+      </ReadingLayout>
 
-      <Section variant="muted">
-        <VStack gap={4}>
-          <VStack gap={2}>
-            <Heading level={2}>{dict.sectionSituation}</Heading>
-            {item.situation.map((p, i) => (
-              <Text key={i}>{p}</Text>
-            ))}
-          </VStack>
-          <VStack gap={2}>
-            <Heading level={2}>{dict.sectionGoal}</Heading>
-            {item.goal.map((p, i) => (
-              <Text key={i}>{p}</Text>
-            ))}
-          </VStack>
-          <VStack gap={2}>
-            <Heading level={2}>{dict.sectionApproach}</Heading>
-            {item.approach.map((a) => (
-              <Card key={a.title}>
-                <VStack gap={1}>
-                  <Heading level={3}>{a.title}</Heading>
-                  <Text color="secondary">{a.text}</Text>
-                </VStack>
-              </Card>
-            ))}
-          </VStack>
-          <VStack gap={2}>
-            <Heading level={2}>{dict.sectionDecisions}</Heading>
-            {item.decisions.map((d) => (
-              <Card key={d.decision} variant="muted">
-                <VStack gap={1}>
-                  <Text weight="semibold">{d.decision}</Text>
-                  <Text color="secondary">{d.reason}</Text>
-                </VStack>
-              </Card>
-            ))}
-          </VStack>
-          <VStack gap={2}>
-            <Heading level={2}>{dict.sectionChallenges}</Heading>
-            {item.challenges.map((c, i) => (
-              <Text key={i}>{c}</Text>
-            ))}
-          </VStack>
-          <VStack gap={2}>
-            <Heading level={2}>{dict.sectionOutcome}</Heading>
-            {item.outcomeOpen && <DemoBadge lang={lang} />}
-            <Text>{item.outcome}</Text>
-          </VStack>
-        </VStack>
-      </Section>
-
-      <Section>
-        <VStack gap={3}>
-          <Heading level={2}>{dict.galleryTitle}</Heading>
-          <Grid columns={{ minWidth: 260 }} gap={3}>
-            {item.gallery.map((g) => (
-              <Image
-                key={g.src}
-                src={g.src}
-                alt={g.alt}
-                width={1280}
-                height={800}
-                loading="lazy"
-                sizes="(max-width: 768px) 100vw, 480px"
-                style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-container)' }}
-              />
-            ))}
-          </Grid>
-        </VStack>
-      </Section>
-
-      {related.length > 0 && (
-        <Section variant="muted">
-          <VStack gap={3}>
-            <Heading level={2}>{dict.relatedTitle}</Heading>
-            <Grid columns={{ minWidth: 260 }} gap={3}>
-              {related.map((p) => (
-                <ClickableCard
-                  key={p.slug}
-                  label={p.title}
-                  href={withLang(`/projekte/${p.slug}`, lang)}
-                  elevation="low"
-                >
-                  <VStack gap={2}>
-                    <ItemCover src={p.cover} alt={p.title} seed={p.slug} />
-                    <DemoBadge lang={lang} />
-                    <Heading level={3}>{p.title}</Heading>
-                  </VStack>
-                </ClickableCard>
+      {gallery.length > 0 && (
+        <Section>
+          <VStack gap={6}>
+            <SectionHeader title={dict.galleryTitle} />
+            <Grid columns={CARD_COLUMNS} gap={4}>
+              {gallery.map((g) => (
+                <Image
+                  key={g.src}
+                  src={g.src}
+                  alt={g.alt}
+                  width={1280}
+                  height={800}
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 360px"
+                  style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-container)' }}
+                />
               ))}
             </Grid>
           </VStack>
         </Section>
       )}
 
-      <Section>
-        <Link href={withLang('/projekte', lang)}>{dict.backToProjects}</Link>
-      </Section>
+      {related.length > 0 && (
+        <Section>
+          <VStack gap={6}>
+            <SectionHeader title={dict.relatedTitle} />
+            <Grid columns={CARD_COLUMNS} gap={4}>
+              {related.map((p) => (
+                <ContentCard key={p.slug} item={p} lang={lang} />
+              ))}
+            </Grid>
+          </VStack>
+        </Section>
+      )}
     </>
   );
 }

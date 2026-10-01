@@ -13,7 +13,9 @@ export interface GhostItem {
   excerpt?: string;
   custom_excerpt?: string;
   feature_image?: string | null;
+  feature_image_alt?: string | null;
   published_at?: string;
+  reading_time?: number;
   html?: string;
   tags?: { slug?: string; name?: string }[];
 }
@@ -70,7 +72,7 @@ export async function getPosts(lang: Lang): Promise<GhostItem[]> {
       getApi().posts.browse({
         limit: 'all',
         include: 'tags',
-        fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at',
+        fields: 'slug,title,excerpt,custom_excerpt,feature_image,published_at,reading_time',
         filter: `tag:${LANG_TAG[lang]}+tag:-project`,
         order: 'published_at DESC',
       }),

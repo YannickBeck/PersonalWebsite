@@ -7,206 +7,191 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
 import { Card } from '@astryxdesign/core/Card';
-import { Banner } from '@astryxdesign/core/Banner';
-import { Link } from '@astryxdesign/core/Link';
-import { ClickableCard } from '@astryxdesign/core/ClickableCard';
+import { List, ListItem } from '@astryxdesign/core/List';
+import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { StatusDot } from '@astryxdesign/core/StatusDot';
-import { Avatar } from '@astryxdesign/core/Avatar';
-import { getDictionary } from '@/i18n/dictionaries';
-import { withLang, type Lang } from '@/i18n/dictionaries';
+import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { getPostCards, getProjectCards } from '@/lib/items';
 import { servicesByLang } from '@/content/pages';
-import { ItemCover } from '@/components/item-cover';
-import { DemoBadge } from '@/components/demo-badge';
+import { PORTRAIT_SRC } from '@/lib/images';
+import { CARD_COLUMNS, ContentCard } from '@/components/content-card';
+import { SectionHeader } from '@/components/section-header';
+import { TerminalCard } from '@/components/terminal-card';
+import { CtaCard } from '@/components/cta-card';
+import { ArrowRight } from '@/components/icons';
+import home from './home.module.css';
 
 export async function HomeContent({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
-  const [projects, posts] = await Promise.all([
-    getProjectCards(lang),
-    getPostCards(lang),
-  ]);
+  const [projects, posts] = await Promise.all([getProjectCards(lang), getPostCards(lang)]);
   const topProjects = projects.slice(0, 3);
   const topPosts = posts.slice(0, 3);
   const services = servicesByLang(lang);
+  const arrow = <ArrowRight />;
 
   return (
     <>
-      <Section>
-        <VStack gap={3}>
-          <Banner
-            status="warning"
-            title={dict.demoBannerTitle}
-            description={
-              <>
-                {dict.demoBannerText}{' '}
-                <Link hasUnderline href={withLang('/content-status', lang)}>{dict.statusTitle}</Link>
-              </>
-            }
-          />
-        </VStack>
-      </Section>
-      <Section>
-        <Grid columns={{ minWidth: 260 }} gap={4}>
-          <VStack gap={4}>
-            <HStack gap={2}>
-              <Avatar name="Yannick Beck" size="md" tooltip={false} />
-              <StatusDot variant="accent" label={dict.homeEyebrow} isPulsing />
-              <Text type="label">{dict.homeEyebrow}</Text>
+      {/* Hero (E4): links Text, rechts Terminal-Karte; asymmetrisch ab 1024px (home.module.css) */}
+      <Section className={home.heroSection}>
+        <Grid columns={{ minWidth: 400, max: 2 }} gap={10} align="center" className={home.hero}>
+          <VStack gap={5}>
+            <HStack gap={2} vAlign="center">
+              {/* dekorativ: der Text daneben trägt die Aussage (X10, keine Doppelansage, kein Puls) */}
+              <StatusDot variant="accent" label={dict.homeEyebrow} aria-hidden="true" />
+              <Text type="label" color="secondary">
+                {dict.homeEyebrow}
+              </Text>
             </HStack>
-            <Heading level={1} type="display-2">
+            <Heading level={1} type="display-2" textWrap="balance">
               {dict.homeTitle}
             </Heading>
-            <Text type="large">{dict.homeLede}</Text>
-            <HStack gap={2}>
+            <Text type="large" color="secondary" textWrap="pretty">
+              {dict.homeLede}
+            </Text>
+            <HStack gap={3} wrap="wrap">
               <Button
                 label={dict.viewProjects}
                 variant="primary"
+                size="lg"
                 href={withLang('/projekte', lang)}
+                endContent={arrow}
               />
-              <Button
-                label={dict.contact}
-                variant="secondary"
-                href={withLang('/kontakt', lang)}
-              />
+              <Button label={dict.contact} variant="secondary" size="lg" href={withLang('/kontakt', lang)} />
             </HStack>
           </VStack>
-          <VStack gap={2}>
-            <Image
-              src="/placeholders/portrait.svg"
-              alt={dict.portraitAlt}
-              width={800}
-              height={1000}
-              priority
-              sizes="(max-width: 768px) 100vw, 440px"
-              style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-container)' }}
-            />
-          </VStack>
+          <TerminalCard title={dict.homeTerminalTitle} lines={dict.homeTerminal} label={dict.homeTerminalLabel} />
         </Grid>
       </Section>
 
       {topProjects.length > 0 && (
-        <Section variant="muted">
-          <VStack gap={4}>
-            <Heading level={2}>{dict.homeProjectsTitle}</Heading>
-            <Grid columns={{ minWidth: 260 }} gap={3}>
+        <Section>
+          <VStack gap={6}>
+            <SectionHeader
+              title={dict.homeProjectsTitle}
+              action={
+                <Button
+                  label={dict.homeAllProjects}
+                  variant="secondary"
+                  href={withLang('/projekte', lang)}
+                  endContent={arrow}
+                />
+              }
+            />
+            <Grid columns={CARD_COLUMNS} gap={4}>
               {topProjects.map((p) => (
-                <ClickableCard
-                  key={p.slug}
-                  label={p.title}
-                  href={p.href}
-                  elevation="low"
-                >
-                  <VStack gap={2}>
-                    <ItemCover src={p.image} alt={p.title} seed={p.slug} />
-                    {p.demo && <DemoBadge lang={lang} />}
-                    <Heading level={3}>{p.title}</Heading>
-                    {p.excerpt && <Text color="secondary">{p.excerpt}</Text>}
-                  </VStack>
-                </ClickableCard>
+                <ContentCard key={p.slug} item={p} lang={lang} />
               ))}
             </Grid>
-            <HStack gap={2}>
-              <Button
-                label={dict.homeAllProjects}
-                variant="secondary"
-                href={withLang('/projekte', lang)}
-              />
-            </HStack>
           </VStack>
         </Section>
       )}
 
+      {/* Leistungen als Zeilen mit Weiterführung wie die anderen Sections (LV3) */}
       <Section>
-        <VStack gap={4}>
-          <Heading level={2}>{dict.homeServicesTitle}</Heading>
-          <Text type="large">{dict.homeServicesLede}</Text>
-          <Grid columns={{ minWidth: 260 }} gap={3}>
-            {services.map((s) => (
-              <Card key={s.slug}>
-                <VStack gap={2}>
-                  <Heading level={3}>{s.title}</Heading>
-                  <Text color="secondary">{s.problem}</Text>
-                </VStack>
-              </Card>
-            ))}
-          </Grid>
+        <VStack gap={6}>
+          <SectionHeader
+            title={dict.homeServicesTitle}
+            lede={dict.homeServicesLede}
+            action={
+              <Button
+                label={dict.homeAllServices}
+                variant="secondary"
+                href={withLang('/leistungen', lang)}
+                endContent={arrow}
+              />
+            }
+          />
+          <Card padding={2}>
+            <List hasDividers density="spacious">
+              {services.map((s, i) => (
+                <ListItem
+                  key={s.slug}
+                  href={`${withLang('/leistungen', lang)}#${s.slug}`}
+                  startContent={
+                    <Text type="code" color="accent" weight="semibold">
+                      {String(i + 1).padStart(2, '0')}
+                    </Text>
+                  }
+                  label={<Text weight="semibold">{s.title}</Text>}
+                  description={<Text color="secondary">{s.problem}</Text>}
+                  endContent={<ArrowRight color="secondary" />}
+                />
+              ))}
+            </List>
+          </Card>
         </VStack>
       </Section>
 
-      <Section variant="muted">
-        <Grid columns={{ minWidth: 260 }} gap={4}>
-          <VStack gap={3}>
+      {/* Kurzporträt ohne Bild (E1/LV2): Text + Fakten; Porträt nur mit echter Bildquelle */}
+      <Section>
+        <Grid columns={{ minWidth: 320, max: 2 }} gap={10} align="start">
+          <VStack gap={4}>
             <Heading level={2}>{dict.homeAboutTitle}</Heading>
-            <Text>{dict.homeAboutLede}</Text>
+            <Text color="secondary" textWrap="pretty">
+              {dict.homeAboutLede}
+            </Text>
             <HStack gap={2}>
               <Button
                 label={dict.homeAboutCta}
                 variant="secondary"
                 href={withLang('/ueber-mich', lang)}
+                endContent={arrow}
               />
             </HStack>
           </VStack>
-          <VStack gap={2}>
-            <Image
-              src="/placeholders/portrait.svg"
-              alt={dict.portraitAlt}
-              width={800}
-              height={1000}
-              loading="lazy"
-              sizes="(max-width: 768px) 100vw, 440px"
-              style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-container)' }}
-            />
-          </VStack>
+          <Card>
+            <HStack gap={5} vAlign="start">
+              {PORTRAIT_SRC ? (
+                <Image
+                  src={PORTRAIT_SRC}
+                  alt=""
+                  width={96}
+                  height={96}
+                  style={{ borderRadius: 'var(--radius-full)', flexShrink: 0 }}
+                />
+              ) : null}
+              <MetadataList label={{ position: 'top' }}>
+                {dict.aboutFacts.map((f) => (
+                  <MetadataListItem key={f.label} label={f.label}>
+                    <Text>{f.value}</Text>
+                  </MetadataListItem>
+                ))}
+              </MetadataList>
+            </HStack>
+          </Card>
         </Grid>
       </Section>
 
       {topPosts.length > 0 && (
         <Section>
-          <VStack gap={4}>
-            <Heading level={2}>{dict.homePostsTitle}</Heading>
-            <Grid columns={{ minWidth: 260 }} gap={3}>
+          <VStack gap={6}>
+            <SectionHeader
+              title={dict.homePostsTitle}
+              action={
+                <Button
+                  label={dict.homeAllPosts}
+                  variant="secondary"
+                  href={withLang('/blog', lang)}
+                  endContent={arrow}
+                />
+              }
+            />
+            <Grid columns={CARD_COLUMNS} gap={4}>
               {topPosts.map((p) => (
-                <ClickableCard
-                  key={p.slug}
-                  label={p.title}
-                  href={p.href}
-                  elevation="low"
-                >
-                  <VStack gap={2}>
-                    <ItemCover src={p.image} alt={p.title} seed={p.slug} />
-                    {p.demo && <DemoBadge lang={lang} />}
-                    <Heading level={3}>{p.title}</Heading>
-                    {p.excerpt && <Text color="secondary">{p.excerpt}</Text>}
-                  </VStack>
-                </ClickableCard>
+                <ContentCard key={p.slug} item={p} lang={lang} />
               ))}
             </Grid>
-            <HStack gap={2}>
-              <Button
-                label={dict.homeAllPosts}
-                variant="secondary"
-                href={withLang('/blog', lang)}
-              />
-            </HStack>
           </VStack>
         </Section>
       )}
 
-      <Section variant="muted">
-        <Card elevation="low">
-          <VStack gap={3}>
-            <Heading level={2}>{dict.homeContactTitle}</Heading>
-            <Text>{dict.homeContactLede}</Text>
-            <HStack gap={2}>
-              <Button
-                label={dict.contact}
-                variant="primary"
-                href={withLang('/kontakt', lang)}
-              />
-            </HStack>
-          </VStack>
-        </Card>
-      </Section>
+      {/* Kontakt-CTA als ruhige Card */}
+      <CtaCard
+        title={dict.homeContactTitle}
+        text={dict.homeContactLede}
+        label={dict.contact}
+        href={withLang('/kontakt', lang)}
+      />
     </>
   );
 }

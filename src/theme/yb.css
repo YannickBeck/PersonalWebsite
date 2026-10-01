@@ -266,6 +266,14 @@
     --yb-ease-enter: var(--ease-standard);
     --yb-ease-exit: cubic-bezier(0.4, 0, 1, 1);
     --yb-ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+    --yb-prose-size: calc(var(--font-size-base) * 1.125);
+    --yb-terminal-background: #0B1020;
+    --yb-terminal-bar: #111833;
+    --yb-terminal-border: light-dark(#1B1F3B26, #A5B4FC24);
+    --yb-terminal-text: #E6E8F2;
+    --yb-terminal-muted: #A3ABC0;
+    --yb-terminal-prompt: #9B7BFF;
+    --yb-terminal-dot: #3D4766;
   }
 
   :scope {
@@ -422,6 +430,10 @@
     border-width: var(--border-width);
     border-style: solid;
     border-color: var(--color-border-emphasized);
+  }
+
+  .astryx-list-item:last-child {
+    border-bottom-width: 0;
   }
 
   .astryx-top-nav-heading {

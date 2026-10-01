@@ -12,3 +12,13 @@ export function HtmlLang() {
   }, [pathname]);
   return null;
 }
+
+/** Sprungmarke zum Inhalt, Beschriftung in der Sprache der Route. */
+export function SkipLink() {
+  const lang = langFromPath(usePathname());
+  return (
+    <a href="#main" className="skip-link">
+      {lang === 'en' ? 'Skip to content' : 'Zum Inhalt springen'}
+    </a>
+  );
+}

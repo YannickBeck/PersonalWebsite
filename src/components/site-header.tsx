@@ -1,15 +1,19 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { TopNav } from '@astryxdesign/core/TopNav';
-import { TopNavHeading } from '@astryxdesign/core/TopNav';
-import { TopNavItem } from '@astryxdesign/core/TopNav';
+import { TopNav, TopNavHeading, TopNavItem } from '@astryxdesign/core/TopNav';
 import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
+import { Icon } from '@astryxdesign/core/Icon';
 import { HStack } from '@astryxdesign/core/HStack';
 import { VStack } from '@astryxdesign/core/VStack';
-import { Link } from '@astryxdesign/core/Link';
+import { Text } from '@astryxdesign/core/Text';
+import { Divider } from '@astryxdesign/core/Divider';
+import { MobileNav } from '@astryxdesign/core/MobileNav';
+import { SideNavItem } from '@astryxdesign/core/SideNav';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { BrandMark } from '@/components/brand-mark';
 import {
   getDictionary,
   langFromPath,
@@ -20,116 +24,114 @@ import {
 import { TRANSLATION_MAP } from '@/i18n/translations';
 import styles from './site-header.module.css';
 
+/** Statische Routen, die es in beiden Sprachen gibt (ohne /en-Präfix). */
+const KNOWN_PATHS = new Set([
+  '/',
+  '/projekte',
+  '/blog',
+  '/leistungen',
+  '/cv',
+  '/kontakt',
+  '/ueber-mich',
+  '/uses',
+  '/newsletter',
+  '/impressum',
+  '/datenschutz',
+  '/content-status',
+]);
+
 /**
  * Sprachwechsel über Übersetzungszuordnung: Detailseiten springen zum
- * Gegenstück, sonst zur anderssprachigen Startseite (keine 404-Links).
+ * Gegenstück, bekannte Seiten werden gespiegelt, alles andere (404, /_not-found)
+ * führt auf die anderssprachige Startseite – nie auf eine weitere 404 (T6).
  */
 export function switchTarget(pathname: string, target: Lang): string {
+  const home = target === 'en' ? '/en' : '/';
   const segs = pathname.split('/').filter(Boolean);
   const noPrefix = segs[0] === 'en' ? segs.slice(1) : segs;
-  if (
-    (noPrefix[0] === 'projekte' || noPrefix[0] === 'blog') &&
-    noPrefix[1]
-  ) {
+  if ((noPrefix[0] === 'projekte' || noPrefix[0] === 'blog') && noPrefix.length === 2) {
     const counterpart = TRANSLATION_MAP[noPrefix[1]];
-    if (counterpart) {
-      return withLang(`/${noPrefix[0]}/${counterpart}`, target);
-    }
-    return target === 'en' ? '/en' : '/';
+    return counterpart ? withLang(`/${noPrefix[0]}/${counterpart}`, target) : home;
   }
-  return mirrorPath(pathname, target);
+  const bare = `/${noPrefix.join('/')}`;
+  return KNOWN_PATHS.has(bare) ? mirrorPath(pathname, target) : home;
+}
+
+/** Aktive Seite: exakter Treffer oder Unterseite (Projekt-/Artikel-Detail markiert „Projekte“/„Blog“). */
+function isActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function SiteHeader() {
   const pathname = usePathname();
   const lang = langFromPath(pathname);
   const dict = getDictionary(lang);
-  // Menü gilt nur für den Pfad, auf dem es geöffnet wurde: ein Routenwechsel schließt es
+  // Drawer gilt nur für den Pfad, auf dem er geöffnet wurde: Navigation schließt ihn
   // ohne Effekt (kein setState im Effekt, react-hooks/set-state-in-effect).
   const [menuPath, setMenuPath] = useState<string | null>(null);
   const menuOpen = menuPath === pathname;
   const setMenuOpen = (open: boolean) => setMenuPath(open ? pathname : null);
-  const panelRef = useRef<HTMLDivElement>(null);
   const homeHref = lang === 'en' ? '/en' : '/';
-
-  useEffect(() => {
-    if (!menuOpen) {
-      return;
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuPath(null);
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    panelRef.current?.querySelector('a')?.focus();
-    return () => document.removeEventListener('keydown', onKey);
-  }, [menuOpen]);
+  const langHref = switchTarget(pathname, dict.switcherTarget);
 
   return (
     <header>
-      <div className={styles.desktop}>
-        <TopNav
-          heading={
-            <TopNavHeading heading={dict.brand} headingHref={homeHref} />
-          }
-          startContent={dict.nav.map((item) => (
-            <TopNavItem
-              key={item.href}
-              label={item.label}
-              href={item.href}
-              isSelected={pathname === item.href}
-            />
-          ))}
-          endContent={
-            <HStack gap={1}>
-              <Button
-                variant="ghost"
-                label={dict.switcherLabel}
-                href={switchTarget(pathname, dict.switcherTarget)}
-              />
-              <ThemeToggle lang={lang} />
-            </HStack>
-          }
-        />
-      </div>
-      <div className={styles.mobileBar}>
-        <Link href={homeHref}>{dict.brand}</Link>
-        <HStack gap={1}>
-          <Button
-            variant="ghost"
-            label={dict.switcherLabel}
-            href={switchTarget(pathname, dict.switcherTarget)}
+      <TopNav
+        label={dict.menuTitle}
+        heading={<TopNavHeading logo={<BrandMark />} heading={dict.brand} headingHref={homeHref} />}
+        startContent={dict.nav.map((item) => (
+          <TopNavItem
+            key={item.href}
+            className={styles.desktopOnly}
+            label={item.label}
+            href={item.href}
+            isSelected={isActive(pathname, item.href)}
           />
-          <ThemeToggle lang={lang} />
-          <Button
-            variant="ghost"
-            label={menuOpen ? dict.menuClose : dict.menuOpen}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-nav"
-          >
-            {menuOpen ? '✕' : '☰'}
-          </Button>
-        </HStack>
-      </div>
-      {menuOpen && (
-        <div
-          className={styles.mobilePanel}
-          id="mobile-nav"
-          ref={panelRef}
-          role="navigation"
-          aria-label={lang === 'en' ? 'Menu' : 'Menü'}
-        >
-          <VStack gap={2}>
+        ))}
+        endContent={
+          <HStack gap={1} vAlign="center">
+            <Button className={styles.langInBar} variant="ghost" label={dict.switcherLabel} href={langHref} />
+            <ThemeToggle lang={lang} />
+            <IconButton
+              className={styles.mobileOnly}
+              variant="ghost"
+              label={dict.menuOpen}
+              icon={<Icon icon="menu" />}
+              onClick={() => setMenuOpen(true)}
+              aria-expanded={menuOpen}
+              aria-haspopup="dialog"
+            />
+          </HStack>
+        }
+      />
+      <MobileNav isOpen={menuOpen} onOpenChange={setMenuOpen} side="end" header={dict.menuTitle}>
+        <VStack gap={4}>
+          <VStack gap={0.5} as="nav" aria-label={dict.menuTitle}>
             {dict.nav.map((item) => (
-              <Link key={item.href} href={item.href}>
-                {item.label}
-              </Link>
+              <SideNavItem
+                key={item.href}
+                label={item.label}
+                href={item.href}
+                size="lg"
+                isSelected={isActive(pathname, item.href)}
+              />
             ))}
           </VStack>
-        </div>
-      )}
+          <Divider />
+          <HStack gap={2} vAlign="center" justify="between" paddingInline={2}>
+            <Text type="label" color="secondary">
+              {dict.colorSchemeLabel}
+            </Text>
+            <ThemeToggle lang={lang} />
+          </HStack>
+          <HStack gap={2} vAlign="center" justify="between" paddingInline={2}>
+            <Text type="label" color="secondary">
+              {dict.languageLabel}
+            </Text>
+            <Button variant="ghost" label={dict.switcherLabel} href={langHref} />
+          </HStack>
+        </VStack>
+      </MobileNav>
     </header>
   );
 }

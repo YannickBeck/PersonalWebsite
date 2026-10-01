@@ -1,0 +1,23 @@
+/*
+ * Cover-Rahmen. Abweichung von AGENTS.md (dokumentiert): Eckenradius/Kontur am
+ * AspectRatio und object-fit am Bild – AspectRatio hat dafür keine Props.
+ */
+.card,
+.hero {
+  overflow: hidden;
+  background-color: var(--color-background-muted);
+}
+
+/* In Karten bündig oben, Karte rundet die oberen Ecken (content-card.module.css) */
+.card {
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.hero {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-container);
+}
+
+.image {
+  object-fit: cover;
+}

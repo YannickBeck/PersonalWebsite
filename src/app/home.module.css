@@ -1,0 +1,18 @@
+/*
+ * Startseite. Abweichung von AGENTS.md (dokumentiert): asymmetrische Hero-Spalten
+ * (Text breiter als Terminal) – Astryx-Grid kennt nur gleich breite Spuren; GridSpan
+ * erzeugt unter 600px eine 0px-Spur (L1-Verifier). Bis 1023px gilt das Astryx-Grid
+ * (1 Spalte unter ~840px, 2 gleiche darüber), ab 1024px 7:5.
+ */
+@media (min-width: 1024px) {
+  .hero {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+
+  /* Hero bekommt mehr Luft als normale Sections (80px statt 40px oben). Section legt
+     className auf den äußeren Wrapper, die Padding-Variablen gelten am inneren .astryx-section. */
+  .heroSection > :global(.astryx-section) {
+    --astryx-section-padding-block-start: calc(var(--spacing-10) * 2);
+    --astryx-section-padding-block-end: var(--spacing-12);
+  }
+}

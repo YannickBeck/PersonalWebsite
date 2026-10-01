@@ -1,0 +1,24 @@
+/*
+ * Seitenrahmen (E7): Layout/LayoutHeader/LayoutContent/LayoutFooter in layout.tsx.
+ * Abweichung von AGENTS.md (dokumentiert): Sticky-Header mit Hintergrund-Blur –
+ * dafür hat LayoutHeader keine Prop. Nur Tokens.
+ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: color-mix(in srgb, var(--color-background-body) 82%, transparent);
+  -webkit-backdrop-filter: blur(var(--spacing-3)) saturate(1.4);
+  backdrop-filter: blur(var(--spacing-3)) saturate(1.4);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .header {
+    background-color: var(--color-background-body);
+  }
+}
+
+/* Demo-Hinweiszeile (E1): ruhige, schmale Leiste über dem Header, scrollt mit weg. */
+.notice {
+  background-color: var(--color-background-muted);
+}

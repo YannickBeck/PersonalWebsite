@@ -1,0 +1,7 @@
+/*
+ * Karte mit bündigem Cover. Abweichung von AGENTS.md (dokumentiert): overflow:hidden,
+ * damit das Cover die abgerundeten Kartenecken übernimmt – ClickableCard hat dafür keine Prop.
+ */
+.card {
+  overflow: hidden;
+}

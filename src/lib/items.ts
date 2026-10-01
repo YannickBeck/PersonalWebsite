@@ -29,7 +29,7 @@ export interface CardItem {
 
 const LANG_TAG = { de: 'hash-lang-de', en: 'hash-lang-en' } as const;
 
-function ghostTopics(item: GhostItem, lang: Lang): { slug: string; label: string }[] {
+export function ghostTopics(item: GhostItem, lang: Lang): { slug: string; label: string }[] {
   return (item.tags ?? [])
     .filter(
       (t) =>
@@ -38,7 +38,7 @@ function ghostTopics(item: GhostItem, lang: Lang): { slug: string; label: string
         t.slug !== 'project' &&
         !t.slug.startsWith('hash-'),
     )
-    .map((t) => ({ slug: t.slug as string, label: prettyTag(t.slug as string) }));
+    .map((t) => ({ slug: t.slug as string, label: t.name ?? prettyTag(t.slug as string) }));
 }
 
 function prettyTag(slug: string): string {
@@ -96,6 +96,7 @@ export async function getPostCards(lang: Lang): Promise<CardItem[]> {
     title: p.title ?? p.slug,
     excerpt: p.custom_excerpt || p.excerpt || '',
     date: p.published_at,
+    readingMinutes: p.reading_time,
     image: p.feature_image ?? null,
     demo: false,
     topics: ghostTopics(p, lang),

@@ -2,17 +2,16 @@
 
 import { useState } from 'react';
 import { VStack } from '@astryxdesign/core/VStack';
+import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
-import { ClickableCard } from '@astryxdesign/core/ClickableCard';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import { TabList, Tab } from '@astryxdesign/core/TabList';
 import { Button } from '@astryxdesign/core/Button';
 import styles from './filters.module.css';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
-import { ItemCover } from '@/components/item-cover';
-import { DemoBadge } from '@/components/demo-badge';
+import { CARD_COLUMNS, ContentCard } from '@/components/content-card';
 import type { CardItem } from '@/lib/items';
 
 export function PostList({
@@ -50,14 +49,19 @@ export function PostList({
   const isFiltered = q.length > 0 || topic !== 'all';
 
   return (
-    <VStack gap={4}>
-      <TextInput
-        label={dict.searchLabel}
-        value={query}
-        onChange={setQuery}
-        placeholder={dict.searchPlaceholder}
-        isLabelHidden
-      />
+    <VStack gap={6}>
+      <VStack gap={4}>
+      <VStack maxWidth={480}>
+        <TextInput
+          label={dict.searchLabel}
+          startIcon="search"
+          hasClear
+          value={query}
+          onChange={setQuery}
+          placeholder={dict.searchPlaceholder}
+          isLabelHidden
+        />
+      </VStack>
       {topics.length > 0 && (
         <div className={styles.clip}>
         <TabList value={topic} onChange={setTopic} overflow="scroll">
@@ -68,10 +72,12 @@ export function PostList({
         </TabList>
         </div>
       )}
+      </VStack>
       {filtered.length === 0 ? (
         <VStack gap={2}>
           <Heading level={2}>{dict.noResultsTitle}</Heading>
           <Text>{dict.noResultsText}</Text>
+          <HStack gap={2}>
           <Button
             label={dict.resetFilters}
             variant="secondary"
@@ -80,23 +86,12 @@ export function PostList({
               setTopic('all');
             }}
           />
+          </HStack>
         </VStack>
       ) : (
-        <Grid columns={{ minWidth: 260 }} gap={3}>
+        <Grid columns={CARD_COLUMNS} gap={4}>
           {filtered.map((p) => (
-            <ClickableCard
-              key={p.slug}
-              label={p.title}
-              href={p.href}
-              elevation="low"
-            >
-              <VStack gap={2}>
-                <ItemCover src={p.image} alt={p.title} seed={p.slug} />
-                {p.demo && <DemoBadge lang={lang} />}
-                <Heading level={3}>{p.title}</Heading>
-                {p.excerpt && <Text color="secondary">{p.excerpt}</Text>}
-              </VStack>
-            </ClickableCard>
+            <ContentCard key={p.slug} item={p} lang={lang} headingAccessibilityLevel={2} />
           ))}
         </Grid>
       )}

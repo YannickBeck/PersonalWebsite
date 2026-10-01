@@ -1,0 +1,56 @@
+/*
+ * Lesespalte + Randspalte. Abweichung von AGENTS.md (dokumentiert): asymmetrische
+ * Spalten und sticky Inhaltsverzeichnis – dafür hat Astryx-Grid keine Prop.
+ *
+ * Lesebreite (E7 „~68ch“, L5): In Fustat ist 1ch (Ziffer 0) etwa 1,38 Durchschnitts-
+ * zeichen breit; max-width: 68ch ergäbe ~94 Zeichen pro Zeile (L5-Verifier). Ziel sind
+ * ~68 Zeichen, daher 50ch (bei 18px Fließtext ≈ 576px).
+ */
+/* Schriftgröße am Grid, damit auch die Spurbreite (50ch) in der Lesegröße gerechnet wird */
+.reading {
+  font-size: var(--yb-prose-size);
+}
+
+.main {
+  min-width: 0;
+  max-width: 50ch;
+}
+
+.aside {
+  min-width: 0;
+}
+
+.toc {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: var(--border-width) solid var(--color-border);
+}
+
+.tocItem {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-element-sm);
+  padding-left: var(--spacing-3);
+}
+
+/* Mobil/Tablet: Inhaltsverzeichnis vor dem Text, kompakt */
+@media (max-width: 1023px) {
+  .aside {
+    order: -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .withAside {
+    grid-template-columns: minmax(0, 50ch) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .aside {
+    position: sticky;
+    top: calc(var(--size-element-md) + var(--spacing-12));
+    max-width: 18rem;
+    width: 100%;
+  }
+}

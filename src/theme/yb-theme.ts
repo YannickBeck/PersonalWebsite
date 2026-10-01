@@ -116,6 +116,19 @@ export const ybTheme = defineTheme({
     '--yb-ease-enter': 'var(--ease-standard)',
     '--yb-ease-exit': 'cubic-bezier(0.4, 0, 1, 1)',
     '--yb-ease-move': 'cubic-bezier(0.65, 0, 0.35, 1)',
+
+    // ---- Fließtext auf Detailseiten (L5): 18px, Zeilenhöhe 1.7 (reading-layout/ghost-content)
+    '--yb-prose-size': 'calc(var(--font-size-base) * 1.125)',
+
+    // ---- Terminal-Karte im Hero (E4): bewusst in beiden Modi dunkel (Code-Optik),
+    //      aus derselben Navy-Familie; Kontraste: Text 15:1, Ausgabe 8:1, Prompt 5,9:1
+    '--yb-terminal-background': '#0B1020',
+    '--yb-terminal-bar': '#111833',
+    '--yb-terminal-border': ['#1B1F3B26', '#A5B4FC24'],
+    '--yb-terminal-text': '#E6E8F2',
+    '--yb-terminal-muted': '#A3ABC0',
+    '--yb-terminal-prompt': '#9B7BFF',
+    '--yb-terminal-dot': '#3D4766',
   },
   components: {
     // Seitenstruktur ohne Farbbänder (L3). Astryx-intern nutzen nur BottomSheet-Panels
@@ -161,6 +174,10 @@ export const ybTheme = defineTheme({
     },
     text: {
       'type:large': {textWrap: 'pretty'},
+    },
+    // Listen mit Trennlinien: keine Linie unter der letzten Zeile (wirkt in Cards wie ein Fehler)
+    'list-item': {
+      base: {':last-child': {borderBottomWidth: '0'}},
     },
     'top-nav-heading': {
       base: {fontWeight: 'var(--font-weight-semibold)', letterSpacing: '-0.01em'},

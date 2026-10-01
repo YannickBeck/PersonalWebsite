@@ -14,6 +14,26 @@ body {
   color: var(--color-text-primary);
 }
 
+/* Sticky-Header verdeckt sonst Sprungziele (#main, Inhaltsverzeichnis-Anker) */
+html {
+  scroll-padding-top: calc(var(--size-element-md) + var(--spacing-12));
+}
+
+/*
+ * Sticky-Footer (L9): Layout height="auto" braucht einen Elternteil mit definierter Höhe.
+ * Das gestreckte Grid-Item gibt Layout diese Höhe; Layouts minHeight 100% und die Mitte
+ * mit flex 1 schieben den Footer auf kurzen Seiten an den unteren Rand.
+ */
+.print-area {
+  display: grid;
+  min-height: 100dvh;
+}
+
+/* Skip-Link-Ziel: Fokus ja, aber kein Rahmen um den ganzen Inhalt */
+main:focus {
+  outline: none;
+}
+
 /*
  * Theme-Flash (X1/T2/VV1): Vor der Hydration trägt der Astryx-Theme-Wrapper noch
  * color-scheme "light dark" (Modus system) und würde ein vom Boot-Script gesetztes
@@ -47,13 +67,29 @@ html[data-theme="dark"] [data-astryx-theme="yb"]:not([data-theme]) {
 /* Reduced Motion: keine globale 0.01ms-Regel mehr (X3). Astryx regelt seine Komponenten
    selbst; eigene Animationen und View Transitions zentral in ./motion.css. */
 
+/*
+ * Druck (A7, v. a. /cv): helles Schema erzwingen (light-dark() löst dann hell auf),
+ * Rahmen, Bedienelemente und Demo-Kennzeichnungen ausblenden, Abstände straffen.
+ */
 @media print {
-  .print-hide {
+  :root,
+  [data-astryx-theme] {
+    color-scheme: light !important;
+  }
+
+  body {
+    background: none;
+  }
+
+  .print-hide,
+  .skip-link,
+  main .astryx-button,
+  main .astryx-banner-frame {
     display: none !important;
   }
 
-  .print-area {
-    background: #fff;
-    color: #000;
+  .astryx-section {
+    --astryx-section-padding-block-start: var(--spacing-4);
+    --astryx-section-padding-block-end: var(--spacing-4);
   }
 }

@@ -139,7 +139,15 @@ export const ybTheme = {
     "--yb-motion-distance": "var(--spacing-6)",
     "--yb-ease-enter": "var(--ease-standard)",
     "--yb-ease-exit": "cubic-bezier(0.4, 0, 1, 1)",
-    "--yb-ease-move": "cubic-bezier(0.65, 0, 0.35, 1)"
+    "--yb-ease-move": "cubic-bezier(0.65, 0, 0.35, 1)",
+    "--yb-prose-size": "calc(var(--font-size-base) * 1.125)",
+    "--yb-terminal-background": "#0B1020",
+    "--yb-terminal-bar": "#111833",
+    "--yb-terminal-border": "light-dark(#1B1F3B26, #A5B4FC24)",
+    "--yb-terminal-text": "#E6E8F2",
+    "--yb-terminal-muted": "#A3ABC0",
+    "--yb-terminal-prompt": "#9B7BFF",
+    "--yb-terminal-dot": "#3D4766"
   },
   __localTokenOwners: {
     "--yb-motion-micro": "yb",
@@ -150,7 +158,15 @@ export const ybTheme = {
     "--yb-motion-distance": "yb",
     "--yb-ease-enter": "yb",
     "--yb-ease-exit": "yb",
-    "--yb-ease-move": "yb"
+    "--yb-ease-move": "yb",
+    "--yb-prose-size": "yb",
+    "--yb-terminal-background": "yb",
+    "--yb-terminal-bar": "yb",
+    "--yb-terminal-border": "yb",
+    "--yb-terminal-text": "yb",
+    "--yb-terminal-muted": "yb",
+    "--yb-terminal-prompt": "yb",
+    "--yb-terminal-dot": "yb"
   },
   __localTokenLineage: ["yb"],
   components: {
@@ -293,6 +309,13 @@ export const ybTheme = {
         "borderWidth": "var(--border-width)",
         "borderStyle": "solid",
         "borderColor": "var(--color-border-emphasized)"
+      }
+    },
+    "list-item": {
+      "base": {
+        ":last-child": {
+          "borderBottomWidth": "0"
+        }
       }
     },
     "top-nav-heading": {

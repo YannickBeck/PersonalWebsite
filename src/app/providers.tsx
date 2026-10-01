@@ -10,10 +10,26 @@ import {
   useSyncExternalStore,
 } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Theme } from '@astryxdesign/core/theme';
 import { LinkProvider } from '@astryxdesign/core/Link';
+import { InternationalizationProvider } from '@astryxdesign/core/i18n';
 import { ybTheme } from '../theme/yb';
 import { THEME_STORAGE_KEY } from '../theme/theme-boot';
+import { langFromPath } from '@/i18n/dictionaries';
+import { ASTRYX_DE } from '@/i18n/astryx-de';
+
+/** Deutsche Astryx-Texte (M8/VV3): Auszug aus dem de-DE-Katalog, s. astryx-de.ts. */
+const ASTRYX_MESSAGES = { 'de-DE': ASTRYX_DE };
+
+/**
+ * next/link ohne das von Astryx zusätzlich gesetzte `to`-Attribut (für React Router
+ * gedacht): sonst landet ein ungültiges <a to="…"> im HTML (T9).
+ */
+function NextLinkAdapter({ to: _to, ...props }: React.ComponentProps<typeof Link> & { to?: string }) {
+  void _to;
+  return <Link {...props} />;
+}
 
 /** system = keine gespeicherte Wahl, folgt prefers-color-scheme (E2). */
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -59,6 +75,7 @@ function readStoredMode(): ThemeMode | null {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const lang = langFromPath(usePathname());
   const [mode, setMode] = useState<ThemeMode>('system');
   const systemScheme = useSyncExternalStore<ResolvedThemeMode | null>(
     subscribeSystemScheme,
@@ -96,7 +113,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeModeContext.Provider value={value}>
       <Theme theme={ybTheme} mode={mode}>
-        <LinkProvider component={Link}>{children}</LinkProvider>
+        <InternationalizationProvider locale={lang === 'en' ? 'en' : 'de-DE'} messages={ASTRYX_MESSAGES}>
+          <LinkProvider component={NextLinkAdapter}>{children}</LinkProvider>
+        </InternationalizationProvider>
       </Theme>
     </ThemeModeContext.Provider>
   );

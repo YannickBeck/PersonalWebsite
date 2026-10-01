@@ -12,10 +12,14 @@ export function Faq({ lang }: { lang: Lang }) {
   return (
     <VStack gap={3}>
       <Heading level={2}>{dict.faqTitle}</Heading>
-      <CollapsibleGroup>
+      <CollapsibleGroup hasDividers density="balanced">
         {dict.faqItems.map((item) => (
-          <Collapsible key={item.q} value={item.q} trigger={item.q}>
-            <Text>{item.a}</Text>
+          <Collapsible
+            key={item.q}
+            value={item.q}
+            trigger={<Text weight="semibold">{item.q}</Text>}
+          >
+            <Text color="secondary">{item.a}</Text>
           </Collapsible>
         ))}
       </CollapsibleGroup>

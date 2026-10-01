@@ -4,7 +4,6 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Banner } from '@astryxdesign/core/Banner';
-import { DemoBadge } from '@/components/demo-badge';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { Metadata } from 'next';
 import { pageMeta } from '@/lib/seo';
@@ -24,10 +23,9 @@ export default function Page() {
     <>
       <PageHero title={page.title} lede={page.lede} />
       <Section>
-        <VStack gap={4}>
-          <DemoBadge lang="de" />
+        <VStack gap={8} maxWidth={680}>
           <Banner
-            status="warning"
+            status="note"
             title={dict.demoNoticeTitle}
             description="Redaktionelle Vorlage — keine Rechtsberatung. Alle Angaben in eckigen Klammern müssen vor Veröffentlichung durch echte Daten ersetzt werden."
           />

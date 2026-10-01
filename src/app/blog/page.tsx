@@ -19,7 +19,7 @@ export default async function BlogPage() {
   return (
     <>
       <PageHero title={dict.pages.blog.title} lede={dict.pages.blog.lede} />
-      <Section variant="muted">
+      <Section>
         <PostList lang="de" posts={posts} />
       </Section>
     </>

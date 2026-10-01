@@ -5,9 +5,10 @@
  */
 .content {
   color: var(--color-text-primary);
-  /* Lesebreite wie Demo-Artikel (article-body.module.css), V5 */
-  max-width: 68ch;
+  /* Lesebreite und Schriftgröße setzt die Lesespalte (reading-layout.module.css, L5) */
   min-width: 0;
+  line-height: 1.7;
+  overflow-wrap: break-word;
 }
 
 .content > :first-child {
@@ -18,15 +19,35 @@
 .content h2,
 .content h3 {
   color: var(--color-text-primary);
-  margin-top: var(--spacing-8);
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.011em;
+  text-wrap: balance;
+  margin-top: var(--spacing-10);
   margin-bottom: var(--spacing-3);
-  scroll-margin-top: var(--spacing-6);
+}
+
+.content h2 {
+  font-size: var(--text-heading-2-size);
+  line-height: var(--text-heading-2-leading);
+}
+
+.content h3 {
+  font-size: var(--text-heading-3-size);
+  line-height: var(--text-heading-3-leading);
+}
+
+.content p,
+.content li,
+.content blockquote {
+  /* Astryx setzt :where(p) auf --text-body-size; Fließtext erbt die Lesegröße der Spalte */
+  font-size: inherit;
 }
 
 .content p {
-  margin-top: var(--spacing-3);
-  margin-bottom: var(--spacing-3);
-  line-height: 1.7;
+  margin-top: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  text-wrap: pretty;
 }
 
 /* Links im Fließtext unterstrichen: nur Farbe reicht nicht (WCAG 1.4.1, VV2) */
@@ -108,4 +129,149 @@
   border-left: 2px solid var(--color-border-emphasized);
   padding-left: var(--spacing-4);
   color: var(--color-text-secondary);
+}
+
+/* ---------- Koenig-Cards (A10): Basisstyles, damit echte Ghost-Inhalte nicht ungestylt sind ---------- */
+.content :global(.kg-card) {
+  margin-top: var(--spacing-8);
+  margin-bottom: var(--spacing-8);
+}
+
+.content :global(.kg-image-card) img,
+.content :global(.kg-gallery-image) img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Lesespalte ist links ausgerichtet (gemeinsame Kante); breite/volle Bilder füllen die Spalte
+   und brechen nicht in die Randspalte aus. */
+.content :global(.kg-width-wide),
+.content :global(.kg-width-full) {
+  width: 100%;
+}
+
+.content :global(.kg-width-full) img {
+  border-radius: var(--radius-container);
+}
+
+.content :global(.kg-gallery-container) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.content :global(.kg-gallery-row) {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.content :global(.kg-gallery-image) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.content :global(.kg-gallery-image) img {
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-element);
+}
+
+.content :global(.kg-callout-card) {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) var(--spacing-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-muted);
+}
+
+.content :global(.kg-callout-emoji) {
+  flex-shrink: 0;
+  line-height: inherit;
+}
+
+.content :global(.kg-callout-text) {
+  min-width: 0;
+}
+
+.content :global(.kg-bookmark-card) a,
+.content :global(.kg-bookmark-container) {
+  display: flex;
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-card);
+  color: var(--color-text-primary);
+  text-decoration-line: none;
+}
+
+.content :global(.kg-bookmark-container):hover {
+  border-color: var(--color-border-emphasized);
+}
+
+.content :global(.kg-bookmark-content) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+  padding: var(--spacing-4);
+}
+
+.content :global(.kg-bookmark-title) {
+  font-weight: var(--font-weight-semibold);
+}
+
+.content :global(.kg-bookmark-description) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.content :global(.kg-bookmark-metadata) {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-1);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.content :global(.kg-bookmark-icon) {
+  width: var(--spacing-5);
+  height: var(--spacing-5);
+}
+
+.content :global(.kg-bookmark-thumbnail) {
+  position: relative;
+  flex: 0 0 33%;
+  min-height: calc(var(--spacing-12) * 2.5);
+}
+
+.content :global(.kg-bookmark-thumbnail) img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.content :global(.kg-toggle-card) {
+  padding: var(--spacing-4) var(--spacing-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-container);
+}
+
+.content :global(.kg-button-card) {
+  display: flex;
+}
+
+.content :global(.kg-embed-card) iframe,
+.content :global(.kg-video-card) video {
+  max-width: 100%;
 }

@@ -1,31 +1,50 @@
 import Image from 'next/image';
-import { CoverArt } from '@/components/cover-art';
+import { AspectRatio } from '@astryxdesign/core/AspectRatio';
+import { CoverArt, type CoverMotif } from '@/components/cover-art';
+import { realImage } from '@/lib/images';
+import styles from './item-cover.module.css';
 
 /**
- * Cover für Cards: echtes Bild (Ghost/Platzhalter-SVG) oder farbcodiertes
- * Muster als Fallback. Keine kaputten Bilder — es gibt immer eine Darstellung.
+ * Ein Cover-Slot für Karten und Detailseiten (L6, V6): festes Seitenverhältnis 16:10,
+ * damit Überschriften in jeder Kartenreihe fluchten. Echtes Bild (Ghost feature_image)
+ * oder – bei fehlendem Bild bzw. /placeholders/*.svg – das generative CoverArt.
+ * In Karten dekorativ (alt=""), weil der Titel daneben als Überschrift steht (T9).
  */
 export function ItemCover({
   src,
-  alt,
+  alt = '',
   seed,
+  label,
+  motif,
+  variant = 'card',
+  priority = false,
 }: {
-  src: string | null;
-  alt: string;
+  src: string | null | undefined;
+  alt?: string;
   seed: string;
+  label?: string;
+  motif?: CoverMotif;
+  variant?: 'card' | 'hero';
+  priority?: boolean;
 }) {
-  if (!src) {
-    return <CoverArt seed={seed} />;
-  }
+  const image = realImage(src);
   return (
-    <Image
-      src={src}
-      alt={alt}
-      width={1280}
-      height={800}
-      loading="lazy"
-      sizes="(max-width: 768px) 100vw, 560px"
-      style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-container)' }}
-    />
+    <AspectRatio
+      ratio={16 / 10}
+      className={variant === 'hero' ? styles.hero : styles.card}
+    >
+      {image ? (
+        <Image
+          src={image}
+          alt={alt}
+          fill
+          priority={priority}
+          sizes={variant === 'hero' ? '(max-width: 768px) 100vw, 720px' : '(max-width: 768px) 100vw, 360px'}
+          className={styles.image}
+        />
+      ) : (
+        <CoverArt seed={seed} label={label} motif={motif} size={variant} />
+      )}
+    </AspectRatio>
   );
 }

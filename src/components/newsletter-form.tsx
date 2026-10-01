@@ -6,6 +6,9 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import { Button } from '@astryxdesign/core/Button';
 import { Banner } from '@astryxdesign/core/Banner';
+import { Text } from '@astryxdesign/core/Text';
+import { Divider } from '@astryxdesign/core/Divider';
+import { FormLayout } from '@astryxdesign/core/FormLayout';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 
 type Phase = 'idle' | 'sending' | 'exists' | 'error' | 'confirm' | 'done';
@@ -41,12 +44,18 @@ export function NewsletterForm({ lang }: { lang: Lang }) {
   };
 
   return (
-    <VStack gap={3}>
-      <Banner
-        status="warning"
-        title={dict.newsletterInviteTitle}
-        description={dict.newsletterInviteText}
-      />
+    // Echtes <form> (M8); Vorschau-Buttons mit kurzen Labels und Umbruch (M1/T3: kein Überlauf)
+    <VStack
+      as="form"
+      gap={6}
+      onSubmit={(e: React.FormEvent) => {
+        e.preventDefault();
+        submit();
+      }}
+      {...{ noValidate: true }}
+    >
+      <Banner status="note" title={dict.newsletterInviteTitle} description={dict.newsletterInviteText} />
+      <FormLayout defaultOptionality="required">
       <TextInput
         label={dict.newsletterEmailLabel}
         type="email"
@@ -55,39 +64,35 @@ export function NewsletterForm({ lang }: { lang: Lang }) {
           setEmail(v);
           setPhase('idle');
         }}
+        htmlName="email"
+        autoComplete="email"
         isRequired
         status={invalid ? { type: 'error', message: dict.newsletterErrInvalid } : undefined}
       />
-      {phase === 'exists' && (
-        <Banner status="info" title={dict.newsletterStateExists} description="" />
-      )}
-      {phase === 'error' && (
-        <Banner status="error" title={dict.newsletterStateError} description="" />
-      )}
-      {phase === 'confirm' && (
-        <Banner status="info" title={dict.newsletterStateConfirm} description="" />
-      )}
-      {phase === 'done' && (
-        <Banner status="success" title={dict.newsletterStateOk} description="" />
-      )}
-      <Button
-        label={dict.newsletterSubmit}
-        variant="primary"
-        onClick={submit}
-        isLoading={phase === 'sending'}
-      />
+      </FormLayout>
+      {phase === 'exists' && <Banner status="info" title={dict.newsletterStateExists} />}
+      {phase === 'error' && <Banner status="error" title={dict.newsletterStateError} />}
+      {phase === 'confirm' && <Banner status="info" title={dict.newsletterStateConfirm} />}
+      {phase === 'done' && <Banner status="success" title={dict.newsletterStateOk} />}
       <HStack gap={2}>
         <Button
-          label={dict.newsletterStateError}
-          variant="ghost"
-          onClick={() => setPhase('error')}
-        />
-        <Button
-          label={dict.newsletterStateOk}
-          variant="ghost"
-          onClick={() => setPhase('done')}
+          type="submit"
+          label={dict.newsletterSubmit}
+          variant="primary"
+          size="lg"
+          isLoading={phase === 'sending'}
         />
       </HStack>
+      <Divider />
+      <VStack gap={2}>
+        <Text type="label" color="secondary">
+          {dict.formPreviewLabel}
+        </Text>
+        <HStack gap={2} wrap="wrap">
+          <Button size="sm" label={dict.formPreviewError} variant="ghost" onClick={() => setPhase('error')} />
+          <Button size="sm" label={dict.formPreviewSuccess} variant="ghost" onClick={() => setPhase('done')} />
+        </HStack>
+      </VStack>
     </VStack>
   );
 }

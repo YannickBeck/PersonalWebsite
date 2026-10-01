@@ -1,0 +1,15 @@
+/*
+ * Footer-Linklisten als echte Liste (ul/li). Abweichung von AGENTS.md (dokumentiert):
+ * Listenreset und Zeilenhöhe für Touch-Ziele – Link hat keine Block-Größen-Prop.
+ */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-element-sm);
+}

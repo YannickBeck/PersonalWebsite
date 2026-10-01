@@ -19,7 +19,7 @@ export default async function ProjektePage() {
   return (
     <>
       <PageHero title={page.title} lede={page.lede} />
-      <Section variant="muted">
+      <Section>
         <ProjectGrid lang="de" items={items} />
       </Section>
     </>
