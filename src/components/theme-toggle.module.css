@@ -1,8 +1,8 @@
 /*
  * Theme-Schalter: Sonne = hell, Mond = dunkel (aktuelles Schema).
- * Abweichung von AGENTS.md (dokumentiert): SVG-Teil-Sichtbarkeit und Mikro-Animation
- * hängen am <html data-theme>-Attribut bzw. an prefers-color-scheme – dafür hat Astryx
- * keine Prop. Nur Tokens, keine Rohwerte außer Winkeln/Skalierung.
+ * Abweichung von AGENTS.md (dokumentiert): SVG-Teil-Sichtbarkeit hängt am
+ * <html data-theme>-Attribut bzw. an prefers-color-scheme – dafür hat Astryx keine Prop.
+ * Nur Tokens, keine Rohwerte außer Winkeln/Skalierung.
  */
 .icon {
   display: block;
@@ -50,11 +50,4 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .sun,
-  .moon {
-    transition-property: opacity, rotate, scale;
-    transition-duration: var(--yb-motion-enter);
-    transition-timing-function: var(--yb-ease-enter);
-  }
-}
+/* Die Dreh-/Blend-Animation des Symbols steht zentral in src/app/motion.css (.yb-theme-icon-part). */

@@ -1,8 +1,7 @@
 /*
  * Terminal-Karte (E4). Abweichung von AGENTS.md (dokumentiert): eigene Fläche
- * (in beiden Modi dunkel, Tokens --yb-terminal-* aus yb-theme.ts) und eine einmalige
- * Tipp-/Einblend-Animation per Keyframes. Bewegung nur unter
- * prefers-reduced-motion: no-preference; Dauern aus Motion-Tokens.
+ * (in beiden Modi dunkel, Tokens --yb-terminal-* aus yb-theme.ts). Die einmalige
+ * Tipp-/Einblend-Animation steht zentral in src/app/motion.css (§3, .yb-term-*).
  */
 .terminal {
   overflow: hidden;
@@ -58,43 +57,7 @@
   background-color: var(--yb-terminal-prompt);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  /* Zeile für Zeile: Befehl tippen, dann Ausgabe einblenden */
-  .command,
-  .output {
-    animation: yb-terminal-line var(--yb-motion-micro) var(--yb-ease-enter) both;
-    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--yb-motion-exit));
-  }
-
-  .typed {
-    display: inline-block;
-    animation: yb-terminal-type calc(var(--yb-chars) * var(--yb-motion-stagger) * 0.3) steps(var(--yb-chars), end) both;
-    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--yb-motion-exit));
-  }
-
-  .cursor {
-    animation: yb-terminal-blink calc(var(--duration-slow) * 1.25) steps(1, end) infinite;
-  }
-}
-
-@keyframes yb-terminal-line {
-  from {
-    opacity: 0;
-    translate: 0 calc(var(--yb-motion-distance) * 0.25);
-  }
-}
-
-@keyframes yb-terminal-type {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes yb-terminal-blink {
-  50% {
-    opacity: 0;
-  }
+/* Getippt wird per clip-path auf einem Inline-Block (Animation: src/app/motion.css, .yb-term-*). */
+.typed {
+  display: inline-block;
 }

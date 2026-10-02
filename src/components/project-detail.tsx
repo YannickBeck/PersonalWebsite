@@ -1,8 +1,5 @@
-import Image from 'next/image';
-import { Section } from '@astryxdesign/core/Section';
 import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
-import { Grid } from '@astryxdesign/core/Grid';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Card } from '@astryxdesign/core/Card';
@@ -11,8 +8,9 @@ import { List, ListItem } from '@astryxdesign/core/List';
 import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { PageHero } from '@/components/page-hero';
 import { ItemCover } from '@/components/item-cover';
-import { CARD_COLUMNS, ContentCard, coverMeta } from '@/components/content-card';
-import { SectionHeader } from '@/components/section-header';
+import { coverMeta } from '@/components/content-card';
+import { GalleryCarousel, RelatedCarousel } from '@/components/carousel-row';
+import { MorphTarget } from '@/components/morph';
 import { BackLink, ReadingLayout } from '@/components/reading-layout';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { getProjectCards } from '@/lib/items';
@@ -32,10 +30,12 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
  * Demo-Projekt als Fallstudie: Lesespalte mit Abschnitten, Fakten in der Randspalte
  * (mobil vor dem Text). Statt Card je Schritt/Entscheidung echte Listen (L7/VV4).
  * Galerie nur mit echten Bildern – Platzhalter-SVGs gelten als „kein Bild“ (V6).
+ * B3: Galerie und „Das könnte dich auch interessieren“ als Karussell, Hero-Cover ist
+ * Ziel des Morphs von der geklickten Karte.
  */
 export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProject }) {
   const dict = getDictionary(lang);
-  const related = (await getProjectCards(lang)).filter((p) => p.slug !== item.slug).slice(0, 3);
+  const related = (await getProjectCards(lang)).filter((p) => p.slug !== item.slug).slice(0, 6);
   const cover = coverMeta(
     { kind: 'project', slug: item.slug, title: item.title, href: '', category: item.category, categoryLabel: item.categoryLabel },
     lang,
@@ -77,7 +77,9 @@ export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProj
           </Card>
         }
       >
-        <ItemCover src={item.cover} seed={item.slug} label={cover.label} motif={cover.motif} variant="hero" priority />
+        <MorphTarget morphKey={withLang(`/projekte/${item.slug}`, lang)}>
+          <ItemCover src={item.cover} seed={item.slug} label={cover.label} motif={cover.motif} variant="hero" priority />
+        </MorphTarget>
         <Block title={dict.sectionSituation}>
           {item.situation.map((p, i) => (
             <Text key={i} as="p" textWrap="pretty">
@@ -137,40 +139,8 @@ export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProj
         </Block>
       </ReadingLayout>
 
-      {gallery.length > 0 && (
-        <Section>
-          <VStack gap={6}>
-            <SectionHeader title={dict.galleryTitle} />
-            <Grid columns={CARD_COLUMNS} gap={4}>
-              {gallery.map((g) => (
-                <Image
-                  key={g.src}
-                  src={g.src}
-                  alt={g.alt}
-                  width={1280}
-                  height={800}
-                  loading="lazy"
-                  sizes="(max-width: 768px) 100vw, 360px"
-                  style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-container)' }}
-                />
-              ))}
-            </Grid>
-          </VStack>
-        </Section>
-      )}
-
-      {related.length > 0 && (
-        <Section>
-          <VStack gap={6}>
-            <SectionHeader title={dict.relatedTitle} />
-            <Grid columns={CARD_COLUMNS} gap={4}>
-              {related.map((p) => (
-                <ContentCard key={p.slug} item={p} lang={lang} />
-              ))}
-            </Grid>
-          </VStack>
-        </Section>
-      )}
+      <GalleryCarousel title={dict.galleryTitle} images={gallery} />
+      <RelatedCarousel title={dict.relatedTitle} items={related} lang={lang} />
     </>
   );
 }

@@ -1,15 +1,13 @@
 import { notFound } from 'next/navigation';
-import { Section } from '@astryxdesign/core/Section';
-import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
-import { Grid } from '@astryxdesign/core/Grid';
 import { Text } from '@astryxdesign/core/Text';
 import { Token } from '@astryxdesign/core/Token';
 import { PageHero } from '@/components/page-hero';
 import { GhostHtml } from '@/components/ghost-html';
 import { ItemCover } from '@/components/item-cover';
-import { CARD_COLUMNS, ContentCard, coverMeta, formatDate } from '@/components/content-card';
-import { SectionHeader } from '@/components/section-header';
+import { coverMeta, formatDate } from '@/components/content-card';
+import { RelatedCarousel } from '@/components/carousel-row';
+import { MorphTarget } from '@/components/morph';
 import { BackLink, ReadingLayout, tocFromHtml } from '@/components/reading-layout';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { getPostCards, getProjectCards, ghostTopics } from '@/lib/items';
@@ -26,7 +24,7 @@ export async function DetailBody({ lang, item }: { lang: Lang; item: GhostItem }
   const kindPath = project ? 'projekte' : 'blog';
   const topics = ghostTopics(item, lang);
   const pool = project ? await getProjectCards(lang) : await getPostCards(lang);
-  const related = pool.filter((p) => p.slug !== item.slug).slice(0, 3);
+  const related = pool.filter((p) => p.slug !== item.slug).slice(0, 6);
   const cover = coverMeta(
     { kind: project ? 'project' : 'post', slug: item.slug, title: item.title ?? item.slug, href: '', topics },
     lang,
@@ -63,29 +61,20 @@ export async function DetailBody({ lang, item }: { lang: Lang; item: GhostItem }
         }
       />
       <ReadingLayout toc={tocFromHtml(item.html)} tocTitle={dict.tocTitle}>
-        <ItemCover
-          src={item.feature_image}
-          alt={item.feature_image_alt ?? ''}
-          seed={item.slug}
-          label={cover.label}
-          motif={cover.motif}
-          variant="hero"
-          priority
-        />
+        <MorphTarget morphKey={withLang(`/${kindPath}/${item.slug}`, lang)}>
+          <ItemCover
+            src={item.feature_image}
+            alt={item.feature_image_alt ?? ''}
+            seed={item.slug}
+            label={cover.label}
+            motif={cover.motif}
+            variant="hero"
+            priority
+          />
+        </MorphTarget>
         {item.html && <GhostHtml html={item.html} />}
       </ReadingLayout>
-      {related.length > 0 && (
-        <Section>
-          <VStack gap={6}>
-            <SectionHeader title={dict.relatedTitle} />
-            <Grid columns={CARD_COLUMNS} gap={4}>
-              {related.map((p) => (
-                <ContentCard key={p.slug} item={p} lang={lang} />
-              ))}
-            </Grid>
-          </VStack>
-        </Section>
-      )}
+      <RelatedCarousel title={dict.relatedTitle} items={related} lang={lang} />
     </>
   );
 }

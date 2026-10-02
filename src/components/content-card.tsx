@@ -5,9 +5,10 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Token } from '@astryxdesign/core/Token';
 import { ItemCover } from '@/components/item-cover';
+import { MorphSource } from '@/components/morph';
+import { detailPath } from '@/lib/transitions';
 import type { CoverMotif } from '@/components/cover-art';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
-import styles from './content-card.module.css';
 
 /** Minimaldaten einer Karte – CardItem (lib/items) und Ghost-/Demo-Einträge passen hinein. */
 export interface ContentCardData {
@@ -74,25 +75,37 @@ function metaLine(item: ContentCardData, lang: Lang): string {
  * Eine Karte für Projekte und Artikel (L6): Cover 16:10 bündig oben, darunter IMMER eine
  * Meta-Zeile (Datum/Lesezeit bzw. Art + Demo-Token), Titel, Auszug (max. 3 Zeilen).
  * Dadurch liegen Überschriften jeder Reihe auf einer Linie, egal ob Bild oder Demo.
+ *
+ * Motion (B3, src/app/motion.css): .yb-card = Hover/Fokus-Lift, Schatten, Akzent-Rand,
+ * Cover-Zoom; .yb-reveal = Einblenden beim Scrollen (nicht im Karussell). Das Cover ist
+ * Quelle des Shared-Element-Morphs zur Detailseite (MorphSource, nur das geklickte).
  */
 export function ContentCard({
   item,
   lang,
   headingAccessibilityLevel,
   showExcerpt = true,
+  reveal = true,
+  className,
 }: {
   item: ContentCardData;
   lang: Lang;
   /** z. B. 2, wenn die Karte direkt unter der H1 steht (T9: kein Sprung h1 → h3). */
   headingAccessibilityLevel?: 2 | 3 | 4;
   showExcerpt?: boolean;
+  /** Scroll-Reveal (false im Karussell: dort scrollt der Container horizontal). */
+  reveal?: boolean;
+  /** Zusatzklasse, z. B. Slide-Breite im Karussell. */
+  className?: string;
 }) {
   const dict = getDictionary(lang);
   const { label, motif } = coverMeta(item, lang);
   return (
-    <ClickableCard label={item.title} href={item.href} padding={0} className={styles.card}>
+    <ClickableCard label={item.title} href={item.href} padding={0} className={['yb-card', reveal ? 'yb-reveal' : null, className].filter(Boolean).join(' ')}>
       <VStack gap={0} height="100%">
-        <ItemCover src={item.image} seed={item.slug} label={label} motif={motif} />
+        <MorphSource morphKey={detailPath(item.href) ?? item.href}>
+          <ItemCover src={item.image} seed={item.slug} label={label} motif={motif} />
+        </MorphSource>
         <VStack gap={2} padding={5}>
           {/* feste Mindesthöhe = Höhe des Tokens sm (22px): Titel fluchten mit und ohne Demo-Token (L6) */}
           <HStack gap={2} vAlign="center" wrap="wrap" minHeight="calc(var(--spacing-5) + var(--spacing-0-5))">

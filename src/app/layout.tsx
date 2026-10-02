@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { HtmlLang, SkipLink } from "@/components/html-lang";
 import { Analytics } from "@/components/analytics";
 import { DemoNotice } from "@/components/demo-notice";
+import { RouteTransition } from "@/components/route-transition";
 import { HStack } from "@astryxdesign/core/HStack";
 import {
   Layout,
@@ -81,21 +82,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                       <DemoNotice />
                     </HStack>
                   </LayoutHeader>
-                  <LayoutHeader hasDivider padding={0} className={`${frame.header} print-hide`}>
+                  <LayoutHeader hasDivider padding={0} className={`${frame.header} yb-vt-header print-hide`}>
                     <SiteHeader />
                   </LayoutHeader>
                 </>
               }
               footer={
-                <LayoutFooter hasDivider className="print-hide">
+                <LayoutFooter hasDivider className="yb-vt-footer print-hide">
                   <SiteFooter />
                 </LayoutFooter>
               }
             >
               <LayoutContent isScrollable={false}>
-                <main id="main" tabIndex={-1}>
-                  {children}
-                </main>
+                {/* Seitenübergang (B3): Boundary je Pfad, Header/Footer stehen außerhalb (motion.css §2) */}
+                <RouteTransition>
+                  <main id="main" tabIndex={-1}>
+                    {children}
+                  </main>
+                </RouteTransition>
               </LayoutContent>
             </Layout>
           </div>

@@ -7,6 +7,7 @@ import { Text } from '@astryxdesign/core/Text';
 /**
  * Einheitlicher Kopf jeder Inhalts-Section (LV3): H2 + optionale Lede links,
  * Weiterführung (z. B. „Alle Projekte“) rechts; bricht auf schmalen Breiten um.
+ * .yb-reveal: blendet beim Hereinscrollen ein (motion.css §4, nur mit Scroll-Timeline-Support).
  */
 export function SectionHeader({
   title,
@@ -20,7 +21,7 @@ export function SectionHeader({
   id?: string;
 }) {
   return (
-    <HStack gap={4} wrap="wrap" vAlign="end" justify="between">
+    <HStack gap={4} wrap="wrap" vAlign="end" justify="between" className="yb-reveal">
       <VStack gap={2} maxWidth={640}>
         <Heading level={2} id={id} textWrap="balance">
           {title}

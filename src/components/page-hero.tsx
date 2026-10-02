@@ -24,7 +24,8 @@ export function PageHero({
 }) {
   return (
     <Section paddingBlockEnd={0}>
-      <VStack gap={4} maxWidth={760}>
+      {/* .yb-enter: gestaffelter Einstieg beim ersten Laden (motion.css §3) */}
+      <VStack gap={4} maxWidth={760} className="yb-enter">
         {eyebrow}
         <Heading level={1} type={display ? 'display-2' : undefined} textWrap="balance">
           {title}

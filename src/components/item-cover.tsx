@@ -31,7 +31,7 @@ export function ItemCover({
   return (
     <AspectRatio
       ratio={16 / 10}
-      className={variant === 'hero' ? styles.hero : styles.card}
+      className={`${variant === 'hero' ? styles.hero : styles.card} yb-cover`}
     >
       {image ? (
         <Image

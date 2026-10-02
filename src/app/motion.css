@@ -1,34 +1,42 @@
 /* =====================================================================
- * yb Motion-Layer – die EINE Stelle für eigene Keyframes, ::view-transition-*
- * und scroll-getriebene Animationen (X3, X8, W8).
+ * yb Motion-Layer – die EINE Stelle für eigene Bewegung: Keyframes, Transitions,
+ * ::view-transition-*, scroll-getriebene Animationen (X3, X8, B3).
+ * 0 KB zusätzliches JS: React <ViewTransition> (im Next-16.3-React-Canary enthalten),
+ * View Transitions API, CSS Scroll-Driven Animations, Astryx Carousel.
  *
- * Abweichung von AGENTS.md (dokumentiert): globales CSS, weil ::view-transition-*
- * und @keyframes nicht in CSS-Module passen und Astryx dafür keine Props hat.
- * Werte ausschließlich aus Tokens (src/theme/yb-theme.ts → yb.css):
+ * Abweichung von AGENTS.md (dokumentiert): globales CSS, weil ::view-transition-*,
+ * @keyframes und Zustände fremder Komponenten (.astryx-*) nicht in CSS-Module passen und
+ * Astryx dafür keine Props hat. Werte ausschließlich aus Tokens (src/theme/yb-theme.ts):
  *
- *   Token                   hell/dunkel       Verwendung
- *   --yb-motion-micro       150ms             Hover, Press, Fokus, Icon-Wechsel
- *   --yb-motion-exit        150ms             alte Seite/Element raus (kürzer als enter)
- *   --yb-motion-enter       350ms             neue Seite rein, Slides, Einblenden
- *   --yb-motion-emphasis    465ms             Hero-Choreografie, Theme-Reveal
- *   --yb-motion-stagger      60ms             Versatz zwischen Geschwistern
- *   --yb-motion-distance     24px             Slide-/Rise-Weg
+ *   Token                   Wert      Verwendung
+ *   --yb-motion-micro       150ms     Hover, Press, Fokus, Icon-Wechsel
+ *   --yb-motion-exit        150ms     alte Seite/Element raus (kürzer als enter)
+ *   --yb-motion-enter       350ms     neue Seite rein, Slides, Morph, Filter
+ *   --yb-motion-emphasis    465ms     Einstiegs-Choreografie, Theme-Reveal
+ *   --yb-motion-stagger      60ms     Versatz zwischen Geschwistern
+ *   --yb-motion-distance     24px     Slide-/Rise-Weg (Seiten-Slide = 2×)
  *   --yb-ease-enter         cubic-bezier(.24,1,.4,1)   Eintritte (= --ease-standard)
- *   --yb-ease-exit          cubic-bezier(.4,0,1,1)     Austritte
- *   --yb-ease-move          cubic-bezier(.65,0,.35,1)  Positionswechsel (Morph, Karussell)
+ *   --yb-ease-exit          cubic-bezier(.4,0,1,1)     Weg der alten Seite (beschleunigt hinaus)
+ *   --yb-ease-move          cubic-bezier(.65,0,.35,1)  Positionswechsel (Morph, Filter, Reveal)
+ *
+ * Wer löst was aus (Vokabular: src/lib/transitions.ts)
+ *   Seitenwechsel  TransitionLink (LinkProvider) setzt nav-forward/-back/-lateral;
+ *                  RouteTransition (key=pathname um <main>) liefert exit/enter-Klassen
+ *                  .yb-nav-forward / .yb-nav-back / .yb-nav-fade.
+ *   Morph          MorphSource (Karte, nur die geklickte) ↔ MorphTarget (Detail) → .yb-morph
+ *   Filter         startTransition + addTransitionType('filter') → Raster-Paar .yb-filter
+ *   Theme          document.startViewTransition({types:['theme']}) + html[data-yb-vt=theme]
  *
  * Regeln
- * 1. Eigene Bewegung nur innerhalb @media (prefers-reduced-motion: no-preference)
- *    deklarieren – oder ausschließlich über --yb-motion-distance/-stagger bewegen:
- *    die Theme-Adaptation setzt beide unter "reduce" auf 0 und kürzt die Dauern,
- *    Slides werden dann automatisch zu kurzen Überblendungen.
- * 2. animation-timeline (Scroll-Reveal) nur in
- *    @supports (animation-timeline: view()) + @media (prefers-reduced-motion: no-preference).
- * 3. Exits kürzer als Entrances, nichts blockiert Interaktion.
+ * 1. Eigene Bewegung NUR in @media (prefers-reduced-motion: no-preference). Unter „reduce“
+ *    gibt es damit keine eigene Animation; ::view-transition-* schaltet §R zentral ab.
+ * 2. animation-timeline nur in @supports (animation-timeline: view()) + no-preference.
+ * 3. Exits kürzer als Entrances; nichts blockiert Interaktion (::view-transition ohne
+ *    pointer-events). Nur transform/translate/scale/opacity/clip-path → kein Layout-Shift.
  * 4. Keine globale *-Keule (0.01ms): sie bricht Astryx-Spinner/MobileNav (X3).
  * ===================================================================== */
 
-/* ---------- 1. Basis-Keyframes (von Abschnitt 4 und B3 genutzt) ---------- */
+/* ---------- 1. Keyframes ---------- */
 @keyframes yb-fade-in {
   from {
     opacity: 0;
@@ -41,31 +49,448 @@
   }
 }
 
-/* ---------- 2. View Transitions (B3: Seiten-Slides, Theme-Reveal) ---------- */
-/* Platz für ::view-transition-old/new(.yb-page) usw. */
+/* Weg über --yb-vt-x/--yb-vt-y (am animierten Element gesetzt) */
+@keyframes yb-shift-in {
+  from {
+    translate: var(--yb-vt-x, 0) var(--yb-vt-y, 0);
+  }
+}
 
-/* ---------- 3. Scroll-getriebene Animationen (B3) ---------- */
-/* @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) { … } } */
+@keyframes yb-shift-out {
+  to {
+    translate: var(--yb-vt-x, 0) var(--yb-vt-y, 0);
+  }
+}
 
-/* ---------- 4. Reduced Motion: zentrale Absicherung ---------- */
-@media (prefers-reduced-motion: reduce) {
-  /* Geteilte Elemente springen an ihr Ziel statt zu wandern … */
-  ::view-transition-group(*) {
-    animation-duration: 0s !important;
+/* Scroll-Reveal animiert transform (nicht translate) – der Hover-Lift nutzt translate,
+   beides addiert sich statt sich zu überschreiben. */
+@keyframes yb-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--yb-motion-distance));
+  }
+}
+
+@keyframes yb-theme-reveal {
+  from {
+    clip-path: circle(0 at var(--yb-reveal-x, 100%) var(--yb-reveal-y, 0));
+  }
+  to {
+    clip-path: circle(var(--yb-reveal-r, 150vmax) at var(--yb-reveal-x, 100%) var(--yb-reveal-y, 0));
+  }
+}
+
+@keyframes yb-terminal-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes yb-terminal-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- 2. View Transitions ---------- */
+
+/* Klicks während eines Übergangs erreichen die Seite */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Taktung: Die alte Ansicht fällt schnell ab (ease-enter = früh steil), die neue setzt erst
+   ein, wenn die alte fast weg ist – kein Moment mit doppeltem Text. */
+:root {
+  --yb-vt-enter-delay: calc(var(--yb-motion-exit) * 0.66);
+}
+
+/* Grundtakt für alle Gruppen (Morph, Filter, Footer, Indikator) */
+::view-transition-group(*) {
+  animation-duration: var(--yb-motion-enter);
+  animation-timing-function: var(--yb-ease-move);
+}
+
+/* Root (Hintergrund, Hinweiszeile): kein UA-Crossfade – sonst erschiene alles, was nicht
+   eigens benannt ist, kurz doppelt (XV1: doppelter Footer). Theme-Reveal überschreibt das. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* 2a. Feste Anker: Header steht, Footer erscheint einmal mit der neuen Seite.
+   Beim Theme-Wechsel ohne eigene Namen, sonst stünde der Header in neuen Farben auf
+   altem Grund (XV1). */
+html:not([data-yb-vt='theme']) .yb-vt-header {
+  view-transition-name: yb-header;
+}
+
+html:not([data-yb-vt='theme']) .yb-vt-footer {
+  view-transition-name: yb-footer;
+}
+
+::view-transition-group(yb-header) {
+  z-index: 100;
+  animation: none;
+}
+
+/* Der Indikator liegt im Header, ist aber eine eigene Gruppe – darüber zeichnen */
+::view-transition-group(yb-nav-indicator) {
+  z-index: 101;
+}
+
+::view-transition-old(yb-header) {
+  display: none;
+}
+
+::view-transition-new(yb-header) {
+  animation: none;
+}
+
+/* Footer bei Seitenwechseln: alter weg, neuer blendet mit der neuen Seite ein (nie doppelt).
+   Beim Filtern gleitet er dagegen mit dem Raster an die neue Position (§2d). */
+html:not(:active-view-transition-type(filter))::view-transition-group(yb-footer) {
+  animation: none;
+}
+
+html:not(:active-view-transition-type(filter))::view-transition-old(yb-footer) {
+  display: none;
+}
+
+html:not(:active-view-transition-type(filter))::view-transition-new(yb-footer) {
+  animation: var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-motion-exit) both yb-fade-in;
+}
+
+/* 2b. Seitenwechsel (RouteTransition). Alte Seite geht schnell, neue kommt sanfter. */
+/* Standard (gleiche Ebene, DE ↔ EN, ohne Typ): Crossfade + leichter Rise */
+::view-transition-old(.yb-nav-fade) {
+  animation: var(--yb-motion-exit) var(--yb-ease-enter) both yb-fade-out;
+}
+
+::view-transition-new(.yb-nav-fade) {
+  --yb-vt-x: 0;
+  --yb-vt-y: calc(var(--yb-motion-distance) * 0.5);
+  animation:
+    var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-vt-enter-delay) both yb-fade-in,
+    var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-vt-enter-delay) both yb-shift-in;
+}
+
+/* Vorwärts (tiefer): alte Seite nach links, neue von rechts */
+::view-transition-old(.yb-nav-forward) {
+  --yb-vt-x: calc(var(--yb-motion-distance) * -2);
+  --yb-vt-y: 0;
+  animation:
+    var(--yb-motion-exit) var(--yb-ease-enter) both yb-fade-out,
+    var(--yb-motion-enter) var(--yb-ease-exit) both yb-shift-out;
+}
+
+::view-transition-new(.yb-nav-forward) {
+  --yb-vt-x: calc(var(--yb-motion-distance) * 2);
+  --yb-vt-y: 0;
+  animation:
+    var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-vt-enter-delay) both yb-fade-in,
+    var(--yb-motion-enter) var(--yb-ease-enter) both yb-shift-in;
+}
+
+/* Zurück (flacher): gespiegelt */
+::view-transition-old(.yb-nav-back) {
+  --yb-vt-x: calc(var(--yb-motion-distance) * 2);
+  --yb-vt-y: 0;
+  animation:
+    var(--yb-motion-exit) var(--yb-ease-enter) both yb-fade-out,
+    var(--yb-motion-enter) var(--yb-ease-exit) both yb-shift-out;
+}
+
+::view-transition-new(.yb-nav-back) {
+  --yb-vt-x: calc(var(--yb-motion-distance) * -2);
+  --yb-vt-y: 0;
+  animation:
+    var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-vt-enter-delay) both yb-fade-in,
+    var(--yb-motion-enter) var(--yb-ease-enter) both yb-shift-in;
+}
+
+/* 2c. Shared Element: Karten-Cover ↔ Detail-Cover (gleiches Seitenverhältnis 16:10).
+   Über den gleitenden Seiten, unter dem Header. */
+::view-transition-group(.yb-morph) {
+  z-index: 50;
+}
+
+/* Karten- und Detail-Cover unterscheiden sich in Marke/Innenabstand: das alte Bild
+   früh abblenden, damit unterwegs keine doppelte Kategorie-Marke steht. */
+::view-transition-old(.yb-morph) {
+  animation-duration: calc(var(--yb-motion-enter) * 0.5);
+  animation-timing-function: var(--yb-ease-enter);
+}
+
+::view-transition-new(.yb-morph) {
+  animation-duration: var(--yb-motion-enter);
+  animation-timing-function: var(--yb-ease-move);
+}
+
+/* 2d. Filter (/projekte, /blog): nur das Raster blendet über, Kein Seitenübergang.
+   Die Gruppe ändert ihre Höhe → Bilder oben verankert und an der Gruppe beschnitten. */
+::view-transition-group(.yb-filter) {
+  overflow: clip;
+}
+
+::view-transition-old(.yb-filter) {
+  animation: var(--yb-motion-exit) var(--yb-ease-enter) both yb-fade-out;
+}
+
+::view-transition-new(.yb-filter) {
+  animation: var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-vt-enter-delay) both yb-fade-in;
+}
+
+/* Tab-Indikator gleitet zum neuen Tab (statt Aus-/Einblenden, X9) */
+html:active-view-transition-type(filter) .astryx-tab-indicator {
+  transition: none;
+}
+
+html:active-view-transition-type(filter) .astryx-tab-indicator[data-selected] {
+  view-transition-name: yb-tab-indicator;
+}
+
+/* 2e. Navigations-Indikator im Header gleitet beim Seitenwechsel zum neuen Punkt
+   (nicht beim Filtern/Theme-Wechsel – dort ändert er sich nicht). */
+html:not([data-yb-vt='theme'], :active-view-transition-type(filter)) .yb-nav-item[aria-current='page'] .yb-nav-indicator {
+  view-transition-name: yb-nav-indicator;
+}
+
+/* 2f. Theme-Wechsel: neuer Zustand deckt sich als Kreis vom Schalter aus auf (X5) */
+html[data-yb-vt='theme']::view-transition-new(root) {
+  animation: var(--yb-motion-emphasis) var(--yb-ease-move) both yb-theme-reveal;
+}
+
+/* Bei Theme-, Seiten- und Filterwechsel (src/lib/instant.ts, zwei Frames) keine
+   CSS-Transitions (Astryx-Farben 150ms, Nav-Indikator): Zustände stehen sofort, sichtbar
+   wird nur der View-Transition-Übergang – unter Reduced Motion also gar nichts.
+   Ausnahme: das Sonne/Mond-Symbol (dreht im Reveal mit). */
+html[data-yb-instant] *:not([data-yb-keep-transition], [data-yb-keep-transition] *),
+html[data-yb-instant] *::before,
+html[data-yb-instant] *::after {
+  transition: none !important;
+}
+
+/* ---------- 3. Einstieg: nur beim ersten Laden des Dokuments ----------
+   RouteTransition setzt <html data-yb-nav> ab der ersten Client-Navigation: Rückkehr zur
+   Startseite spielt die Choreografie nicht erneut (M3), die Seite kommt per View Transition.
+   Ohne JS läuft sie trotzdem (reines CSS) und endet sichtbar – nichts bleibt unsichtbar. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-yb-nav]) .yb-enter > *,
+  html:not([data-yb-nav]) .yb-hero-terminal {
+    --yb-vt-x: 0;
+    --yb-vt-y: calc(var(--yb-motion-distance) * 0.67);
+    animation:
+      var(--yb-motion-emphasis) var(--yb-ease-enter) both yb-fade-in,
+      var(--yb-motion-emphasis) var(--yb-ease-enter) both yb-shift-in;
+    animation-delay: calc(var(--yb-step, 0) * var(--yb-motion-stagger) * 1.5);
   }
 
-  /* … und alte/neue Ansicht blenden nur kurz über, ohne Weg und Verzögerung. */
+  .yb-enter > :nth-child(2) {
+    --yb-step: 1;
+  }
+
+  .yb-enter > :nth-child(3) {
+    --yb-step: 2;
+  }
+
+  .yb-enter > :nth-child(4) {
+    --yb-step: 3;
+  }
+
+  .yb-enter > :nth-child(n + 5) {
+    --yb-step: 4;
+  }
+
+  .yb-hero-terminal {
+    --yb-step: 4;
+  }
+
+  /* Terminal: Zeile für Zeile – Befehl tippen, dann Ausgabe einblenden */
+  html:not([data-yb-nav]) .yb-term-line {
+    --yb-vt-x: 0;
+    --yb-vt-y: calc(var(--yb-motion-distance) * 0.25);
+    animation:
+      var(--yb-motion-micro) var(--yb-ease-enter) both yb-fade-in,
+      var(--yb-motion-micro) var(--yb-ease-enter) both yb-shift-in;
+    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--yb-motion-emphasis) + var(--yb-motion-exit));
+  }
+
+  html:not([data-yb-nav]) .yb-term-typed {
+    animation: yb-terminal-type calc(var(--yb-chars) * var(--yb-motion-stagger) * 0.3) steps(var(--yb-chars), end) both;
+    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--yb-motion-emphasis) + var(--yb-motion-exit));
+  }
+
+  .yb-term-cursor {
+    animation: yb-terminal-blink calc(var(--duration-slow) * 1.25) steps(1, end) infinite;
+  }
+}
+
+/* ---------- 4. Scroll-Reveal (Sektionsköpfe, Karten, CTA) ----------
+   Nur mit Scroll-Timeline-Support (Chrome 115+, Safari 26+); Firefox ohne Support zeigt
+   alles sofort statisch. Kurzer Bereich (erste 40 % des Eintritts), damit Inhalte am
+   Fold nicht lange halbtransparent stehen. Nicht im Karussell (horizontaler Scroller). */
+@supports (animation-timeline: view()) {
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .yb-reveal {
+      animation: yb-reveal var(--yb-ease-move) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+/* ---------- 5. Mikrointeraktionen ---------- */
+
+/* 5a. Karten (ContentCard): Lift 3px, Schatten, Akzent-Rand, Cover-Zoom 1.03.
+   Fokus (Tastatur) gleichwertig zu Hover. */
+.yb-card {
+  --yb-lift: calc(var(--spacing-1) * 0.75);
+  /* Astryx Card clippt (overflow: clip) – das schnitte die verlängerte Trefferfläche
+     (::before) ab. Das Cover rundet seine Ecken selbst (item-cover.module.css). */
+  overflow: visible;
+}
+
+.yb-card::after {
+  border-radius: inherit;
+}
+
+@media (hover: hover) {
+  .yb-card:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+    box-shadow: var(--shadow-high);
+  }
+}
+
+.yb-card:has(:focus-visible) {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-high);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .yb-card {
+    transition-property: translate, scale, box-shadow, border-color;
+    transition-duration: var(--yb-motion-micro);
+    transition-timing-function: var(--yb-ease-enter);
+  }
+
+  .yb-card .yb-cover > div {
+    transition: scale var(--yb-motion-enter) var(--yb-ease-enter);
+  }
+
+  .yb-card:has(:focus-visible) {
+    translate: 0 calc(-1 * var(--yb-lift));
+  }
+
+  .yb-card:has(:focus-visible) .yb-cover > div {
+    scale: 1.03;
+  }
+
+  @media (hover: hover) {
+    .yb-card:hover {
+      translate: 0 calc(-1 * var(--yb-lift));
+    }
+
+    /* Trefferfläche nach unten verlängern: sonst verliert ein Cursor in den untersten
+       Pixeln beim Anheben den Hover und die Karte flackert (X4-Verifier). */
+    .yb-card:hover::before {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      top: 100%;
+      height: calc(var(--yb-lift) + var(--border-width) * 2);
+    }
+
+    .yb-card:hover .yb-cover > div {
+      scale: 1.03;
+    }
+  }
+
+  /* Druck-Feedback wie Astryx-Button (scale .98), bei Karten dezenter */
+  .yb-card:active {
+    translate: 0 0;
+    scale: 0.99;
+    transition-duration: var(--duration-fast-min);
+  }
+}
+
+/* 5b. Navigation im Header: Unterstrich wächst beim Hover ein, aktive Seite trägt ihn
+   in Akzentfarbe. Er ersetzt Astryx' graue Fläche (aktiv und Hover) – eine Markierung
+   statt zwei, ruhiger. */
+.yb-nav-item {
+  position: relative;
+}
+
+.yb-nav-item,
+.yb-nav-item:hover,
+.yb-nav-item[aria-current='page'] {
+  background-color: transparent;
+}
+
+@media (hover: hover) {
+  .yb-nav-item:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.yb-nav-indicator {
+  position: absolute;
+  inset-inline: var(--spacing-3);
+  bottom: 0;
+  height: calc(var(--border-width) * 2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-accent);
+  opacity: 0;
+  scale: 0 1;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .yb-nav-item:hover .yb-nav-indicator {
+    opacity: 0.5;
+    scale: 1 1;
+  }
+}
+
+.yb-nav-item:focus-visible .yb-nav-indicator,
+.yb-nav-item[aria-current='page'] .yb-nav-indicator {
+  opacity: 1;
+  scale: 1 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .yb-nav-indicator {
+    transition:
+      scale var(--yb-motion-micro) var(--yb-ease-enter),
+      opacity var(--yb-motion-micro) var(--yb-ease-enter);
+  }
+
+  /* 5c. Theme-Schalter: Sonne/Mond drehen und blenden ineinander */
+  .yb-theme-icon-part {
+    transition-property: opacity, rotate, scale;
+    transition-duration: var(--yb-motion-enter);
+    transition-timing-function: var(--yb-ease-enter);
+  }
+
+  /* Bewusst KEIN html { scroll-behavior: smooth }: es macht auch die Scroll-Wiederherstellung
+     des Browsers bei Zurück/Vorwärts weich und verschiebt damit die Zielposition
+     (gemessen 671 statt 700 px, route-transition.tsx). */
+}
+
+/* ---------- R. Reduced Motion: zentrale Absicherung ----------
+   Eigene Bewegung steht ausschließlich in no-preference-Blöcken (oben) – unter „reduce“
+   existiert sie nicht. Hier nur, was sich nicht über die Media-Query ausklammern lässt:
+   die View-Transition-Pseudoelemente (UA-Standard: 250ms Crossfade/Morph). Der Wechsel
+   ist damit sofort; die Transition endet im selben Frame. Astryx regelt seine Komponenten
+   (Spinner 3s, MobileNav, Carousel) selbst – davon bleibt hier alles unberührt. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
-    animation-duration: var(--duration-fast-min) !important;
-    animation-delay: 0s !important;
-  }
-
-  ::view-transition-new(*) {
-    animation-name: yb-fade-in !important;
-  }
-
-  ::view-transition-old(*) {
-    animation-name: yb-fade-out !important;
+    animation: none !important;
   }
 }

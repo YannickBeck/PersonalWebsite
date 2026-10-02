@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ViewTransition, addTransitionType, startTransition, useLayoutEffect, useRef, useState } from 'react';
 import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
@@ -13,6 +13,8 @@ import styles from './filters.module.css';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { CARD_COLUMNS, ContentCard } from '@/components/content-card';
 import type { CardItem } from '@/lib/items';
+import { FILTER, FILTER_SHARE } from '@/lib/transitions';
+import { suppressTransitions } from '@/lib/instant';
 
 export function PostList({
   lang,
@@ -23,7 +25,23 @@ export function PostList({
 }) {
   const dict = getDictionary(lang);
   const [query, setQuery] = useState('');
-  const [topic, setTopic] = useState('all');
+  const [topic, setTopicState] = useState('all');
+  // Tab-Farben/Indikator ohne Nachziehen umschalten (Commit der Filter-Transition)
+  const firstRender = useRef(true);
+  useLayoutEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    suppressTransitions();
+  }, [topic]);
+  // Themen-Tabs als Filter-Transition (wie project-grid.tsx); die Suche filtert sofort
+  // (kein Überblenden bei jedem Tastendruck).
+  const setTopic = (value: string) =>
+    startTransition(() => {
+      addTransitionType(FILTER);
+      setTopicState(value);
+    });
 
   const seen = new Map<string, string>();
   for (const p of posts) {
@@ -73,6 +91,8 @@ export function PostList({
         </div>
       )}
       </VStack>
+      <ViewTransition key={topic} name="yb-filter-blog" share={FILTER_SHARE} default="none">
+      <VStack gap={4}>
       {filtered.length === 0 ? (
         <VStack gap={2}>
           <Heading level={2}>{dict.noResultsTitle}</Heading>
@@ -100,6 +120,8 @@ export function PostList({
           {filtered.length} / {posts.length}
         </Text>
       )}
+      </VStack>
+      </ViewTransition>
     </VStack>
   );
 }

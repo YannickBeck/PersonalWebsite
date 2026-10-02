@@ -18,8 +18,10 @@ function WindowDots() {
 /**
  * Terminal-Karte im Hero (E4): Code-Optik statt Porträt. Zeilen aus dict.homeTerminal;
  * „$ “-Zeilen sind Befehle (Prompt in Akzentfarbe, werden „getippt“), die übrigen Ausgaben.
- * Die Einblendung ist reines CSS (terminal-card.module.css) und läuft nur ohne
- * Reduced-Motion-Präferenz; ohne JS und für Screenreader steht der volle Text sofort da.
+ * Die Einblendung ist reines CSS (src/app/motion.css, §3 Einstieg: .yb-term-*) und läuft
+ * nur beim ersten Laden des Dokuments und ohne Reduced-Motion-Präferenz; bei Rückkehr per
+ * Client-Navigation steht das Terminal fertig da. Ohne JS läuft sie trotzdem (reines CSS)
+ * und endet sichtbar; für Screenreader steht der volle Text sofort da.
  */
 export function TerminalCard({
   title,
@@ -31,7 +33,7 @@ export function TerminalCard({
   label: string;
 }) {
   return (
-    <Card padding={0} className={styles.terminal} role="figure" aria-label={label}>
+    <Card padding={0} className={`${styles.terminal} yb-hero-terminal`} role="figure" aria-label={label}>
       <HStack className={styles.bar} gap={3} vAlign="center" paddingInline={4} paddingBlock={3}>
         <WindowDots />
         <Text type="code" size="sm" className={styles.title}>
@@ -48,7 +50,7 @@ export function TerminalCard({
               key={`${i}-${line}`}
               type="code"
               display="block"
-              className={isCommand ? styles.command : styles.output}
+              className={`${isCommand ? styles.command : styles.output} yb-term-line`}
               style={vars}
             >
               {isCommand ? (
@@ -56,7 +58,7 @@ export function TerminalCard({
                   <span className={styles.prompt} aria-hidden="true">
                     ${' '}
                   </span>
-                  <span className={styles.typed}>{text}</span>
+                  <span className={`${styles.typed} yb-term-typed`}>{text}</span>
                 </>
               ) : (
                 text
@@ -67,12 +69,12 @@ export function TerminalCard({
         <Text
           type="code"
           display="block"
-          className={styles.command}
+          className={`${styles.command} yb-term-line`}
           style={{ '--yb-line': lines.length } as CSSProperties}
           aria-hidden="true"
         >
           <span className={styles.prompt}>$ </span>
-          <span className={styles.cursor} />
+          <span className={`${styles.cursor} yb-term-cursor`} />
         </Text>
       </VStack>
     </Card>

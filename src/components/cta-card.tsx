@@ -21,7 +21,7 @@ export function CtaCard({
 }) {
   return (
     <Section>
-      <Card variant="muted" padding={8}>
+      <Card variant="muted" padding={8} className="yb-reveal">
         <HStack gap={6} wrap="wrap" vAlign="center" justify="between">
           <VStack gap={2} maxWidth={560}>
             <Heading level={2}>{title}</Heading>

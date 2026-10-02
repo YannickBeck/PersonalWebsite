@@ -8,9 +8,15 @@
   background-color: var(--color-background-muted);
 }
 
-/* In Karten bündig oben, Karte rundet die oberen Ecken (content-card.module.css) */
+/*
+ * In Karten bündig oben. Das Cover rundet seine oberen Ecken selbst (Kartenradius minus
+ * Rahmen) – die Karte braucht dadurch kein overflow:hidden mehr, und der Hover-Lift kann
+ * seine Trefferfläche nach unten verlängern (motion.css, .yb-card::before).
+ */
 .card {
   border-bottom: var(--border-width) solid var(--color-border);
+  border-start-start-radius: calc(var(--radius-container) - var(--border-width));
+  border-start-end-radius: calc(var(--radius-container) - var(--border-width));
 }
 
 .hero {

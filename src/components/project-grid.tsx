@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ViewTransition, addTransitionType, startTransition, useLayoutEffect, useRef, useState } from 'react';
 import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
@@ -12,10 +12,32 @@ import styles from './filters.module.css';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { CARD_COLUMNS, ContentCard } from '@/components/content-card';
 import type { CardItem } from '@/lib/items';
+import { FILTER, FILTER_SHARE } from '@/lib/transitions';
+import { suppressTransitions } from '@/lib/instant';
 
+/**
+ * Filter als eigene Transition (B3, Typ „filter“): startTransition + addTransitionType.
+ * Das Raster steckt in einer benannten ViewTransition mit key=Kategorie → altes und neues
+ * Raster bilden ein Paar und blenden über (FILTER_SHARE), der Seiten-Wrapper reagiert
+ * nicht (route-transition.tsx: update/share none), Header/Footer gleiten nur mit (motion.css).
+ */
 export function ProjectGrid({ lang, items }: { lang: Lang; items: CardItem[] }) {
   const dict = getDictionary(lang);
-  const [category, setCategory] = useState('all');
+  const [category, setCategoryState] = useState('all');
+  // Tab-Farben/Indikator ohne Nachziehen umschalten (Commit der Filter-Transition)
+  const firstRender = useRef(true);
+  useLayoutEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    suppressTransitions();
+  }, [category]);
+  const setCategory = (value: string) =>
+    startTransition(() => {
+      addTransitionType(FILTER);
+      setCategoryState(value);
+    });
   const cats = [
     { value: 'all', label: dict.categoryAll },
     { value: 'web', label: dict.categoryWeb },
@@ -34,6 +56,7 @@ export function ProjectGrid({ lang, items }: { lang: Lang; items: CardItem[] }) 
         ))}
         </TabList>
       </div>
+      <ViewTransition key={category} name="yb-filter-projekte" share={FILTER_SHARE} default="none">
       {filtered.length === 0 ? (
         <VStack gap={2}>
           <Heading level={2}>{dict.noResultsTitle}</Heading>
@@ -53,6 +76,7 @@ export function ProjectGrid({ lang, items }: { lang: Lang; items: CardItem[] }) 
           ))}
         </Grid>
       )}
+      </ViewTransition>
     </VStack>
   );
 }

@@ -9,7 +9,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
-import Link from 'next/link';
+import { flushSync } from 'react-dom';
 import { usePathname } from 'next/navigation';
 import { Theme } from '@astryxdesign/core/theme';
 import { LinkProvider } from '@astryxdesign/core/Link';
@@ -18,18 +18,11 @@ import { ybTheme } from '../theme/yb';
 import { THEME_STORAGE_KEY } from '../theme/theme-boot';
 import { langFromPath } from '@/i18n/dictionaries';
 import { ASTRYX_DE } from '@/i18n/astryx-de';
+import { TransitionLink } from '@/components/transition-link';
+import { suppressTransitions } from '@/lib/instant';
 
 /** Deutsche Astryx-Texte (M8/VV3): Auszug aus dem de-DE-Katalog, s. astryx-de.ts. */
 const ASTRYX_MESSAGES = { 'de-DE': ASTRYX_DE };
-
-/**
- * next/link ohne das von Astryx zusätzlich gesetzte `to`-Attribut (für React Router
- * gedacht): sonst landet ein ungültiges <a to="…"> im HTML (T9).
- */
-function NextLinkAdapter({ to: _to, ...props }: React.ComponentProps<typeof Link> & { to?: string }) {
-  void _to;
-  return <Link {...props} />;
-}
 
 /** system = keine gespeicherte Wahl, folgt prefers-color-scheme (E2). */
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -39,8 +32,11 @@ interface ThemeModeValue {
   mode: ThemeMode;
   /** Tatsächlich sichtbares Schema; null nur während SSR/Hydration (noch unbekannt). */
   resolvedMode: ResolvedThemeMode | null;
-  /** Zwei-Zustand-Schalter hell ↔ dunkel; speichert die Wahl. */
-  toggleMode: () => void;
+  /**
+   * Zwei-Zustand-Schalter hell ↔ dunkel; speichert die Wahl. origin = Mittelpunkt des
+   * Schalters (Viewport-Koordinaten) für den Kreis-Reveal.
+   */
+  toggleMode: (origin?: { x: number; y: number }) => void;
 }
 
 const ThemeModeContext = createContext<ThemeModeValue>({
@@ -63,6 +59,55 @@ function subscribeSystemScheme(onChange: () => void) {
 
 function readSystemScheme(): ResolvedThemeMode {
   return window.matchMedia(DARK_QUERY).matches ? 'dark' : 'light';
+}
+
+/**
+ * Theme-Wechsel als Kreis-Reveal vom Schalter aus (X5, B3). Fallback = sofortiger Wechsel:
+ * - ohne View Transitions bzw. ohne Transition-Types (Chrome < 125, Safari < 18.2,
+ *   Firefox < 147): dort wirft startViewTransition({types}) einen TypeError (XV1),
+ * - unter prefers-reduced-motion: reduce,
+ * - wenn gerade eine andere View Transition läuft (z. B. Seitenwechsel): keine zweite.
+ * Während des Wechsels trägt <html> data-yb-vt="theme": motion.css nimmt Header/Footer
+ * die eigenen Namen (sonst stünden sie in neuen Farben auf altem Grund, XV1);
+ * suppressTransitions() schaltet CSS-Transitions ab (kein Farb-Nachziehen von 150 ms).
+ */
+function switchThemeWithTransition(apply: () => void, origin?: { x: number; y: number }) {
+  const root = document.documentElement;
+  const done = () => root.removeAttribute('data-yb-vt');
+  suppressTransitions();
+
+  const vtInterface = (window as unknown as { ViewTransition?: { prototype: object } }).ViewTransition;
+  const supportsTypes =
+    typeof document.startViewTransition === 'function' && !!vtInterface && 'types' in vtInterface.prototype;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let busy = false;
+  try {
+    busy = root.matches(':active-view-transition');
+  } catch {
+    busy = false;
+  }
+  if (!supportsTypes || reduce || busy) {
+    flushSync(apply);
+    done();
+    return;
+  }
+
+  const x = origin?.x ?? window.innerWidth;
+  const y = origin?.y ?? 0;
+  const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+  root.style.setProperty('--yb-reveal-x', `${Math.round(x)}px`);
+  root.style.setProperty('--yb-reveal-y', `${Math.round(y)}px`);
+  root.style.setProperty('--yb-reveal-r', `${Math.ceil(r)}px`);
+  root.setAttribute('data-yb-vt', 'theme');
+  try {
+    const vt = document.startViewTransition({ update: () => flushSync(apply), types: ['theme'] });
+    // Übersprungen (z. B. Seitenwechsel startet eine eigene VT): kein unbehandelter Fehler
+    vt.ready.catch(() => {});
+    vt.finished.then(done, done);
+  } catch {
+    flushSync(apply);
+    done();
+  }
 }
 
 function readStoredMode(): ThemeMode | null {
@@ -97,16 +142,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   const resolvedMode: ResolvedThemeMode | null = mode === 'system' ? systemScheme : mode;
 
-  const toggleMode = useCallback(() => {
-    const current = mode === 'system' ? readSystemScheme() : mode;
-    const next: ResolvedThemeMode = current === 'dark' ? 'light' : 'dark';
-    try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      /* ignore */
-    }
-    setMode(next);
-  }, [mode]);
+  const toggleMode = useCallback(
+    (origin?: { x: number; y: number }) => {
+      const current = mode === 'system' ? readSystemScheme() : mode;
+      const next: ResolvedThemeMode = current === 'dark' ? 'light' : 'dark';
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, next);
+      } catch {
+        /* ignore */
+      }
+      switchThemeWithTransition(() => setMode(next), origin);
+    },
+    [mode],
+  );
 
   const value = useMemo(() => ({ mode, resolvedMode, toggleMode }), [mode, resolvedMode, toggleMode]);
 
@@ -114,7 +162,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeModeContext.Provider value={value}>
       <Theme theme={ybTheme} mode={mode}>
         <InternationalizationProvider locale={lang === 'en' ? 'en' : 'de-DE'} messages={ASTRYX_MESSAGES}>
-          <LinkProvider component={NextLinkAdapter}>{children}</LinkProvider>
+          <LinkProvider component={TransitionLink}>{children}</LinkProvider>
         </InternationalizationProvider>
       </Theme>
     </ThemeModeContext.Provider>

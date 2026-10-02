@@ -82,11 +82,16 @@ export function SiteHeader() {
         startContent={dict.nav.map((item) => (
           <TopNavItem
             key={item.href}
-            className={styles.desktopOnly}
+            className={`${styles.desktopOnly} yb-nav-item`}
             label={item.label}
             href={item.href}
             isSelected={isActive(pathname, item.href)}
-          />
+          >
+            {item.label}
+            {/* Unterstrich-Indikator (motion.css §5): Hover wächst er ein, die aktive Seite
+                trägt ihn; beim Seitenwechsel gleitet er per View Transition zum neuen Punkt. */}
+            <span className="yb-nav-indicator" aria-hidden="true" />
+          </TopNavItem>
         ))}
         endContent={
           <HStack gap={1} vAlign="center">

@@ -1,0 +1,43 @@
+/*
+ * Karussell-Reihen (E5/B3: „Slides“ für verwandte Inhalte und Galerien).
+ * Abweichung von AGENTS.md (dokumentiert): Slide-Breiten per Container-Query-Einheiten –
+ * Astryx Carousel bestimmt die Breite seiner Folien nicht selbst (Folie = Breite des Kindes).
+ * Breite folgt der Kartenregel (E6): Desktop 3 sichtbar wie CARD_COLUMNS, Tablet 2 + Anschnitt,
+ * Mobil 1 + Anschnitt der nächsten Karte (signalisiert „wischbar“). Nur Tokens.
+ */
+.row {
+  container-type: inline-size;
+}
+
+/* Folien gleich hoch (Carousel zentriert sonst vertikal) */
+.row > :global(.astryx-carousel-scroller) {
+  align-items: stretch;
+}
+
+.card {
+  width: calc((100cqi - 2 * var(--spacing-4)) / 3);
+}
+
+.image {
+  width: calc((100cqi - var(--spacing-4)) / 1.6);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-container);
+  background-color: var(--color-background-muted);
+}
+
+.image img {
+  object-fit: cover;
+}
+
+@container (width < 860px) {
+  .card {
+    width: calc((100cqi - var(--spacing-4)) / 2.2);
+  }
+}
+
+@container (width < 560px) {
+  .card,
+  .image {
+    width: 84cqi;
+  }
+}

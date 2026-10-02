@@ -31,10 +31,12 @@ export async function HomeContent({ lang }: { lang: Lang }) {
 
   return (
     <>
-      {/* Hero (E4): links Text, rechts Terminal-Karte; asymmetrisch ab 1024px (home.module.css) */}
+      {/* Hero (E4): links Text, rechts Terminal-Karte; asymmetrisch ab 1024px (home.module.css).
+          Einstieg (B3): .yb-enter staffelt Eyebrow, H1, Lede, CTAs, dann die Terminal-Karte –
+          nur beim ersten Laden des Dokuments (motion.css §3). */}
       <Section className={home.heroSection}>
         <Grid columns={{ minWidth: 400, max: 2 }} gap={10} align="center" className={home.hero}>
-          <VStack gap={5}>
+          <VStack gap={5} className="yb-enter">
             <HStack gap={2} vAlign="center">
               {/* dekorativ: der Text daneben trägt die Aussage (X10, keine Doppelansage, kein Puls) */}
               <StatusDot variant="accent" label={dict.homeEyebrow} aria-hidden="true" />
@@ -101,7 +103,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
               />
             }
           />
-          <Card padding={2}>
+          <Card padding={2} className="yb-reveal">
             <List hasDividers density="spacious">
               {services.map((s, i) => (
                 <ListItem
@@ -125,7 +127,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
       {/* Kurzporträt ohne Bild (E1/LV2): Text + Fakten; Porträt nur mit echter Bildquelle */}
       <Section>
         <Grid columns={{ minWidth: 320, max: 2 }} gap={10} align="start">
-          <VStack gap={4}>
+          <VStack gap={4} className="yb-reveal">
             <Heading level={2}>{dict.homeAboutTitle}</Heading>
             <Text color="secondary" textWrap="pretty">
               {dict.homeAboutLede}
@@ -139,7 +141,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
               />
             </HStack>
           </VStack>
-          <Card>
+          <Card className="yb-reveal">
             <HStack gap={5} vAlign="start">
               {PORTRAIT_SRC ? (
                 <Image
