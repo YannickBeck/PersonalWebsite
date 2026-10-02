@@ -39,7 +39,7 @@ export const ybTheme = {
     "--color-background-popover": "light-dark(#FFFFFF, #1E2744)",
     "--color-background-inverted": "light-dark(#141826, #F6F7FB)",
     "--color-border": "light-dark(#1B1F3B1A, #A5B4FC24)",
-    "--color-border-emphasized": "light-dark(#A7AEC2, #3D4766)",
+    "--color-border-emphasized": "light-dark(#858CA1, #626C8D)",
     "--color-skeleton": "light-dark(#D5D9E5, #2A3350)",
     "--color-track": "light-dark(#D5D9E5, #2A3350)",
     "--color-shadow": "light-dark(#0000001A, #0000004D)",
@@ -107,23 +107,23 @@ export const ybTheme = {
     "--duration-slow-min": "600ms",
     "--duration-slow": "800ms",
     "--duration-slow-max": "1065ms",
-    "--font-family-body": "Fustat, \"Fustat Fallback\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
-    "--font-family-heading": "Fustat, \"Fustat Fallback\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
-    "--font-family-code": "\"JetBrains Mono\", \"JetBrains Mono Fallback\", ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
-    "--color-syntax-keyword": "#ff79c6",
-    "--color-syntax-string": "#f1fa8c",
-    "--color-syntax-comment": "#6272a4",
-    "--color-syntax-number": "#bd93f9",
-    "--color-syntax-function": "#50fa7b",
-    "--color-syntax-type": "#8be9fd",
-    "--color-syntax-variable": "#f8f8f2",
-    "--color-syntax-operator": "#ff79c6",
-    "--color-syntax-constant": "#bd93f9",
-    "--color-syntax-tag": "#ff79c6",
-    "--color-syntax-attribute": "#50fa7b",
-    "--color-syntax-property": "#66d9ef",
-    "--color-syntax-punctuation": "#f8f8f2",
-    "--color-syntax-background": "#282a36",
+    "--font-family-body": "var(--font-fustat), -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+    "--font-family-heading": "var(--font-fustat), -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+    "--font-family-code": "var(--font-jetbrains-mono), ui-monospace, \"SF Mono\", Menlo, Consolas, monospace",
+    "--color-syntax-keyword": "#B49CFF",
+    "--color-syntax-string": "#B7C0D8",
+    "--color-syntax-comment": "#8590AD",
+    "--color-syntax-number": "#C9B8FF",
+    "--color-syntax-function": "#D9CCFF",
+    "--color-syntax-type": "#C3CCE6",
+    "--color-syntax-variable": "#E6E8F2",
+    "--color-syntax-operator": "#A3ABC0",
+    "--color-syntax-constant": "#C9B8FF",
+    "--color-syntax-tag": "#B49CFF",
+    "--color-syntax-attribute": "#D9CCFF",
+    "--color-syntax-property": "#C3CCE6",
+    "--color-syntax-punctuation": "#A3ABC0",
+    "--color-syntax-background": "#0B1020",
     "--focus-outline-color": "var(--color-accent)",
     "--shadow-inset-selected": "inset 0px 0px 0px 2px color-mix(in srgb, var(--color-accent) 55%, transparent)",
     "--size-element-sm": "30px",
@@ -132,22 +132,27 @@ export const ybTheme = {
   },
   localTokens: {
     "--yb-motion-micro": "var(--duration-fast)",
-    "--yb-motion-exit": "var(--duration-fast)",
-    "--yb-motion-enter": "var(--duration-medium)",
+    "--yb-motion-exit": "var(--duration-fast-min)",
+    "--yb-motion-enter": "var(--duration-medium-min)",
     "--yb-motion-emphasis": "var(--duration-medium-max)",
-    "--yb-motion-stagger": "calc(var(--duration-fast) * 0.4)",
+    "--yb-motion-stagger": "calc(var(--duration-fast) * 0.2667)",
     "--yb-motion-distance": "var(--spacing-6)",
     "--yb-ease-enter": "var(--ease-standard)",
     "--yb-ease-exit": "cubic-bezier(0.4, 0, 1, 1)",
     "--yb-ease-move": "cubic-bezier(0.65, 0, 0.35, 1)",
     "--yb-prose-size": "calc(var(--font-size-base) * 1.125)",
+    "--yb-heading-tracking": "-0.011em",
+    "--yb-stroke-motif": "1.5px",
+    "--yb-stroke-icon": "2px",
+    "--yb-control-border": "light-dark(#B9BFCF, #3D4766)",
     "--yb-terminal-background": "#0B1020",
     "--yb-terminal-bar": "#111833",
     "--yb-terminal-border": "light-dark(#1B1F3B26, #A5B4FC24)",
     "--yb-terminal-text": "#E6E8F2",
     "--yb-terminal-muted": "#A3ABC0",
     "--yb-terminal-prompt": "#9B7BFF",
-    "--yb-terminal-dot": "#3D4766"
+    "--yb-terminal-dot": "#3D4766",
+    "--yb-terminal-size": "clamp(var(--font-size-sm), 0.72rem + 0.32vw, calc(var(--font-size-base) * 0.9375))"
   },
   __localTokenOwners: {
     "--yb-motion-micro": "yb",
@@ -160,13 +165,18 @@ export const ybTheme = {
     "--yb-ease-exit": "yb",
     "--yb-ease-move": "yb",
     "--yb-prose-size": "yb",
+    "--yb-heading-tracking": "yb",
+    "--yb-stroke-motif": "yb",
+    "--yb-stroke-icon": "yb",
+    "--yb-control-border": "yb",
     "--yb-terminal-background": "yb",
     "--yb-terminal-bar": "yb",
     "--yb-terminal-border": "yb",
     "--yb-terminal-text": "yb",
     "--yb-terminal-muted": "yb",
     "--yb-terminal-prompt": "yb",
-    "--yb-terminal-dot": "yb"
+    "--yb-terminal-dot": "yb",
+    "--yb-terminal-size": "yb"
   },
   __localTokenLineage: ["yb"],
   components: {
@@ -227,7 +237,7 @@ export const ybTheme = {
         "letterSpacing": "-0.02em"
       },
       "base": {
-        "letterSpacing": "-0.011em",
+        "letterSpacing": "var(--yb-heading-tracking)",
         "textWrap": "balance"
       }
     },
@@ -287,13 +297,6 @@ export const ybTheme = {
         "padding": "var(--spacing-5)"
       }
     },
-    "clickable-card": {
-      "base": {
-        ":hover": {
-          "borderColor": "color-mix(in srgb, var(--color-accent) 55%, var(--color-border-emphasized))"
-        }
-      }
-    },
     "button": {
       "base": {
         "fontWeight": "var(--font-weight-semibold)"
@@ -304,11 +307,14 @@ export const ybTheme = {
         }
       },
       "variant:secondary": {
-        "backgroundColor": "var(--color-neutral)",
+        "backgroundColor": "light-dark(var(--color-background-card), var(--color-neutral))",
         "color": "var(--color-text-primary)",
         "borderWidth": "var(--border-width)",
         "borderStyle": "solid",
-        "borderColor": "var(--color-border-emphasized)"
+        "borderColor": "var(--yb-control-border)",
+        ":hover": {
+          "backgroundColor": "light-dark(var(--color-background-muted), var(--color-neutral))"
+        }
       }
     },
     "list-item": {
@@ -380,9 +386,16 @@ export const ybTheme = {
         },
         "value": {
           "tokens": {
-            "--size-element-sm": "36px",
+            "--size-element-sm": "44px",
             "--size-element-md": "44px",
             "--size-element-lg": "48px"
+          },
+          "components": {
+            "collapsible-trigger": {
+              "base": {
+                "minHeight": "var(--size-element-md)"
+              }
+            }
           }
         }
       },
@@ -409,17 +422,17 @@ export const ybTheme = {
         "ratio": 1.25
       },
       "body": {
-        "family": "Fustat",
-        "fallbacks": "\"Fustat Fallback\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+        "family": "var(--font-fustat)",
+        "fallbacks": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
       },
       "heading": {
-        "family": "Fustat",
-        "fallbacks": "\"Fustat Fallback\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+        "family": "var(--font-fustat)",
+        "fallbacks": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
         "weight": "semibold"
       },
       "code": {
-        "family": "JetBrains Mono",
-        "fallbacks": "\"JetBrains Mono Fallback\", ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
+        "family": "var(--font-jetbrains-mono)",
+        "fallbacks": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
       }
     },
     "color": {

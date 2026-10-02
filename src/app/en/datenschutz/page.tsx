@@ -38,7 +38,7 @@ const SERVICES = [
     text: 'No analytics service is active currently (placeholder for Cloudflare Web Analytics). No tracking cookies are set. [Verify and complete]',
   },
   {
-    name: 'Contact form (demo)',
+    name: 'Contact form',
     text: 'The form currently sends and stores nothing — input stays in the browser. [On activation: add processor and retention details]',
   },
 ];
@@ -50,7 +50,7 @@ export default function Page() {
     <>
       <PageHero title={page.title} lede={page.lede} />
       <Section>
-        <VStack gap={8} maxWidth={680}>
+        <VStack gap={8} maxWidth={640}>
           <Banner
             status="note"
             title={dict.demoNoticeTitle}
@@ -58,20 +58,20 @@ export default function Page() {
           />
           <VStack gap={2}>
             <Heading level={2}>Controller</Heading>
-            <Text>[Add name, address and email]</Text>
+            <Text type="code" color="secondary">[Add name, address and email]</Text>
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Services in use (actual state)</Heading>
             {SERVICES.map((s) => (
               <VStack key={s.name} gap={1}>
                 <Heading level={3}>{s.name}</Heading>
-                <Text color="secondary">{s.text}</Text>
+                <Text>{s.text}</Text>
               </VStack>
             ))}
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Your rights</Heading>
-            <Text>[Describe access, rectification, erasure, restriction, portability, objection and complaint rights — add text module]</Text>
+            <Text type="code" color="secondary">[Describe access, rectification, erasure, restriction, portability, objection and complaint rights — add text module]</Text>
           </VStack>
         </VStack>
       </Section>

@@ -1,69 +1,71 @@
 import Image from 'next/image';
 import { Section } from '@astryxdesign/core/Section';
-import { VStack } from '@astryxdesign/core/VStack';
-import { Carousel } from '@astryxdesign/core/Carousel';
 import { AspectRatio } from '@astryxdesign/core/AspectRatio';
 import { ContentCard, type ContentCardData } from '@/components/content-card';
-import { SectionHeader } from '@/components/section-header';
+import { CarouselShell } from '@/components/carousel-shell';
 import type { Lang } from '@/i18n/dictionaries';
+import type { ReactNode } from 'react';
 import styles from './carousel-row.module.css';
 
 /*
  * „Slides“ (E5): Astryx Carousel – natives Scroll-Snap, APG-Carousel-Pattern ohne
- * Auto-Rotation, Pfeile erscheinen nur, wenn es in die Richtung weitergeht, mobil wischbar,
- * unter Reduced Motion springt es statt zu gleiten (Astryx selbst). 0 KB eigene Logik.
+ * Auto-Rotation, mobil wischbar, unter Reduced Motion springt es statt zu gleiten (Astryx
+ * selbst). Vor/Zurück als eigene Pfeile im Abschnittskopf (CarouselShell, A112/MOT7).
  */
 
-/** „Das könnte dich auch interessieren“ auf Detailseiten (Demo-Projekt, Ghost, Artikel). */
-export function RelatedCarousel({
+/** Kartenreihe als Karussell: Related auf Detailseiten und Teaser der Startseite (VIS9). */
+export function CardCarousel({
   title,
   items,
   lang,
+  action,
 }: {
   title: string;
   items: ContentCardData[];
   lang: Lang;
+  action?: ReactNode;
 }) {
   if (items.length === 0) {
     return null;
   }
   return (
     <Section>
-      <VStack gap={6}>
-        <SectionHeader title={title} />
-        <Carousel aria-label={title} hasSnap gap={4} className={styles.row}>
-          {items.map((p) => (
-            <ContentCard key={p.slug} item={p} lang={lang} reveal={false} className={styles.card} />
-          ))}
-        </Carousel>
-      </VStack>
+      <CarouselShell title={title} lang={lang} action={action}>
+        {items.map((p) => (
+          <ContentCard key={p.slug} item={p} lang={lang} reveal={false} className={styles.card} />
+        ))}
+      </CarouselShell>
     </Section>
   );
+}
+
+/** „Das könnte dich auch interessieren“ auf Detailseiten (Demo-Projekt, Ghost, Artikel). */
+export function RelatedCarousel(props: { title: string; items: ContentCardData[]; lang: Lang }) {
+  return <CardCarousel {...props} />;
 }
 
 /** Bild-Galerie (nur echte Bilder – Platzhalter gelten als „kein Bild“, V6). */
 export function GalleryCarousel({
   title,
   images,
+  lang,
 }: {
   title: string;
   images: { src: string; alt: string }[];
+  lang: Lang;
 }) {
   if (images.length === 0) {
     return null;
   }
   return (
     <Section>
-      <VStack gap={6}>
-        <SectionHeader title={title} />
-        <Carousel aria-label={title} hasSnap gap={4} className={styles.row}>
-          {images.map((g) => (
-            <AspectRatio key={g.src} ratio={16 / 10} className={styles.image}>
-              <Image src={g.src} alt={g.alt} fill loading="lazy" sizes="(max-width: 768px) 84vw, 680px" />
-            </AspectRatio>
-          ))}
-        </Carousel>
-      </VStack>
+      <CarouselShell title={title} lang={lang}>
+        {images.map((g) => (
+          <AspectRatio key={g.src} ratio={16 / 10} className={styles.image}>
+            <Image src={g.src} alt={g.alt} fill loading="lazy" sizes="(max-width: 768px) 84vw, 680px" />
+          </AspectRatio>
+        ))}
+      </CarouselShell>
     </Section>
   );
 }

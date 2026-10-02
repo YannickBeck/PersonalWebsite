@@ -9,6 +9,8 @@ import { MorphSource } from '@/components/morph';
 import { detailPath } from '@/lib/transitions';
 import type { CoverMotif } from '@/components/cover-art';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
+import styles from './content-card.module.css';
+import { TRANSLATION_MAP } from '@/i18n/translations';
 
 /** Minimaldaten einer Karte – CardItem (lib/items) und Ghost-/Demo-Einträge passen hinein. */
 export interface ContentCardData {
@@ -56,24 +58,32 @@ export function coverMeta(item: ContentCardData, lang: Lang): { label: string; m
   return { label, motif };
 }
 
+/**
+ * Sprachunabhängiger Seed fürs generative Cover (VIS8): EN-Einträge nutzen den Slug ihres
+ * DE-Gegenstücks, damit dasselbe Projekt in beiden Sprachen gleich aussieht (Karte, Detail).
+ */
+export function coverSeed(slug: string, lang: Lang): string {
+  return lang === 'en' ? (TRANSLATION_MAP[slug] ?? slug) : slug;
+}
+
+/** Meta-Zeile immer „Art · Datum“ (VIS8): Projekte mit Jahr, Artikel mit Datum. */
 function metaLine(item: ContentCardData, lang: Lang): string {
   const dict = getDictionary(lang);
-  const parts: string[] = [];
-  if (item.date) {
-    parts.push(formatDate(item.date, lang));
+  const kind = item.kind === 'post' ? dict.kindPost : dict.kindProject;
+  if (!item.date) {
+    return kind;
   }
-  if (item.readingMinutes) {
-    parts.push(`${item.readingMinutes} ${dict.readingMinutes}`);
-  }
-  if (parts.length === 0) {
-    parts.push(item.kind === 'post' ? dict.kindPost : dict.kindProject);
-  }
-  return parts.join(' · ');
+  const when =
+    item.kind === 'project'
+      ? new Intl.DateTimeFormat(DATE_LOCALE[lang], { year: 'numeric', timeZone: 'Europe/Berlin' }).format(new Date(item.date))
+      : formatDate(item.date, lang);
+  return `${kind} · ${when}`;
 }
 
 /**
  * Eine Karte für Projekte und Artikel (L6): Cover 16:10 bündig oben, darunter IMMER eine
- * Meta-Zeile (Datum/Lesezeit bzw. Art + Demo-Token), Titel, Auszug (max. 3 Zeilen).
+ * Meta-Zeile („Art · Datum“ + ggf. Demo-Token als einziger Demo-Marker der Karte, VIS1),
+ * Titel, Auszug (max. 3 Zeilen).
  * Dadurch liegen Überschriften jeder Reihe auf einer Linie, egal ob Bild oder Demo.
  *
  * Motion (B3, src/app/motion.css): .yb-card = Hover/Fokus-Lift, Schatten, Akzent-Rand,
@@ -86,6 +96,8 @@ export function ContentCard({
   headingAccessibilityLevel,
   showExcerpt = true,
   reveal = true,
+  eager = false,
+  compactOnMobile = false,
   className,
 }: {
   item: ContentCardData;
@@ -95,16 +107,20 @@ export function ContentCard({
   showExcerpt?: boolean;
   /** Scroll-Reveal (false im Karussell: dort scrollt der Container horizontal). */
   reveal?: boolean;
+  /** Cover sofort laden (erste sichtbare Reihe, COD1). */
+  eager?: boolean;
+  /** Unter 768px ohne Cover (lange Listen, VIS9). */
+  compactOnMobile?: boolean;
   /** Zusatzklasse, z. B. Slide-Breite im Karussell. */
   className?: string;
 }) {
   const dict = getDictionary(lang);
   const { label, motif } = coverMeta(item, lang);
   return (
-    <ClickableCard label={item.title} href={item.href} padding={0} className={['yb-card', reveal ? 'yb-reveal' : null, className].filter(Boolean).join(' ')}>
+    <ClickableCard label={item.title} href={item.href} padding={0} className={['yb-card', reveal ? 'yb-reveal' : null, compactOnMobile ? styles.compact : null, className].filter(Boolean).join(' ')}>
       <VStack gap={0} height="100%">
         <MorphSource morphKey={detailPath(item.href) ?? item.href}>
-          <ItemCover src={item.image} seed={item.slug} label={label} motif={motif} />
+          <ItemCover src={item.image} seed={coverSeed(item.slug, lang)} label={label} motif={motif} eager={eager} />
         </MorphSource>
         <VStack gap={2} padding={5}>
           {/* feste Mindesthöhe = Höhe des Tokens sm (22px): Titel fluchten mit und ohne Demo-Token (L6) */}

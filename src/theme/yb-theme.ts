@@ -17,41 +17,71 @@
  *   Section-Padding 40px (mobil 24px) block, 16px inline (L4).
  *
  * Typografie (V5, A6)
- * - Fustat (Text/Überschriften) und JetBrains Mono (Code), beide über next/font geladen;
- *   die metrisch angepassten Fallbacks "Fustat Fallback" / "JetBrains Mono Fallback"
- *   stehen im Stack, damit der Font-Swap keinen Layout-Sprung erzeugt.
+ * - Fustat (Text/Überschriften) und JetBrains Mono (Code), beide über next/font geladen und
+ *   per CSS-Variable eingebunden (var(--font-fustat) usw., layout.tsx); die Variablen
+ *   enthalten die metrisch angepassten Fallbacks, damit der Font-Swap keinen Layout-Sprung
+ *   erzeugt.
  * - Skala base 16 / ratio 1.25: sm 13 · base 16 · lg 20 · xl 25 · 2xl 31 · 3xl 39 · 4xl 49 · 5xl 61 px.
  * - Display- und H1-Größen fließend per clamp() zwischen zwei Skalenstufen (keine Sprünge
  *   an Breakpoints): display-2 (Hero-H1) 31→49 px, H1 Unterseiten 31→39 px, H2 25 px.
  * - Display: Zeilenhöhe ~1.08, Tracking −0.025em. Lede (Text type="large") normales Gewicht.
  * - Alle Überschriften semibold (gothic hatte H3/H4 bold → H3 wirkte schwerer als H2).
  *
+ * Code (VIS4, A114): eigenes Syntax-Theme aus der yb-Palette statt Dracula – Fläche wie die
+ *   Terminal-Karte (#0B1020, in beiden Modi dunkel), Keywords im Akzent-Violett, Strings und
+ *   Kommentare gedämpft. Kontraste gegen #0B1020: Text 15,5 · Keyword 8,2 · String 10,5 ·
+ *   Kommentar/Codeblock-Titel 5,9 · Operator 8,2 (alle ≥ 4,5:1; Dracula-Kommentar hatte 3,02).
+ *
  * Motion (dokumentiert, Werte nur hier; Nutzung in src/app/motion.css)
  * - Astryx-Dauern: fast 150 ms (Hover/Press), medium 350 ms (Ein-/Ausblenden, Slides),
  *   slow 800 ms; min/max = ×0.75 / ÷0.75. Easing --ease-standard = cubic-bezier(.24,1,.4,1).
  * - Eigene lokale Tokens (--yb-*): micro, exit (kürzer als enter), enter, emphasis,
- *   stagger, Slide-Distanz und Exit-/Move-Easing. Unter prefers-reduced-motion: reduce
+ *   stagger, Slide-Distanz und Exit-/Move-Easing. Seitenwechsel kurz und leicht überlappend
+ *   (MOT3): exit = fast-min (~113 ms), enter = medium-min (~263 ms), gesamt ~300 ms. Unter prefers-reduced-motion: reduce
  *   setzt eine Adaptation Distanz und Stagger auf 0 und kürzt die Dauern → Slides werden
  *   automatisch zu kurzen Überblendungen, ohne dass jede Animation das selbst prüfen muss.
  */
 import {defineTheme} from '@astryxdesign/core/theme';
-import {dracula} from '@astryxdesign/core/theme/syntax';
+import {defineSyntaxTheme} from '@astryxdesign/core/theme/syntax';
 
-const SANS_FALLBACKS =
-  '"Fustat Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-const MONO_FALLBACKS = '"JetBrains Mono Fallback", ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+// Familie über die next/font-Variablen (COD5): --font-fustat/--font-jetbrains-mono liefern
+// „Fustat", „Fustat Fallback" (metrisch angepasst) selbst – kein Literal, das an Nexts
+// generierte Familiennamen gekoppelt ist. Hier nur noch der System-Stack.
+const SANS_FALLBACKS = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+const MONO_FALLBACKS = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+
+/** Syntax-Farben aus der yb-Palette (VIS4/A114). */
+const ybSyntax = defineSyntaxTheme({
+  name: 'yb',
+  tokens: {
+    keyword: '#B49CFF',
+    string: '#B7C0D8',
+    comment: '#8590AD',
+    number: '#C9B8FF',
+    function: '#D9CCFF',
+    type: '#C3CCE6',
+    variable: '#E6E8F2',
+    operator: '#A3ABC0',
+    constant: '#C9B8FF',
+    tag: '#B49CFF',
+    attribute: '#D9CCFF',
+    property: '#C3CCE6',
+    punctuation: '#A3ABC0',
+    background: '#0B1020',
+  },
+});
 
 export const ybTheme = defineTheme({
   name: 'yb',
   color: {accent: ['#5B3FE0', '#9B7BFF'], neutralStyle: 'cool', contrast: 'standard'},
   typography: {
     scale: {base: 16, ratio: 1.25},
-    body: {family: 'Fustat', fallbacks: SANS_FALLBACKS},
-    heading: {family: 'Fustat', fallbacks: SANS_FALLBACKS, weight: 'semibold'},
-    code: {family: 'JetBrains Mono', fallbacks: MONO_FALLBACKS},
+    body: {family: 'var(--font-fustat)', fallbacks: SANS_FALLBACKS},
+    heading: {family: 'var(--font-fustat)', fallbacks: SANS_FALLBACKS, weight: 'semibold'},
+    code: {family: 'var(--font-jetbrains-mono)', fallbacks: MONO_FALLBACKS},
   },
   motion: {fast: 150, medium: 350, slow: 800, ratio: 0.75},
-  syntax: dracula,
+  syntax: ybSyntax,
   tokens: {
     // ---- Akzent (E3, V3): ein Violett, kontraststark in beiden Modi
     '--color-accent': ['#5B3FE0', '#9B7BFF'],
@@ -75,7 +105,9 @@ export const ybTheme = defineTheme({
     '--color-icon-secondary': ['#525868', '#A3ABC0'],
     '--color-icon-disabled': ['#9AA0B2', '#5D6580'],
     '--color-border': ['#1B1F3B1A', '#A5B4FC24'],
-    '--color-border-emphasized': ['#A7AEC2', '#3D4766'],
+    // Feld- und Steuerelementränder ≥ 3:1 gegen Seite UND Feldfläche (A111, WCAG 1.4.11):
+    // hell 3,35 (Weiß) / 3,13 (#F6F7FB), dunkel 3,71 (Seite) / 3,50 (Feld) / 3,10 (Karte)
+    '--color-border-emphasized': ['#858CA1', '#626C8D'],
     '--color-neutral': ['#1B1F3B0F', '#A5B4FC1A'],
     '--color-overlay': ['#0A0E1A66', '#05070D99'],
     '--color-overlay-hover': ['#1B1F3B0D', '#FFFFFF12'],
@@ -108,17 +140,25 @@ export const ybTheme = defineTheme({
   localTokens: {
     // ---- Motion-Tokens für eigene Animationen (src/app/motion.css)
     '--yb-motion-micro': 'var(--duration-fast)',
-    '--yb-motion-exit': 'var(--duration-fast)',
-    '--yb-motion-enter': 'var(--duration-medium)',
+    '--yb-motion-exit': 'var(--duration-fast-min)',
+    '--yb-motion-enter': 'var(--duration-medium-min)',
     '--yb-motion-emphasis': 'var(--duration-medium-max)',
-    '--yb-motion-stagger': 'calc(var(--duration-fast) * 0.4)',
+    '--yb-motion-stagger': 'calc(var(--duration-fast) * 0.2667)',
     '--yb-motion-distance': 'var(--spacing-6)',
     '--yb-ease-enter': 'var(--ease-standard)',
     '--yb-ease-exit': 'cubic-bezier(0.4, 0, 1, 1)',
     '--yb-ease-move': 'cubic-bezier(0.65, 0, 0.35, 1)',
 
-    // ---- Fließtext auf Detailseiten (L5): 18px, Zeilenhöhe 1.7 (reading-layout/ghost-content)
+    // ---- Fließtext auf Detailseiten (L5, VIS4): 18px, Zeilenhöhe 1.7 – Demo- und Ghost-
+    //      Inhalte, Projekt-Fallstudien (reading-layout/article-body/ghost-content)
     '--yb-prose-size': 'calc(var(--font-size-base) * 1.125)',
+    // ---- Überschriften-Tracking (auch für Ghost-/Artikel-HTML) und Strichstärken (COD10)
+    '--yb-heading-tracking': '-0.011em',
+    '--yb-stroke-motif': '1.5px',
+    '--yb-stroke-icon': '2px',
+    // ---- Kontur des Secondary-Buttons (VIS14): hell dezent (Fläche weiß, Label trägt die
+    //      Bedeutung), dunkel unverändert
+    '--yb-control-border': ['#B9BFCF', '#3D4766'],
 
     // ---- Terminal-Karte im Hero (E4): bewusst in beiden Modi dunkel (Code-Optik),
     //      aus derselben Navy-Familie; Kontraste: Text 15:1, Ausgabe 8:1, Prompt 5,9:1
@@ -129,6 +169,8 @@ export const ybTheme = defineTheme({
     '--yb-terminal-muted': '#A3ABC0',
     '--yb-terminal-prompt': '#9B7BFF',
     '--yb-terminal-dot': '#3D4766',
+    // Terminal-Schrift fließend 13 → 15px (VIS7)
+    '--yb-terminal-size': 'clamp(var(--font-size-sm), 0.72rem + 0.32vw, calc(var(--font-size-base) * 0.9375))',
   },
   components: {
     // Seitenstruktur ohne Farbbänder (L3). Astryx-intern nutzen nur BottomSheet-Panels
@@ -140,13 +182,6 @@ export const ybTheme = defineTheme({
     card: {
       base: {padding: 'var(--spacing-5)'},
     },
-    'clickable-card': {
-      base: {
-        ':hover': {
-          borderColor: 'color-mix(in srgb, var(--color-accent) 55%, var(--color-border-emphasized))',
-        },
-      },
-    },
     button: {
       base: {fontWeight: 'var(--font-weight-semibold)'},
       // Primary-Hover sichtbar in beiden Modi (V8-Verifier)
@@ -156,17 +191,21 @@ export const ybTheme = defineTheme({
             'light-dark(color-mix(in srgb, var(--color-accent) 86%, black), color-mix(in srgb, var(--color-accent) 82%, white))',
         },
       },
-      // Secondary: leise Fläche + Kontur statt Schieferblock (V1-Verifier)
+      // Secondary: hell weiße Fläche + dezente Kontur, Hover auf muted (VIS14); dunkel leise
+      // Fläche + Kontur wie bisher (V1-Verifier)
       'variant:secondary': {
-        backgroundColor: 'var(--color-neutral)',
+        backgroundColor: 'light-dark(var(--color-background-card), var(--color-neutral))',
         color: 'var(--color-text-primary)',
         borderWidth: 'var(--border-width)',
         borderStyle: 'solid',
-        borderColor: 'var(--color-border-emphasized)',
+        borderColor: 'var(--yb-control-border)',
+        ':hover': {
+          backgroundColor: 'light-dark(var(--color-background-muted), var(--color-neutral))',
+        },
       },
     },
     heading: {
-      base: {letterSpacing: '-0.011em', textWrap: 'balance'},
+      base: {letterSpacing: 'var(--yb-heading-tracking)', textWrap: 'balance'},
       'level:1': {letterSpacing: '-0.02em'},
       'type:display-1': {letterSpacing: '-0.03em'},
       'type:display-2': {letterSpacing: '-0.025em'},
@@ -197,10 +236,15 @@ export const ybTheme = defineTheme({
         when: {width: {below: 'md'}},
         value: {components: {section: {base: {padding: 'var(--spacing-6) var(--spacing-4)'}}}},
       },
-      // Touch: Bedienelemente ≥ 44px (M5)
+      // Touch: Bedienelemente ≥ 44px (M5, A122) – auch Größe sm (FAQ, Vorschau, Code kopieren,
+      // Footer-/Inhaltsverzeichnis-Zeilen)
       {
         when: {pointer: 'coarse'},
-        value: {tokens: {'--size-element-sm': '36px', '--size-element-md': '44px', '--size-element-lg': '48px'}},
+        value: {
+          tokens: {'--size-element-sm': '44px', '--size-element-md': '44px', '--size-element-lg': '48px'},
+          // Aufklapp-Zeilen (FAQ, Formularzustände) haben keine Größen-Token (A122)
+          components: {'collapsible-trigger': {base: {minHeight: 'var(--size-element-md)'}}},
+        },
       },
       // Reduced Motion: keine Wege, kein Stagger, kurze Dauern (X3/W8)
       {

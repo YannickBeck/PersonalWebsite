@@ -6,9 +6,13 @@ export default function EnglishHome() {
   return <HomeContent lang="en" />;
 }
 
-export const metadata: Metadata = pageMeta({
-  lang: 'en',
-  path: '/',
-  title: 'Yannick Beck',
-  description: 'Personal website by Yannick Beck — projects, blog and contact.',
-});
+// title absolute (FUN10): sonst ergänzt das Root-Template „%s · Yannick Beck“ den Namen doppelt
+export const metadata: Metadata = {
+  ...pageMeta({
+    lang: 'en',
+    path: '/',
+    title: 'Yannick Beck',
+    description: 'Personal website by Yannick Beck — projects, blog and contact.',
+  }),
+  title: { absolute: 'Yannick Beck' },
+};

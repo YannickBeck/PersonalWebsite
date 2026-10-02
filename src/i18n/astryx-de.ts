@@ -63,4 +63,5 @@ export const ASTRYX_DE: Catalog = {
   "@astryx.token.remove": { defaultMessage: "{label} entfernen" },
   "@astryx.lightbox.imagePosition": { defaultMessage: "Bild {index, number} von {total, number}" },
   "@astryx.lightbox.mediaPosition": { defaultMessage: "{alt}, {index, number} von {total, number}" },
+  "@astryx.keyboardHint.toNavigate": { defaultMessage: "zum Navigieren" },
 };

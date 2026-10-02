@@ -14,7 +14,8 @@ import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { skillsByLang } from '@/content/pages';
 import { PORTRAIT_SRC } from '@/lib/images';
 
-/** Über mich (E1, LV2, VV4): kein Porträt-Platzhalter – Text + Fakten; Bild nur mit echter Quelle. */
+/** Über mich (E1, LV2, VV4): kein Porträt-Platzhalter – Text + Fakten; Bild nur mit echter Quelle.
+ * Demo-Kennzeichnung (VIS1): Hinweiszeile im Header + EIN Hinweis in der Randspalte. */
 export function AboutContent({ lang, bio, workstyle }: { lang: Lang; bio: string[]; workstyle: string }) {
   const dict = getDictionary(lang);
   const page = dict.pages['ueber-mich'];
@@ -29,6 +30,9 @@ export function AboutContent({ lang, bio, workstyle }: { lang: Lang; bio: string
                 {p}
               </Text>
             ))}
+            <Text as="p" color="secondary" textWrap="pretty">
+              {workstyle}
+            </Text>
           </VStack>
           <VStack gap={4}>
             <Card>
@@ -51,7 +55,8 @@ export function AboutContent({ lang, bio, workstyle }: { lang: Lang; bio: string
                 </MetadataList>
               </HStack>
             </Card>
-            <Banner status="note" title={dict.demoNoticeTitle} description={workstyle} />
+            {/* Ein Hinweis je Seite (VIS1): die Bio ist Platzhaltertext */}
+            <Banner status="note" title={dict.demoNoticeTitle} description={dict.aboutDemoNote} />
           </VStack>
         </Grid>
       </Section>

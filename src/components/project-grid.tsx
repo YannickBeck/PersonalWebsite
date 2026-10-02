@@ -38,19 +38,20 @@ export function ProjectGrid({ lang, items }: { lang: Lang; items: CardItem[] }) 
       addTransitionType(FILTER);
       setCategoryState(value);
     });
+  // Nur Bereiche mit Einträgen als Tab (FUN6) – kein Tab führt in einen leeren Zustand
   const cats = [
     { value: 'all', label: dict.categoryAll },
     { value: 'web', label: dict.categoryWeb },
     { value: 'cms', label: dict.categoryCms },
     { value: 'automation', label: dict.categoryAutomation },
-  ];
+  ].filter((c) => c.value === 'all' || items.some((i) => i.category === c.value));
   const filtered =
     category === 'all' ? items : items.filter((i) => i.category === category);
 
   return (
     <VStack gap={6}>
       <div className={styles.clip}>
-        <TabList value={category} onChange={setCategory} overflow="scroll">
+        <TabList value={category} onChange={setCategory} overflow="scroll" aria-label={dict.projectFilterLabel}>
         {cats.map((c) => (
           <Tab key={c.value} value={c.value} label={c.label} />
         ))}
@@ -71,12 +72,16 @@ export function ProjectGrid({ lang, items }: { lang: Lang; items: CardItem[] }) 
         </VStack>
       ) : (
         <Grid columns={CARD_COLUMNS} gap={4}>
-          {filtered.map((p) => (
-            <ContentCard key={p.slug} item={p} lang={lang} headingAccessibilityLevel={2} />
+          {filtered.map((p, i) => (
+            <ContentCard key={p.slug} item={p} lang={lang} headingAccessibilityLevel={2} eager={i < 3} />
           ))}
         </Grid>
       )}
       </ViewTransition>
+      {/* Trefferzahl dauerhaft eingehängt, damit der Filterwechsel angesagt wird (A119) */}
+      <Text type="supporting" color="secondary" role="status">
+        {dict.resultCount(filtered.length, 'project')}
+      </Text>
     </VStack>
   );
 }

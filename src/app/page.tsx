@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Section } from '@astryxdesign/core/Section';
 import { VStack } from '@astryxdesign/core/VStack';
@@ -14,10 +15,12 @@ import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { getPostCards, getProjectCards } from '@/lib/items';
 import { servicesByLang } from '@/content/pages';
 import { PORTRAIT_SRC } from '@/lib/images';
-import { CARD_COLUMNS, ContentCard } from '@/components/content-card';
+import { pageMeta } from '@/lib/seo';
+import { CardCarousel } from '@/components/carousel-row';
 import { SectionHeader } from '@/components/section-header';
 import { TerminalCard } from '@/components/terminal-card';
 import { CtaCard } from '@/components/cta-card';
+import { PAGE_TOP } from '@/components/page-hero';
 import { ArrowRight } from '@/components/icons';
 import home from './home.module.css';
 
@@ -34,7 +37,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
       {/* Hero (E4): links Text, rechts Terminal-Karte; asymmetrisch ab 1024px (home.module.css).
           Einstieg (B3): .yb-enter staffelt Eyebrow, H1, Lede, CTAs, dann die Terminal-Karte –
           nur beim ersten Laden des Dokuments (motion.css §3). */}
-      <Section className={home.heroSection}>
+      <Section className={`${home.heroSection} ${PAGE_TOP}`}>
         <Grid columns={{ minWidth: 400, max: 2 }} gap={10} align="center" className={home.hero}>
           <VStack gap={5} className="yb-enter">
             <HStack gap={2} vAlign="center">
@@ -65,28 +68,17 @@ export async function HomeContent({ lang }: { lang: Lang }) {
         </Grid>
       </Section>
 
-      {topProjects.length > 0 && (
-        <Section>
-          <VStack gap={6}>
-            <SectionHeader
-              title={dict.homeProjectsTitle}
-              action={
-                <Button
-                  label={dict.homeAllProjects}
-                  variant="secondary"
-                  href={withLang('/projekte', lang)}
-                  endContent={arrow}
-                />
-              }
-            />
-            <Grid columns={CARD_COLUMNS} gap={4}>
-              {topProjects.map((p) => (
-                <ContentCard key={p.slug} item={p} lang={lang} />
-              ))}
-            </Grid>
-          </VStack>
-        </Section>
-      )}
+      {/* Teaser-Reihen als Karussell (VIS9): Desktop 3 nebeneinander wie ein Raster (kein
+          Überlauf, keine Pfeile), Tablet 2 + Anschnitt, mobil 1 + Anschnitt – statt eines
+          ~1300px hohen Kartenstapels. */}
+      <CardCarousel
+        title={dict.homeProjectsTitle}
+        items={topProjects}
+        lang={lang}
+        action={
+          <Button label={dict.homeAllProjects} variant="secondary" href={withLang('/projekte', lang)} endContent={arrow} />
+        }
+      />
 
       {/* Leistungen als Zeilen mit Weiterführung wie die anderen Sections (LV3) */}
       <Section>
@@ -103,7 +95,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
               />
             }
           />
-          <Card padding={2} className="yb-reveal">
+          <Card padding={2} className={`${home.services} yb-reveal`}>
             <List hasDividers density="spacious">
               {services.map((s, i) => (
                 <ListItem
@@ -124,25 +116,20 @@ export async function HomeContent({ lang }: { lang: Lang }) {
         </VStack>
       </Section>
 
-      {/* Kurzporträt ohne Bild (E1/LV2): Text + Fakten; Porträt nur mit echter Bildquelle */}
+      {/* Kurzporträt (VIS18): Kopf wie alle Sections, Fakten als eine ruhige Zeile in voller
+          Breite statt dünner Textspalte neben einer Faktenkarte. Porträt (E1) erst mit echter
+          Bildquelle und echter Bio – dann hier auf 3–4 Zeilen Text auslegen. */}
       <Section>
-        <Grid columns={{ minWidth: 320, max: 2 }} gap={10} align="start">
-          <VStack gap={4} className="yb-reveal">
-            <Heading level={2}>{dict.homeAboutTitle}</Heading>
-            <Text color="secondary" textWrap="pretty">
-              {dict.homeAboutLede}
-            </Text>
-            <HStack gap={2}>
-              <Button
-                label={dict.homeAboutCta}
-                variant="secondary"
-                href={withLang('/ueber-mich', lang)}
-                endContent={arrow}
-              />
-            </HStack>
-          </VStack>
+        <VStack gap={6}>
+          <SectionHeader
+            title={dict.homeAboutTitle}
+            lede={dict.homeAboutLede}
+            action={
+              <Button label={dict.homeAboutCta} variant="secondary" href={withLang('/ueber-mich', lang)} endContent={arrow} />
+            }
+          />
           <Card className="yb-reveal">
-            <HStack gap={5} vAlign="start">
+            <HStack gap={5} vAlign="center">
               {PORTRAIT_SRC ? (
                 <Image
                   src={PORTRAIT_SRC}
@@ -152,7 +139,7 @@ export async function HomeContent({ lang }: { lang: Lang }) {
                   style={{ borderRadius: 'var(--radius-full)', flexShrink: 0 }}
                 />
               ) : null}
-              <MetadataList label={{ position: 'top' }}>
+              <MetadataList orientation="horizontal" label={{ position: 'top' }}>
                 {dict.aboutFacts.map((f) => (
                   <MetadataListItem key={f.label} label={f.label}>
                     <Text>{f.value}</Text>
@@ -161,31 +148,15 @@ export async function HomeContent({ lang }: { lang: Lang }) {
               </MetadataList>
             </HStack>
           </Card>
-        </Grid>
+        </VStack>
       </Section>
 
-      {topPosts.length > 0 && (
-        <Section>
-          <VStack gap={6}>
-            <SectionHeader
-              title={dict.homePostsTitle}
-              action={
-                <Button
-                  label={dict.homeAllPosts}
-                  variant="secondary"
-                  href={withLang('/blog', lang)}
-                  endContent={arrow}
-                />
-              }
-            />
-            <Grid columns={CARD_COLUMNS} gap={4}>
-              {topPosts.map((p) => (
-                <ContentCard key={p.slug} item={p} lang={lang} />
-              ))}
-            </Grid>
-          </VStack>
-        </Section>
-      )}
+      <CardCarousel
+        title={dict.homePostsTitle}
+        items={topPosts}
+        lang={lang}
+        action={<Button label={dict.homeAllPosts} variant="secondary" href={withLang('/blog', lang)} endContent={arrow} />}
+      />
 
       {/* Kontakt-CTA als ruhige Card */}
       <CtaCard
@@ -197,6 +168,16 @@ export async function HomeContent({ lang }: { lang: Lang }) {
     </>
   );
 }
+
+export const metadata: Metadata = {
+  ...pageMeta({
+    lang: 'de',
+    path: '/',
+    title: 'Yannick Beck',
+    description: 'Persönliche Website von Yannick Beck — Projekte, Blog und Kontakt.',
+  }),
+  title: { absolute: 'Yannick Beck' },
+};
 
 export default function Home() {
   return <HomeContent lang="de" />;

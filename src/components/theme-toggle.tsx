@@ -55,7 +55,9 @@ export function ThemeToggle({ lang }: { lang: Lang }) {
     <IconButton
       variant="ghost"
       label={label}
-      tooltip={label}
+      // Tooltip ergänzt statt zu wiederholen (A123): sonst käme das Label zusätzlich als
+      // aria-describedby doppelt an
+      tooltip={dict.colorSchemeLabel}
       icon={<SunMoonIcon />}
       onClick={onClick}
     />

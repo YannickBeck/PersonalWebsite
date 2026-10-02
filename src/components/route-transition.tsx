@@ -3,7 +3,7 @@
 import { ViewTransition, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { armMorph } from '@/components/morph';
-import { NAV_BACK, NAV_FORWARD, PAGE_TRANSITION, morphKeyFor } from '@/lib/transitions';
+import { INTERCEPT_POPSTATE, NAV_BACK, NAV_FORWARD, PAGE_TRANSITION, morphKeyFor } from '@/lib/transitions';
 import { suppressTransitions } from '@/lib/instant';
 
 type NavigationLike = { currentEntry?: { index: number; key: string } | null };
@@ -23,6 +23,27 @@ export function rememberScroll() {
   if (entry) {
     scrollByEntry.set(entry.key, window.scrollY);
   }
+}
+
+/**
+ * Laufende View Transition sofort beenden (MOT4): Ein zweiter Klick während eines
+ * Seitenübergangs wartete bis zu 490ms in Reacts VT-Warteschlange. Ohne
+ * document.activeViewTransition (ältere Browser) bleibt es beim bisherigen Verhalten.
+ */
+export function skipActiveTransition() {
+  const active = (document as Document & { activeViewTransition?: { skipTransition(): void } | null })
+    .activeViewTransition;
+  active?.skipTransition();
+}
+
+/**
+ * Start einer Seiten-Navigation (Link, Drawer, Browser-Zurück): laufende VT beenden und
+ * festhalten, ob die alte Seite gescrollt war. motion.css lässt die Hinweiszeile nur dann
+ * mit dem gleitenden Header von oben einfahren (MOT1) – sonst stehen beide still.
+ */
+export function markNavigationStart() {
+  skipActiveTransition();
+  document.documentElement.toggleAttribute('data-yb-vt-scrolled', window.scrollY > 0);
 }
 
 let pendingRestore: number | null = null;
@@ -57,6 +78,11 @@ let pendingRestore: number | null = null;
  * Navigation-API-Index) → normale Router-Transition mit Slide und Morph; replace lässt den
  * History-Stapel unverändert. Die Scroll-Position des Ziels kommt aus scrollByEntry und wird
  * im Commit (Layout-Effekt, also vor dem Aufnehmen des neuen Zustands) gesetzt.
+ * Next-Interna (COD2): erkannt wird ein Next-Eintrag am internen History-Feld __NA, und
+ * stopImmediatePropagation unterdrückt Nexts eigenen popstate-Handler. Getestet mit Next
+ * TESTED_NEXT (src/lib/transitions.ts); nach jedem Next-Upgrade scripts/vt-probe.mjs und
+ * scripts/backscroll.mjs laufen lassen (AGENTS.md). Abschalten ohne Codeumbau:
+ * INTERCEPT_POPSTATE = false → Nexts Standard (harter Schnitt, korrekte Position).
  * Nicht abgefangen (Nexts Standardverhalten bleibt): ohne Navigation API oder View
  * Transitions, bei Reduced Motion, bei fremden History-Einträgen (kein __NA, Next lädt neu),
  * bei reinen Anker-Wechseln auf derselben Seite, bei unbekannter Ziel-Position und wenn der
@@ -90,26 +116,37 @@ export function RouteTransition({ children }: { children: ReactNode }) {
       const entry = currentEntry();
       const previous = shown.current;
       const to = window.location.pathname;
+      const { search, hash } = window.location;
       const target = entry ? scrollByEntry.get(entry.key) : undefined;
-      const skip =
-        to === currentPath.current ||
-        typeof document.startViewTransition !== 'function' ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-        (event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition === true ||
-        !(event.state && typeof event.state === 'object' && '__NA' in event.state);
+      const isNextEntry = !!(event.state && typeof event.state === 'object' && '__NA' in event.state);
       if (previous) {
         // Position der Seite, die wir gerade verlassen (der Browser hat noch nicht gescrollt)
         scrollByEntry.set(previous.key, window.scrollY);
       }
+      // Fremder Eintrag ohne Next-State (z. B. ein nativer Anker #main auf einer anderen
+      // Seite, FUN2): Next ignoriert ihn, URL und angezeigte Seite liefen auseinander. Dann
+      // die URL selbst ansteuern – ohne Animation, Next scrollt zum Anker bzw. nach oben.
+      if (!isNextEntry && to !== currentPath.current) {
+        event.stopImmediatePropagation();
+        router.replace(`${to}${search}${hash}`, { scroll: true });
+        return;
+      }
+      const skip =
+        !INTERCEPT_POPSTATE ||
+        to === currentPath.current ||
+        typeof document.startViewTransition !== 'function' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        (event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition === true ||
+        !isNextEntry;
       if (skip || entry === null || previous === null || target === undefined) {
         return;
       }
       event.stopImmediatePropagation();
+      markNavigationStart();
       const type = entry.index > previous.index ? NAV_FORWARD : NAV_BACK;
       armMorph(morphKeyFor(currentPath.current, to));
       pendingRestore = target;
       const leaving = window.scrollY;
-      const { search, hash } = window.location;
       // Nächster Frame (vor dem Malen): Der Browser hat inzwischen seine eigene Scroll-
       // Wiederherstellung auf die noch alte Seite angewendet – zurück auf die Stelle, an der
       // der Nutzer war, damit die alte Ansicht ohne Sprung hinausgleitet. Außerdem liegt der

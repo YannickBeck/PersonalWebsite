@@ -48,6 +48,37 @@ function prettyTag(slug: string): string {
     .join(' ');
 }
 
+/**
+ * Bereich eines Ghost-Projekts für die Filter auf /projekte (FUN6). Vorrang hat ein interner
+ * Tag `#bereich-web|cms|automation` (Slug `hash-bereich-…`); sonst der erste passende
+ * öffentliche Tag. Ohne Treffer: kein Bereich (Projekt erscheint nur unter „Alle“).
+ * Konvention: docs/content-guide.md.
+ */
+const CATEGORY_BY_TAG: Record<string, ProjectCategory> = {
+  web: 'web',
+  webentwicklung: 'web',
+  'web-development': 'web',
+  nextjs: 'web',
+  cms: 'cms',
+  ghost: 'cms',
+  'headless-cms': 'cms',
+  automation: 'automation',
+  automatisierung: 'automation',
+  tooling: 'automation',
+  'ci-cd': 'automation',
+  devops: 'automation',
+};
+
+const CATEGORIES: ProjectCategory[] = ['web', 'cms', 'automation'];
+
+export function ghostCategory(item: GhostItem): ProjectCategory | undefined {
+  const slugs = (item.tags ?? []).map((t) => t.slug ?? '');
+  const internal = slugs
+    .map((s) => s.match(/^hash-bereich-(.+)$/)?.[1])
+    .find((c): c is ProjectCategory => !!c && (CATEGORIES as string[]).includes(c));
+  return internal ?? slugs.map((s) => CATEGORY_BY_TAG[s]).find(Boolean);
+}
+
 function demoTopics(slugs: string[], lang: Lang): { slug: string; label: string }[] {
   return slugs.map((s) => ({ slug: s, label: TOPIC_LABELS[lang][s] ?? prettyTag(s) }));
 }
@@ -58,22 +89,28 @@ export async function getProjectCards(lang: Lang): Promise<CardItem[]> {
     getGhostProjects(lang),
     Promise.resolve(DEMO_PROJECTS.filter((p) => p.lang === lang)),
   ]);
-  const g: CardItem[] = ghost.map((p) => ({
-    kind: 'project' as const,
-    slug: p.slug,
-    title: p.title ?? p.slug,
-    excerpt: p.custom_excerpt || p.excerpt || '',
-    date: p.published_at,
-    image: p.feature_image ?? null,
-    demo: false,
-    topics: ghostTopics(p, lang),
-    href: withLang(`/projekte/${p.slug}`, lang),
-  }));
+  const g: CardItem[] = ghost.map((p) => {
+    const category = ghostCategory(p);
+    return {
+      kind: 'project' as const,
+      slug: p.slug,
+      title: p.title ?? p.slug,
+      excerpt: p.custom_excerpt || p.excerpt || '',
+      date: p.published_at,
+      image: p.feature_image ?? null,
+      demo: false,
+      category,
+      categoryLabel: category ? TOPIC_LABELS[lang][category] : undefined,
+      topics: ghostTopics(p, lang),
+      href: withLang(`/projekte/${p.slug}`, lang),
+    };
+  });
   const d: CardItem[] = demo.map((p) => ({
     kind: 'project' as const,
     slug: p.slug,
     title: p.title,
     excerpt: p.excerpt,
+    date: p.date,
     image: p.cover,
     demo: true,
     category: p.category,

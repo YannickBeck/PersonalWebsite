@@ -6,12 +6,19 @@ Zwei Quellen, klar getrennt:
 
 - **Blog-Artikel:** Posts mit Tag `#lang-de` bzw. `#lang-en` (interne Tags).
 - **Projekte:** Posts mit Tag `project` **plus** Sprach-Tag.
+- **Bereich eines Projekts** (Filter auf /projekte: Webentwicklung, CMS, Automatisierung):
+  interner Tag `#bereich-web`, `#bereich-cms` oder `#bereich-automation` (hat Vorrang);
+  sonst der erste passende öffentliche Tag (`web`/`webentwicklung`/`nextjs` → Web,
+  `cms`/`ghost`/`headless-cms` → CMS, `automation`/`automatisierung`/`tooling`/`ci-cd`/
+  `devops` → Automatisierung; `src/lib/items.ts`). Ohne Bereich erscheint das Projekt nur
+  unter „Alle Bereiche“. Tabs gibt es nur für Bereiche mit Einträgen.
 - **Seiten:** About & Co. als Pages mit Sprach-Tag.
 - **Cover:** pro Beitrag als Feature-Image setzen (16:10, min. 1280 × 800) —
   sobald gesetzt, ersetzt das Frontend automatisch das generative Cover
   (Verlauf + Muster + Motiv, Kategorie aus dem ersten öffentlichen Tag).
 - **Inhaltsverzeichnis:** h2-Überschriften mit `id` (Ghost setzt sie automatisch)
-  erscheinen ab 1024px in der Randspalte, mobil über dem Text.
+  erscheinen ab 1024px in der Randspalte (aktiver Abschnitt markiert), mobil nach dem
+  Titelbild – dort erst ab 4 Überschriften. Sonderzeichen wie `<`, `&` sind erlaubt.
 - **Koenig-Cards:** Bild (auch breit/voll), Galerie, Callout, Bookmark, Toggle haben
   Basisstyles (`src/components/ghost-content.module.css`).
 - **Veröffentlichen** löst per Webhook (`site.changed` → `/api/revalidate`)
@@ -30,6 +37,9 @@ Zwei Quellen, klar getrennt:
   Bildquelle zeigt (z. B. `/portrait.jpg` in `public/`); bis dahin Text + Fakten.
 - **Demo-Hinweis:** eine schlanke Zeile über dem Header (`src/components/demo-notice.tsx`,
   Text `demoNoticeLine` in den Dictionaries). Entfernen, sobald keine Demo-Inhalte mehr live sind.
+  Demo-Einträge selbst tragen KEINE Präfixe/Suffixe („Demo-Projekt:“, „(fiktiv)“ …):
+  Karten und Detailseiten zeigen dafür ein Token „Demo“ (über `demo: true`), Seiten mit
+  persönlichen Angaben (CV, Über mich, Uses, Leistungen) je einen ruhigen Hinweis.
 - **Brand-Theme:** `src/theme/yb-theme.ts` — nach jeder Änderung
   `pnpm exec astryx theme build src/theme/yb-theme.ts` ausführen (erzeugt `yb.css`/`yb.js`/`yb.d.ts`/`yb.variants.d.ts`, alle committen).
   Farb-, Typo- und Motion-Entscheidungen stehen im Kopfkommentar der Theme-Datei.

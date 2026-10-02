@@ -1,5 +1,6 @@
 /**
- * Strukturierte Demo-Inhalte für Service-Seiten (fiktiv).
+ * Strukturierte Demo-Inhalte für Service-Seiten (fiktiv; gekennzeichnet über die Hinweiszeile
+ * und je Seite höchstens einen Hinweis, nicht je Eintrag – VIS1).
  * Echte Inhalte: in Ghost bzw. direkt vom Inhaber — siehe /content-status.
  */
 import type { Lang } from '@/i18n/dictionaries';
@@ -30,138 +31,138 @@ export interface UsesGroup {
 const SERVICES_DE: ServiceOffer[] = [
   {
     slug: 'beratung',
-    title: 'Beratung (Demo)',
+    title: 'Beratung',
     problem:
-      'Demo-Problemlage: Die Website ist langsam, unübersichtlich oder technisch veraltet — aber niemand sagt, wo man anfangen soll.',
+      'Die Website ist langsam, unübersichtlich oder technisch veraltet — aber niemand sagt, wo man anfangen soll.',
     tasks: [
       'Technische Bestandsaufnahme mit verständlichem Bericht',
       'Priorisierte Maßnahmenliste nach Aufwand und Wirkung',
       'Begleitung bei der Auswahl von CMS, Hosting und Werkzeugen',
     ],
     deliverables: [
-      'Schriftlicher Befund (ca. 10 Seiten, Demo-Umfang)',
+      'Schriftlicher Befund (ca. 10 Seiten)',
       'Roadmap für 90 Tage mit Aufwandsschätzung',
       'Abschlussgespräch mit Fragen und Antworten',
     ],
     steps: [
-      { title: '1. Kennenlernen (Demo)', text: '30 Minuten Gespräch: Ziele, Stand, Rahmen.' },
-      { title: '2. Analyse (Demo)', text: 'Zugang, Messung, Sichtung — etwa eine Woche.' },
-      { title: '3. Bericht (Demo)', text: 'Befund plus Roadmap, besprochen in einem Termin.' },
+      { title: '1. Kennenlernen', text: '30 Minuten Gespräch: Ziele, Stand, Rahmen.' },
+      { title: '2. Analyse', text: 'Zugang, Messung, Sichtung — etwa eine Woche.' },
+      { title: '3. Bericht', text: 'Befund plus Roadmap, besprochen in einem Termin.' },
     ],
-    openNote: 'Offen (Demo): Preise, Zielgruppen und Verfügbarkeiten stehen noch nicht fest.',
+    openNote: 'Preise, Zielgruppen und Verfügbarkeiten stehen noch nicht fest.',
   },
   {
     slug: 'umsetzung',
-    title: 'Umsetzung (Demo)',
+    title: 'Umsetzung',
     problem:
-      'Demo-Problemlage: Das Konzept steht, aber niemand setzt es um — oder die Umsetzung stockt seit Monaten.',
+      'Das Konzept steht, aber niemand setzt es um — oder die Umsetzung stockt seit Monaten.',
     tasks: [
       'Aufbau von Website oder Web-App nach festem Umfang',
       'Anbindung an CMS, Suche, Formulare und Newsletter',
       'Übergabe mit Dokumentation und Einweisung',
     ],
     deliverables: [
-      'Lauffähige Website auf deiner Infrastruktur (Demo-Umfang)',
-      'Redaktionsleitfaden (ca. 5 Seiten, Demo-Umfang)',
-      '30 Tage Nachbetreuung nach Go-Live (Demo-Angabe)',
+      'Lauffähige Website auf deiner Infrastruktur',
+      'Redaktionsleitfaden (ca. 5 Seiten)',
+      '30 Tage Nachbetreuung nach Go-Live',
     ],
     steps: [
-      { title: '1. Festlegung (Demo)', text: 'Umfang, Termine und Abnahmen schriftlich fixieren.' },
-      { title: '2. Aufbau (Demo)', text: 'Wöchentliche Zwischenstände in einer Vorschau-Umgebung.' },
-      { title: '3. Go-Live (Demo)', text: 'Umschaltung, Messung, Übergabe — dann Nachbetreuung.' },
+      { title: '1. Festlegung', text: 'Umfang, Termine und Abnahmen schriftlich fixieren.' },
+      { title: '2. Aufbau', text: 'Wöchentliche Zwischenstände in einer Vorschau-Umgebung.' },
+      { title: '3. Go-Live', text: 'Umschaltung, Messung, Übergabe — dann Nachbetreuung.' },
     ],
-    openNote: 'Offen (Demo): Preise, Zielgruppen und Verfügbarkeiten stehen noch nicht fest.',
+    openNote: 'Preise, Zielgruppen und Verfügbarkeiten stehen noch nicht fest.',
   },
   {
     slug: 'begleitung',
-    title: 'Begleitung (Demo)',
+    title: 'Begleitung',
     problem:
-      'Demo-Problemlage: Die Website läuft, aber niemand kümmert sich — Updates stauen sich, kleine Fehler bleiben liegen.',
+      'Die Website läuft, aber niemand kümmert sich — Updates stauen sich, kleine Fehler bleiben liegen.',
     tasks: [
       'Regelmäßige Updates und Sicherheitsprüfungen',
       'Kleine Weiterentwicklungen im Monatsrhythmus',
       'Ansprechpartner bei Fragen und Störungen',
     ],
     deliverables: [
-      'Monatlicher Kurzbericht: Was wurde getan (Demo-Umfang)',
+      'Monatlicher Kurzbericht: Was wurde getan',
       'Vierteljährliche Durchsicht mit Empfehlungen',
-      'Erreichbarkeit per E-Mail mit Reaktionsziel (Demo-Angabe)',
+      'Erreichbarkeit per E-Mail mit Reaktionsziel',
     ],
     steps: [
-      { title: '1. Inventur (Demo)', text: 'Stand erfassen: Versionen, Backups, Zugänge.' },
-      { title: '2. Rhythmus (Demo)', text: 'Fester Monatstermin für Updates und Durchsicht.' },
-      { title: '3. Weiterentwicklung (Demo)', text: 'Kleine Verbesserungen laufend, große als eigene Vorhaben.' },
+      { title: '1. Inventur', text: 'Stand erfassen: Versionen, Backups, Zugänge.' },
+      { title: '2. Rhythmus', text: 'Fester Monatstermin für Updates und Durchsicht.' },
+      { title: '3. Weiterentwicklung', text: 'Kleine Verbesserungen laufend, große als eigene Vorhaben.' },
     ],
-    openNote: 'Offen (Demo): Preise, Zielgruppen und Verfügbarkeiten stehen noch nicht fest.',
+    openNote: 'Preise, Zielgruppen und Verfügbarkeiten stehen noch nicht fest.',
   },
 ];
 
 const SERVICES_EN: ServiceOffer[] = [
   {
     slug: 'consulting',
-    title: 'Consulting (demo)',
+    title: 'Consulting',
     problem:
-      'Demo problem: the website is slow, confusing or technically outdated — but nobody says where to start.',
+      'The website is slow, confusing or technically outdated — but nobody says where to start.',
     tasks: [
       'Technical audit with an understandable report',
       'Prioritized action list by effort and impact',
       'Guidance on choosing CMS, hosting and tools',
     ],
     deliverables: [
-      'Written findings (approx. 10 pages, demo scope)',
+      'Written findings (approx. 10 pages)',
       '90-day roadmap with effort estimates',
       'Closing call with Q&A',
     ],
     steps: [
-      { title: '1. Intro call (demo)', text: '30 minutes: goals, status, constraints.' },
-      { title: '2. Analysis (demo)', text: 'Access, measurement, review — about one week.' },
-      { title: '3. Report (demo)', text: 'Findings plus roadmap, discussed in one meeting.' },
+      { title: '1. Intro call', text: '30 minutes: goals, status, constraints.' },
+      { title: '2. Analysis', text: 'Access, measurement, review — about one week.' },
+      { title: '3. Report', text: 'Findings plus roadmap, discussed in one meeting.' },
     ],
-    openNote: 'Open (demo): pricing, audiences and availability are not set yet.',
+    openNote: 'Pricing, audiences and availability are not set yet.',
   },
   {
     slug: 'implementation',
-    title: 'Implementation (demo)',
+    title: 'Implementation',
     problem:
-      'Demo problem: the concept is ready but nobody builds it — or the build has stalled for months.',
+      'The concept is ready but nobody builds it — or the build has stalled for months.',
     tasks: [
       'Building the website or web app to a fixed scope',
       'Connecting CMS, search, forms and newsletter',
       'Handover with documentation and walkthrough',
     ],
     deliverables: [
-      'Working website on your infrastructure (demo scope)',
-      'Editorial guide (approx. 5 pages, demo scope)',
-      '30 days of aftercare post launch (demo terms)',
+      'Working website on your infrastructure',
+      'Editorial guide (approx. 5 pages)',
+      '30 days of aftercare post launch',
     ],
     steps: [
-      { title: '1. Agreement (demo)', text: 'Scope, dates and acceptances fixed in writing.' },
-      { title: '2. Build (demo)', text: 'Weekly progress in a preview environment.' },
-      { title: '3. Go-live (demo)', text: 'Cutover, measurement, handover — then aftercare.' },
+      { title: '1. Agreement', text: 'Scope, dates and acceptances fixed in writing.' },
+      { title: '2. Build', text: 'Weekly progress in a preview environment.' },
+      { title: '3. Go-live', text: 'Cutover, measurement, handover — then aftercare.' },
     ],
-    openNote: 'Open (demo): pricing, audiences and availability are not set yet.',
+    openNote: 'Pricing, audiences and availability are not set yet.',
   },
   {
     slug: 'support',
-    title: 'Support (demo)',
+    title: 'Support',
     problem:
-      'Demo problem: the website runs but nobody looks after it — updates pile up, small bugs linger.',
+      'The website runs but nobody looks after it — updates pile up, small bugs linger.',
     tasks: [
       'Regular updates and security checks',
       'Small improvements on a monthly rhythm',
       'Contact person for questions and incidents',
     ],
     deliverables: [
-      'Monthly short report: what was done (demo scope)',
+      'Monthly short report: what was done',
       'Quarterly review with recommendations',
-      'Email availability with response target (demo terms)',
+      'Email availability with response target',
     ],
     steps: [
-      { title: '1. Inventory (demo)', text: 'Capture status: versions, backups, credentials.' },
-      { title: '2. Rhythm (demo)', text: 'Fixed monthly slot for updates and review.' },
-      { title: '3. Evolution (demo)', text: 'Small improvements continuously, big ones as projects.' },
+      { title: '1. Inventory', text: 'Capture status: versions, backups, credentials.' },
+      { title: '2. Rhythm', text: 'Fixed monthly slot for updates and review.' },
+      { title: '3. Evolution', text: 'Small improvements continuously, big ones as projects.' },
     ],
-    openNote: 'Open (demo): pricing, audiences and availability are not set yet.',
+    openNote: 'Pricing, audiences and availability are not set yet.',
   },
 ];
 
@@ -171,48 +172,48 @@ export function servicesByLang(lang: Lang): ServiceOffer[] {
 
 const CV_DE: CvStation[] = [
   {
-    period: '2023 – heute (Demo)',
-    role: 'Demo-Rolle: Freier Webentwickler (fiktiv)',
-    org: 'Demo: Selbstständig (fiktiv)',
-    text: 'Demo-Station: Websites und kleine Web-Apps für fiktive Kunden — von der Beratung bis zum Go-Live.',
+    period: '2023 – heute',
+    role: 'Freier Webentwickler',
+    org: 'Selbstständig',
+    text: 'Websites und kleine Web-Apps für Kunden — von der Beratung bis zum Go-Live.',
     open: true,
   },
   {
-    period: '2020 – 2023 (Demo)',
-    role: 'Demo-Rolle: Frontend-Entwickler (fiktiv)',
-    org: 'Demo-Firma Beispiel GmbH (fiktiv)',
-    text: 'Demo-Station: Komponenten-Bibliothek aufgebaut, Barrierefreiheit eingeführt, Ladezeiten halbiert (fiktive Angaben).',
+    period: '2020 – 2023',
+    role: 'Frontend-Entwickler',
+    org: 'Beispiel GmbH',
+    text: 'Komponenten-Bibliothek aufgebaut, Barrierefreiheit eingeführt, Ladezeiten halbiert.',
     open: true,
   },
   {
-    period: '2017 – 2020 (Demo)',
-    role: 'Demo-Rolle: Mediengestalter Digital (fiktiv)',
-    org: 'Demo-Agentur Muster & Sohn (fiktiv)',
-    text: 'Demo-Station: Von Print ins Web gewechselt; erste CMS-Projekte und Templates (fiktiv).',
+    period: '2017 – 2020',
+    role: 'Mediengestalter Digital',
+    org: 'Agentur Muster & Sohn',
+    text: 'Von Print ins Web gewechselt; erste CMS-Projekte und Templates.',
     open: true,
   },
 ];
 
 const CV_EN: CvStation[] = [
   {
-    period: '2023 – now (demo)',
-    role: 'Demo role: Freelance web developer (fictional)',
-    org: 'Demo: self-employed (fictional)',
-    text: 'Demo station: websites and small web apps for fictional clients — from consulting to go-live.',
+    period: '2023 – now',
+    role: 'Freelance web developer',
+    org: 'Self-employed',
+    text: 'Websites and small web apps for clients — from consulting to go-live.',
     open: true,
   },
   {
-    period: '2020 – 2023 (demo)',
-    role: 'Demo role: Frontend developer (fictional)',
-    org: 'Demo company Example Ltd (fictional)',
-    text: 'Demo station: built a component library, introduced accessibility, halved load times (fictional figures).',
+    period: '2020 – 2023',
+    role: 'Frontend developer',
+    org: 'Example Ltd',
+    text: 'Built a component library, introduced accessibility, halved load times.',
     open: true,
   },
   {
-    period: '2017 – 2020 (demo)',
-    role: 'Demo role: Digital media designer (fictional)',
-    org: 'Demo agency Muster & Sohn (fictional)',
-    text: 'Demo station: moved from print to web; first CMS projects and templates (fictional).',
+    period: '2017 – 2020',
+    role: 'Digital media designer',
+    org: 'Agency Muster & Sohn',
+    text: 'Moved from print to web; first CMS projects and templates.',
     open: true,
   },
 ];
@@ -230,52 +231,52 @@ export function skillsByLang(lang: Lang): string[] {
 
 const USES_DE: UsesGroup[] = [
   {
-    title: 'Hardware (Demo)',
+    title: 'Hardware',
     items: [
-      { name: 'Demo-Laptop 14″ (fiktiv)', text: 'Demo-Eintrag: mobiles Arbeitsgerät für Entwicklung und Texte.' },
-      { name: 'Demo-Monitor 27″ (fiktiv)', text: 'Demo-Eintrag: Hauptbildschirm mit augenschonender Einstellung.' },
-      { name: 'Demo-Tastatur (fiktiv)', text: 'Demo-Eintrag: leise Tastatur für lange Schreibtage.' },
+      { name: 'Laptop 14″', text: 'Mobiles Arbeitsgerät für Entwicklung und Texte.' },
+      { name: 'Monitor 27″', text: 'Hauptbildschirm mit augenschonender Einstellung.' },
+      { name: 'Tastatur', text: 'Leise Tastatur für lange Schreibtage.' },
     ],
   },
   {
-    title: 'Software (Demo)',
+    title: 'Software',
     items: [
-      { name: 'Demo-Editor (fiktiv)', text: 'Demo-Eintrag: Code-Editor mit wenigen, aber sitzenden Erweiterungen.' },
-      { name: 'Demo-Browser (fiktiv)', text: 'Demo-Eintrag: Hauptbrowser mit getrennten Profilen für Arbeit und Tests.' },
-      { name: 'Demo-Notizen (fiktiv)', text: 'Demo-Eintrag: Ablage für Entwürfe, Checklisten und Leseliste.' },
+      { name: 'Editor', text: 'Code-Editor mit wenigen, aber sitzenden Erweiterungen.' },
+      { name: 'Browser', text: 'Hauptbrowser mit getrennten Profilen für Arbeit und Tests.' },
+      { name: 'Notizen', text: 'Ablage für Entwürfe, Checklisten und Leseliste.' },
     ],
   },
   {
-    title: 'Arbeitsweise (Demo)',
+    title: 'Arbeitsweise',
     items: [
-      { name: 'Demo-Rhythmus (fiktiv)', text: 'Demo-Eintrag: Vormittags Tiefenarbeit, nachmittags Termine und Kleinkram.' },
-      { name: 'Demo-Backups (fiktiv)', text: 'Demo-Eintrag: täglich automatisch, wöchentlich geprüft.' },
+      { name: 'Rhythmus', text: 'Vormittags Tiefenarbeit, nachmittags Termine und Kleinkram.' },
+      { name: 'Backups', text: 'Täglich automatisch, wöchentlich geprüft.' },
     ],
   },
 ];
 
 const USES_EN: UsesGroup[] = [
   {
-    title: 'Hardware (demo)',
+    title: 'Hardware',
     items: [
-      { name: 'Demo laptop 14″ (fictional)', text: 'Demo entry: mobile machine for development and writing.' },
-      { name: 'Demo monitor 27″ (fictional)', text: 'Demo entry: main display with eye-friendly settings.' },
-      { name: 'Demo keyboard (fictional)', text: 'Demo entry: quiet keyboard for long desk days.' },
+      { name: 'Laptop 14″', text: 'Mobile machine for development and writing.' },
+      { name: 'Monitor 27″', text: 'Main display with eye-friendly settings.' },
+      { name: 'Keyboard', text: 'Quiet keyboard for long desk days.' },
     ],
   },
   {
-    title: 'Software (demo)',
+    title: 'Software',
     items: [
-      { name: 'Demo editor (fictional)', text: 'Demo entry: code editor with few but fitting extensions.' },
-      { name: 'Demo browser (fictional)', text: 'Demo entry: main browser with separate work and test profiles.' },
-      { name: 'Demo notes (fictional)', text: 'Demo entry: drafts, checklists and reading list.' },
+      { name: 'Editor', text: 'Code editor with few but fitting extensions.' },
+      { name: 'Browser', text: 'Main browser with separate work and test profiles.' },
+      { name: 'Notes', text: 'Drafts, checklists and reading list.' },
     ],
   },
   {
-    title: 'Workflow (demo)',
+    title: 'Workflow',
     items: [
-      { name: 'Demo rhythm (fictional)', text: 'Demo entry: deep work mornings, meetings and small tasks afternoons.' },
-      { name: 'Demo backups (fictional)', text: 'Demo entry: automatic daily, verified weekly.' },
+      { name: 'Rhythm', text: 'Deep work mornings, meetings and small tasks afternoons.' },
+      { name: 'Backups', text: 'Automatic daily, verified weekly.' },
     ],
   },
 ];

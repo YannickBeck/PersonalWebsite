@@ -21,7 +21,7 @@
   color: var(--color-text-primary);
   font-family: var(--font-family-heading);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: -0.011em;
+  letter-spacing: var(--yb-heading-tracking);
   text-wrap: balance;
   margin-top: var(--spacing-10);
   margin-bottom: var(--spacing-3);
@@ -54,12 +54,12 @@
 .content a {
   color: var(--color-text-accent);
   text-decoration-line: underline;
-  text-decoration-thickness: 1px;
+  text-decoration-thickness: var(--border-width);
   text-underline-offset: 0.2em;
 }
 
 .content a:hover {
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: calc(var(--border-width) * 2);
 }
 
 /* Astryx-Reset entfernt Listenpunkte; im Fließtext wieder einschalten */
@@ -83,18 +83,48 @@
   margin-top: var(--spacing-1);
 }
 
-/* Code-Blöcke scrollen in sich statt die Seite zu verbreitern (Reflow, WCAG 1.4.10) */
+/* Code-Blöcke scrollen in sich statt die Seite zu verbreitern (Reflow, WCAG 1.4.10).
+   Optik wie Astryx-CodeBlock der Demo-Artikel (VIS4): gleicher Radius, Rand, Schriftgröße
+   und Syntax-Fläche. Per Tastatur scrollbar (tabindex in ghost-html.tsx, A113). */
 .content pre {
   max-width: 100%;
   overflow-x: auto;
   margin-top: var(--spacing-4);
   margin-bottom: var(--spacing-4);
   padding: var(--spacing-4);
-  border-radius: var(--radius-container);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-element);
   background: var(--color-syntax-background);
   color: var(--color-syntax-variable);
-  font-size: var(--font-size-sm);
+  font-size: var(--text-code-size);
   line-height: 1.6;
+}
+
+.content pre:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--focus-outline-color);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
+/* Tabellen wie in Demo-Artikeln (VIS4) */
+.content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.content th,
+.content td {
+  text-align: left;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+  vertical-align: top;
+}
+
+.content th {
+  font-weight: var(--font-weight-semibold);
+  background-color: var(--color-background-muted);
 }
 
 .content pre code {
@@ -126,7 +156,7 @@
 }
 
 .content blockquote {
-  border-left: 2px solid var(--color-border-emphasized);
+  border-left: calc(var(--border-width) * 2) solid var(--color-border-emphasized);
   padding-left: var(--spacing-4);
   color: var(--color-text-secondary);
 }

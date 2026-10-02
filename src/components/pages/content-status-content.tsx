@@ -17,7 +17,7 @@ interface Gap {
 
 const GAPS_DE: Gap[] = [
   { where: 'Startseite, Über-mich-Seite', need: 'Eigenes Portraitfoto', format: 'JPG/PNG, min. 800 × 1000, dunkler Hintergrund', state: 'offen' },
-  { where: 'Alle Projekt- und Artikel-Cards', need: 'Echte Coverbilder', format: '16:10, min. 1280 × 800', state: 'offen (Platzhalter aktiv)' },
+  { where: 'Alle Projekt- und Artikel-Cards', need: 'Echte Coverbilder', format: '16:10, min. 1280 × 800', state: 'offen (generatives Cover aktiv)' },
   { where: 'Startseite, Über-mich-Seite', need: 'Bio, Positionierung, Claim (DE+EN)', format: 'Bio 3–4 Sätze, Claim 1 Zeile', state: 'offen (Demo-Texte aktiv)' },
   { where: 'CV-Seite', need: 'Echte Stationen, Skills, Talks', format: 'Pro Station: Zeitraum, Rolle, Organisation, 1 Satz', state: 'offen (Demo-Stationen aktiv)' },
   { where: 'Leistungen', need: 'Preise, Zielgruppen, Verfügbarkeiten', format: 'Pro Angebot klären und eintragen', state: 'offen (als „offen“ markiert)' },
@@ -31,7 +31,7 @@ const GAPS_DE: Gap[] = [
 
 const GAPS_EN: Gap[] = [
   { where: 'Homepage, about page', need: 'Own portrait photo', format: 'JPG/PNG, min. 800 × 1000, dark background', state: 'open' },
-  { where: 'All project and article cards', need: 'Real cover images', format: '16:10, min. 1280 × 800', state: 'open (placeholders active)' },
+  { where: 'All project and article cards', need: 'Real cover images', format: '16:10, min. 1280 × 800', state: 'open (generated covers active)' },
   { where: 'Homepage, about page', need: 'Bio, positioning, claim (DE+EN)', format: 'Bio 3–4 sentences, claim 1 line', state: 'open (demo texts active)' },
   { where: 'CV page', need: 'Real stations, skills, talks', format: 'Per station: period, role, org, 1 sentence', state: 'open (demo stations active)' },
   { where: 'Services', need: 'Pricing, audiences, availability', format: 'Clarify and enter per offer', state: 'open (marked “open”)' },

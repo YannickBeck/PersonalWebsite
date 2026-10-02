@@ -16,10 +16,12 @@ import {
   LayoutHeader,
 } from "@astryxdesign/core/Layout";
 import { THEME_BOOT } from "@/theme/theme-boot";
+import { InlineScript } from "@/components/inline-script";
 import frame from "./frame.module.css";
 
-// Eigene Variablennamen: --font-family-body/-code gehören dem Theme (yb.css) und
-// nennen dort "Fustat"/"JetBrains Mono" samt metrisch angepasster Fallbacks (V5).
+// Eigene Variablennamen: --font-family-body/-code gehören dem Theme (yb.css) und binden
+// diese Variablen ein (var(--font-fustat) …, COD5) – die Variablen enthalten auch die
+// metrisch angepassten Fallbacks von next/font (V5).
 const fustat = Fustat({
   variable: "--font-fustat",
   subsets: ["latin"],
@@ -38,14 +40,8 @@ export const metadata: Metadata = {
   description:
     "Persönliche Website von Yannick Beck — Projekte, Blog und Kontakt.",
   metadataBase: new URL("https://yannick-beck.de"),
-  alternates: {
-    canonical: "https://yannick-beck.de/",
-    languages: {
-      de: "https://yannick-beck.de/",
-      en: "https://yannick-beck.de/en",
-      "x-default": "https://yannick-beck.de/",
-    },
-  },
+  // Kein canonical/hreflang im Root-Layout (FUN4): sonst erbten 404-Seiten die der
+  // Startseite. Jede Seite setzt sie über pageMeta (src/lib/seo.ts), die Startseite in page.tsx.
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -57,8 +53,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${fustat.variable} ${jetbrains.variable}`}
     >
       <head>
-        {/* Blockierend vor dem ersten Paint: gespeichertes Farbschema setzen (theme-boot.ts) */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+        {/* Blockierend vor dem ersten Paint: gespeichertes Farbschema + lang setzen (theme-boot.ts) */}
+        <InlineScript html={THEME_BOOT} />
       </head>
       <body>
         <Providers>
@@ -77,7 +73,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               contentWidth={1120}
               header={
                 <>
-                  <LayoutHeader padding={2} className={`${frame.notice} print-hide`}>
+                  <LayoutHeader padding={2} className={`${frame.notice} yb-vt-notice print-hide`}>
                     <HStack paddingInline={2}>
                       <DemoNotice />
                     </HStack>
@@ -93,7 +89,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </LayoutFooter>
               }
             >
-              <LayoutContent isScrollable={false}>
+              <LayoutContent isScrollable={false} className={frame.content}>
                 {/* Seitenübergang (B3): Boundary je Pfad, Header/Footer stehen außerhalb (motion.css §2) */}
                 <RouteTransition>
                   <main id="main" tabIndex={-1}>

@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import { Button } from '@astryxdesign/core/Button';
 import { Banner } from '@astryxdesign/core/Banner';
 import { Text } from '@astryxdesign/core/Text';
-import { Divider } from '@astryxdesign/core/Divider';
 import { FormLayout } from '@astryxdesign/core/FormLayout';
+import { FormPreview, type PreviewState } from '@/components/form-preview';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 
 type Phase = 'idle' | 'sending' | 'exists' | 'error' | 'confirm' | 'done';
@@ -18,81 +18,116 @@ function isEmail(v: string): boolean {
 }
 
 /**
- * Newsletter-Demo: Der Dienst ist nur auf Einladung aktiv (Ghost-Einstellung),
- * daher demonstriert das Formular alle Zustände lokal — ohne Übertragung.
+ * Newsletter-Demo: Der Dienst ist nur auf Einladung aktiv (Ghost-Einstellung), daher
+ * demonstriert das Formular alle Zustände lokal — ohne Übertragung. Gleiches Muster wie
+ * contact-form.tsx: <form method="dialog"> (FUN1, nie Daten in der URL), Fokus aufs
+ * fehlerhafte Feld bzw. zurück auf den Button, dauerhafte Live-Region (A117), zugeklappte
+ * Zustands-Vorschau mit denselben vier Zuständen (VIS6).
  */
 export function NewsletterForm({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
   const [email, setEmail] = useState('');
   const [touched, setTouched] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
+  const [preview, setPreview] = useState<PreviewState>('idle');
+  const formRef = useRef<HTMLFormElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
+  const returnFocus = useRef(false);
 
+  const show: Phase = preview !== 'idle' ? preview : phase;
   const invalid = touched && !isEmail(email);
+
+  useEffect(() => {
+    if (attempt > 0) {
+      formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+    }
+  }, [attempt]);
+
+  useEffect(() => {
+    if (phase !== 'idle' && phase !== 'sending' && returnFocus.current) {
+      returnFocus.current = false;
+      submitRef.current?.focus();
+    }
+  }, [phase]);
 
   const submit = () => {
     setTouched(true);
+    setPreview('idle');
     if (!isEmail(email)) {
+      setAttempt((n) => n + 1);
       return;
     }
+    returnFocus.current = true;
     setPhase('sending');
     window.setTimeout(() => {
       // Deterministische Demo-Verzweigung anhand der Adresse:
       // ...@beispiel.test → bereits angemeldet, sonst Bestätigung.
-      // Fehler/Erfolg zusätzlich über die Vorschau unten erzwingbar.
       setPhase(email.trim().endsWith('@beispiel.test') ? 'exists' : 'confirm');
     }, 900);
   };
 
   return (
-    // Echtes <form> (M8); Vorschau-Buttons mit kurzen Labels und Umbruch (M1/T3: kein Überlauf)
-    <VStack
-      as="form"
-      gap={6}
-      onSubmit={(e: React.FormEvent) => {
-        e.preventDefault();
-        submit();
-      }}
-      {...{ noValidate: true }}
-    >
+    <VStack gap={6}>
       <Banner status="note" title={dict.newsletterInviteTitle} description={dict.newsletterInviteText} />
-      <FormLayout defaultOptionality="required">
-      <TextInput
-        label={dict.newsletterEmailLabel}
-        type="email"
-        value={email}
-        onChange={(v) => {
-          setEmail(v);
-          setPhase('idle');
+      <form
+        ref={formRef}
+        method="dialog"
+        noValidate
+        onSubmit={(e: FormEvent<HTMLFormElement>) => {
+          e.preventDefault();
+          submit();
         }}
-        htmlName="email"
-        autoComplete="email"
-        isRequired
-        status={invalid ? { type: 'error', message: dict.newsletterErrInvalid } : undefined}
+      >
+        <VStack gap={6}>
+          <FormLayout defaultOptionality="required">
+            <TextInput
+              label={dict.newsletterEmailLabel}
+              type="email"
+              value={email}
+              onChange={(v) => {
+                setEmail(v);
+                setPhase('idle');
+              }}
+              htmlName="email"
+              autoComplete="email"
+              isRequired
+              status={invalid ? { type: 'error', message: dict.newsletterErrInvalid } : undefined}
+            />
+          </FormLayout>
+          {show === 'error' && <Banner status="error" title={dict.newsletterStateError} />}
+          <VStack gap={4}>
+            <HStack gap={2}>
+              <Button
+                ref={submitRef}
+                type="submit"
+                label={dict.newsletterSubmit}
+                variant="primary"
+                size="lg"
+                isLoading={show === 'sending'}
+              />
+            </HStack>
+            <VStack role="status" aria-live="polite">
+              {show === 'exists' && <Banner status="info" title={dict.newsletterStateExists} />}
+              {show === 'confirm' && <Banner status="info" title={dict.newsletterStateConfirm} />}
+              {show === 'done' && <Banner status="success" title={dict.newsletterStateOk} />}
+            </VStack>
+          </VStack>
+        </VStack>
+      </form>
+      <noscript>
+        <Text color="secondary">{dict.formNoScript}</Text>
+      </noscript>
+      <FormPreview
+        lang={lang}
+        value={preview}
+        onChange={(p) => {
+          setPreview(p);
+          if (p === 'idle') {
+            setPhase('idle');
+          }
+        }}
       />
-      </FormLayout>
-      {phase === 'exists' && <Banner status="info" title={dict.newsletterStateExists} />}
-      {phase === 'error' && <Banner status="error" title={dict.newsletterStateError} />}
-      {phase === 'confirm' && <Banner status="info" title={dict.newsletterStateConfirm} />}
-      {phase === 'done' && <Banner status="success" title={dict.newsletterStateOk} />}
-      <HStack gap={2}>
-        <Button
-          type="submit"
-          label={dict.newsletterSubmit}
-          variant="primary"
-          size="lg"
-          isLoading={phase === 'sending'}
-        />
-      </HStack>
-      <Divider />
-      <VStack gap={2}>
-        <Text type="label" color="secondary">
-          {dict.formPreviewLabel}
-        </Text>
-        <HStack gap={2} wrap="wrap">
-          <Button size="sm" label={dict.formPreviewError} variant="ghost" onClick={() => setPhase('error')} />
-          <Button size="sm" label={dict.formPreviewSuccess} variant="ghost" onClick={() => setPhase('done')} />
-        </HStack>
-      </VStack>
     </VStack>
   );
 }

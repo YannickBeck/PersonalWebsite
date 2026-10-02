@@ -66,7 +66,8 @@
   );
 }
 
-/* Großes Linienmotiv, angeschnitten unten rechts */
+/* Großes Linienmotiv; Bildaufbau je Seed (data-composition, VIS8):
+   corner = angeschnitten unten rechts, side = frei rechts mittig, crop = groß und gedreht. */
 .motif {
   position: absolute;
   right: -4%;
@@ -75,8 +76,22 @@
   height: 86%;
   aspect-ratio: 1;
   stroke: color-mix(in srgb, var(--color-accent) 72%, var(--color-text-primary));
-  stroke-width: 1.5px;
+  stroke-width: var(--yb-stroke-motif);
   opacity: 0.85;
+}
+
+.cover[data-composition='side'] .motif {
+  right: 8%;
+  bottom: 18%;
+  height: 64%;
+}
+
+.cover[data-composition='crop'] .motif {
+  right: -14%;
+  bottom: -34%;
+  height: 128%;
+  rotate: -10deg;
+  opacity: 0.7;
 }
 
 .motif * {
@@ -101,10 +116,10 @@
   width: var(--spacing-4);
   height: var(--spacing-4);
   stroke: var(--color-text-accent);
-  stroke-width: 2px;
+  stroke-width: var(--yb-stroke-icon);
 }
 
-.cover[data-size='hero'] .motif {
+.cover[data-size='hero'][data-composition='corner'] .motif {
   height: 96%;
   right: 2%;
 }

@@ -9,6 +9,12 @@ import styles from './item-cover.module.css';
  * damit Überschriften in jeder Kartenreihe fluchten. Echtes Bild (Ghost feature_image)
  * oder – bei fehlendem Bild bzw. /placeholders/*.svg – das generative CoverArt.
  * In Karten dekorativ (alt=""), weil der Titel daneben als Überschrift steht (T9).
+ *
+ * eager (COD1/COD3): sichtbares LCP-Bild (Detail-Hero, erste Kartenreihe) sofort und mit
+ * hoher Priorität laden – loading="eager" + fetchPriority="high" statt des seit Next 16
+ * veralteten priority (image.md). Alle übrigen Bilder bleiben lazy.
+ * .yb-cover-media (COD4): eigenes Ziel für den Cover-Zoom (motion.css §5a), unabhängig vom
+ * internen Markup von AspectRatio.
  */
 export function ItemCover({
   src,
@@ -17,7 +23,7 @@ export function ItemCover({
   label,
   motif,
   variant = 'card',
-  priority = false,
+  eager = false,
 }: {
   src: string | null | undefined;
   alt?: string;
@@ -25,7 +31,7 @@ export function ItemCover({
   label?: string;
   motif?: CoverMotif;
   variant?: 'card' | 'hero';
-  priority?: boolean;
+  eager?: boolean;
 }) {
   const image = realImage(src);
   return (
@@ -38,9 +44,10 @@ export function ItemCover({
           src={image}
           alt={alt}
           fill
-          priority={priority}
+          loading={eager ? 'eager' : 'lazy'}
+          fetchPriority={eager ? 'high' : undefined}
           sizes={variant === 'hero' ? '(max-width: 768px) 100vw, 720px' : '(max-width: 768px) 100vw, 360px'}
-          className={styles.image}
+          className={`${styles.image} yb-cover-media`}
         />
       ) : (
         <CoverArt seed={seed} label={label} motif={motif} size={variant} />

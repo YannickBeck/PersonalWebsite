@@ -11,6 +11,17 @@
  *   filter       Filter-Tabs auf /projekte und /blog: nur das Raster blendet über
  *   theme        Theme-Wechsel (document.startViewTransition, kein React-Übergang)
  */
+/**
+ * Next-Version, gegen die das popstate-Abfangen in route-transition.tsx verifiziert ist
+ * (COD2). Es stützt sich auf Next-Interna (__NA im History-State, Reihenfolge der popstate-
+ * Handler). Nach jedem Next-Upgrade: scripts/vt-probe.mjs + scripts/backscroll.mjs (AGENTS.md),
+ * dann diese Konstante anheben.
+ */
+export const TESTED_NEXT = '16.3.6';
+
+/** Schalter für das popstate-Abfangen (false = Nexts Standardverhalten bei Zurück/Vorwärts). */
+export const INTERCEPT_POPSTATE = true;
+
 export const NAV_FORWARD = 'nav-forward';
 export const NAV_BACK = 'nav-back';
 export const NAV_LATERAL = 'nav-lateral';
@@ -32,6 +43,9 @@ export const PAGE_TRANSITION: ClassMap = {
 
 /** Karten-Cover ↔ Detail-Cover: morpht bei jeder Seiten-Navigation, nie beim Filtern. */
 export const MORPH_SHARE: ClassMap = { [FILTER]: 'none', default: 'yb-morph' };
+
+/** Kategorie-Marke im Cover: eigenes Paar über dem Cover (MOT5, motion.css §2c). */
+export const MORPH_TAG_SHARE: ClassMap = { [FILTER]: 'none', default: 'yb-morph-tag' };
 
 /** Filter-Raster: Paar (gleicher Name, neuer key) blendet nur beim Typ „filter“ über. */
 export const FILTER_SHARE: ClassMap = { [FILTER]: 'yb-filter', default: 'none' };

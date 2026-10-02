@@ -38,7 +38,7 @@ const SERVICES = [
     text: 'Derzeit ist kein Analyse-Dienst aktiv (Platzhalter für Cloudflare Web Analytics vorgesehen). Es werden keine Tracking-Cookies gesetzt. [Stand prüfen und ergänzen]',
   },
   {
-    name: 'Kontaktformular (Demo)',
+    name: 'Kontaktformular',
     text: 'Das Formular versendet derzeit nichts und speichert nichts — Eingaben bleiben im Browser. [Bei Anbindung: Auftragsverarbeitung und Speicherdauer ergänzen]',
   },
 ];
@@ -50,7 +50,7 @@ export default function Page() {
     <>
       <PageHero title={page.title} lede={page.lede} />
       <Section>
-        <VStack gap={8} maxWidth={680}>
+        <VStack gap={8} maxWidth={640}>
           <Banner
             status="note"
             title={dict.demoNoticeTitle}
@@ -58,20 +58,20 @@ export default function Page() {
           />
           <VStack gap={2}>
             <Heading level={2}>Verantwortliche Stelle</Heading>
-            <Text>[Name, Anschrift und E-Mail-Adresse ergänzen]</Text>
+            <Text type="code" color="secondary">[Name, Anschrift und E-Mail-Adresse ergänzen]</Text>
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Eingesetzte Dienste (tatsächlicher Stand)</Heading>
             {SERVICES.map((s) => (
               <VStack key={s.name} gap={1}>
                 <Heading level={3}>{s.name}</Heading>
-                <Text color="secondary">{s.text}</Text>
+                <Text>{s.text}</Text>
               </VStack>
             ))}
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Deine Rechte</Heading>
-            <Text>[Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch und Beschwerderecht bei der Aufsichtsbehörde beschreiben — Textbaustein ergänzen]</Text>
+            <Text type="code" color="secondary">[Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch und Beschwerderecht bei der Aufsichtsbehörde beschreiben — Textbaustein ergänzen]</Text>
           </VStack>
         </VStack>
       </Section>

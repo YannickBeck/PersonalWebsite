@@ -19,7 +19,7 @@
   font-size: var(--text-heading-2-size);
   font-weight: var(--font-weight-semibold);
   line-height: var(--text-heading-2-leading);
-  letter-spacing: -0.011em;
+  letter-spacing: var(--yb-heading-tracking);
   text-wrap: balance;
   margin-top: var(--spacing-10);
   margin-bottom: var(--spacing-3);
@@ -42,12 +42,12 @@
 .prose a {
   color: var(--color-text-accent);
   text-decoration-line: underline;
-  text-decoration-thickness: 1px;
+  text-decoration-thickness: var(--border-width);
   text-underline-offset: 0.2em;
 }
 
 .prose a:hover {
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: calc(var(--border-width) * 2);
 }
 
 .prose ul {
@@ -62,21 +62,33 @@
   margin-top: var(--spacing-1);
 }
 
+/* Tabellen (VIS4): volle Spaltenbreite, 16px statt 13px, Ziffern tabellarisch, Kopfzeile
+   auf muted; breite Tabellen scrollen im Wrapper statt die Seite zu verbreitern. */
+.tableScroll {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  margin-top: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.tableScroll:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--focus-outline-color);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: var(--spacing-4);
-  margin-bottom: var(--spacing-4);
-  font-size: var(--font-size-sm);
-  display: block;
-  overflow-x: auto;
+  font-size: var(--font-size-base);
+  font-variant-numeric: tabular-nums;
 }
 
 .prose th,
 .prose td {
   text-align: left;
   padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border);
   vertical-align: top;
 }
 
@@ -84,6 +96,7 @@
   color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
   white-space: nowrap;
+  background-color: var(--color-background-muted);
 }
 
 .prose figure {

@@ -10,10 +10,10 @@
  *
  *   Token                   Wert      Verwendung
  *   --yb-motion-micro       150ms     Hover, Press, Fokus, Icon-Wechsel
- *   --yb-motion-exit        150ms     alte Seite/Element raus (kürzer als enter)
- *   --yb-motion-enter       350ms     neue Seite rein, Slides, Morph, Filter
- *   --yb-motion-emphasis    465ms     Einstiegs-Choreografie, Theme-Reveal
- *   --yb-motion-stagger      60ms     Versatz zwischen Geschwistern
+ *   --yb-motion-exit        ~113ms    alte Seite/Element raus (kürzer als enter, MOT3)
+ *   --yb-motion-enter       ~263ms    neue Seite rein, Slides, Morph, Filter (MOT3)
+ *   --yb-motion-emphasis    465ms     Theme-Reveal
+ *   --yb-motion-stagger      40ms     Versatz zwischen Geschwistern (Hero-Einstieg, MOT8)
  *   --yb-motion-distance     24px     Slide-/Rise-Weg (Seiten-Slide = 2×)
  *   --yb-ease-enter         cubic-bezier(.24,1,.4,1)   Eintritte (= --ease-standard)
  *   --yb-ease-exit          cubic-bezier(.4,0,1,1)     Weg der alten Seite (beschleunigt hinaus)
@@ -62,12 +62,26 @@
   }
 }
 
-/* Scroll-Reveal animiert transform (nicht translate) – der Hover-Lift nutzt translate,
-   beides addiert sich statt sich zu überschreiben. */
+/* Scroll-Reveal animiert nur transform (nicht translate – der Hover-Lift nutzt translate,
+   beides addiert sich) und KEINE Opazität: Die Animation hängt am Scrollen und bleibt beim
+   Anhalten stehen; Text darf dann nie halbtransparent sein (A121). */
 @keyframes yb-reveal {
   from {
-    opacity: 0;
     transform: translateY(var(--yb-motion-distance));
+  }
+}
+
+/* H1 im Einstieg: nie ganz unsichtbar (bleibt LCP-Kandidat, MOT8) */
+@keyframes yb-fade-in-soft {
+  from {
+    opacity: 0.3;
+  }
+}
+
+/* Hinweiszeile fährt mit dem Header von oben ein (MOT1) */
+@keyframes yb-from-top {
+  from {
+    translate: 0 -100%;
   }
 }
 
@@ -102,10 +116,11 @@
   pointer-events: none;
 }
 
-/* Taktung: Die alte Ansicht fällt schnell ab (ease-enter = früh steil), die neue setzt erst
-   ein, wenn die alte fast weg ist – kein Moment mit doppeltem Text. */
+/* Taktung (MOT3): Die alte Ansicht fällt schnell ab (ease-enter = früh steil), die neue
+   setzt nach einem kurzen Versatz ein und überlappt leicht – kein Leerbild. Der Slide
+   (±48px gegenläufig) trennt alt und neu räumlich, kein störender Doppeltext. Gesamt ~300ms. */
 :root {
-  --yb-vt-enter-delay: calc(var(--yb-motion-exit) * 0.66);
+  --yb-vt-enter-delay: calc(var(--yb-motion-exit) * 0.35);
 }
 
 /* Grundtakt für alle Gruppen (Morph, Filter, Footer, Indikator) */
@@ -121,20 +136,48 @@
   animation: none;
 }
 
-/* 2a. Feste Anker: Header steht, Footer erscheint einmal mit der neuen Seite.
-   Beim Theme-Wechsel ohne eigene Namen, sonst stünde der Header in neuen Farben auf
-   altem Grund (XV1). */
+/* 2a. Feste Anker: Header gleitet an seine neue Position, Footer erscheint einmal mit der
+   neuen Seite. Beim Theme-Wechsel ohne eigene Namen, sonst stünde der Header in neuen
+   Farben auf altem Grund (XV1). */
 html:not([data-yb-vt='theme']) .yb-vt-header {
   view-transition-name: yb-header;
+}
+
+/* Hinweiszeile als eigene Gruppe ÜBER den Seiten (MOT1): Aus gescrollter Position steht
+   der Header vorher bei y=0 und danach unter der Hinweiszeile (y≈36). Ohne eigene Gruppe
+   lag die Zeile im Root-Snapshot unter der alten Seite – alter Inhalt blitzte über dem
+   Header auf. Jetzt gleitet der Header nach unten und die Zeile fährt synchron von oben ein
+   – aber nur, wenn vorher gescrollt war (html[data-yb-vt-scrolled], gesetzt beim Start der
+   Navigation, route-transition.tsx); sonst steht sie still. */
+html:not([data-yb-vt='theme']) .yb-vt-notice {
+  view-transition-name: yb-notice;
+}
+
+::view-transition-group(yb-notice) {
+  z-index: 99;
+  animation: none;
+}
+
+::view-transition-old(yb-notice) {
+  display: none;
+}
+
+::view-transition-new(yb-notice) {
+  animation: none;
+}
+
+html[data-yb-vt-scrolled]:active-view-transition-type(nav-forward, nav-back, nav-lateral)::view-transition-new(yb-notice) {
+  animation: var(--yb-motion-enter) var(--yb-ease-move) both yb-from-top;
 }
 
 html:not([data-yb-vt='theme']) .yb-vt-footer {
   view-transition-name: yb-footer;
 }
 
+/* Gruppen-Animation (Position) läuft mit dem Grundtakt (§2, enter + ease-move): steht der
+   Header vorher und nachher gleich, bewegt sich nichts. */
 ::view-transition-group(yb-header) {
   z-index: 100;
-  animation: none;
 }
 
 /* Der Indikator liegt im Header, ist aber eine eigene Gruppe – darüber zeichnen */
@@ -150,18 +193,19 @@ html:not([data-yb-vt='theme']) .yb-vt-footer {
   animation: none;
 }
 
-/* Footer bei Seitenwechseln: alter weg, neuer blendet mit der neuen Seite ein (nie doppelt).
-   Beim Filtern gleitet er dagegen mit dem Raster an die neue Position (§2d). */
+/* Footer bei Seitenwechseln (MOT6): der alte blendet mit der alten Seite aus (statt hart
+   weggeschnitten zu werden), der neue mit der neuen Seite ein – Gruppe ohne Bewegung, also
+   nie zwei Footer an zwei Stellen. Beim Filtern gleitet er dagegen mit dem Raster (§2d). */
 html:not(:active-view-transition-type(filter))::view-transition-group(yb-footer) {
   animation: none;
 }
 
 html:not(:active-view-transition-type(filter))::view-transition-old(yb-footer) {
-  display: none;
+  animation: var(--yb-motion-exit) var(--yb-ease-enter) both yb-fade-out;
 }
 
 html:not(:active-view-transition-type(filter))::view-transition-new(yb-footer) {
-  animation: var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-motion-exit) both yb-fade-in;
+  animation: var(--yb-motion-enter) var(--yb-ease-enter) var(--yb-vt-enter-delay) both yb-fade-in;
 }
 
 /* 2b. Seitenwechsel (RouteTransition). Alte Seite geht schnell, neue kommt sanfter. */
@@ -218,16 +262,20 @@ html:not(:active-view-transition-type(filter))::view-transition-new(yb-footer) {
   z-index: 50;
 }
 
-/* Karten- und Detail-Cover unterscheiden sich in Marke/Innenabstand: das alte Bild
-   früh abblenden, damit unterwegs keine doppelte Kategorie-Marke steht. */
-::view-transition-old(.yb-morph) {
-  animation-duration: calc(var(--yb-motion-enter) * 0.5);
-  animation-timing-function: var(--yb-ease-enter);
-}
-
-::view-transition-new(.yb-morph) {
+/* Alt und neu mit gleicher Dauer und Kurve überblenden (MOT5): Der UA mischt das Paar mit
+   plus-lighter, die Deckkraft-Summe bleibt so bei 1 – das Cover ist über die ganze Strecke
+   sichtbar (vorher fiel sie bei 75–100ms auf 0,13). Die Kategorie-Marke ist ein eigenes
+   Paar (.yb-morph-tag, morph.tsx) und fliegt an ihre neue Stelle statt doppelt zu stehen. */
+::view-transition-old(.yb-morph),
+::view-transition-new(.yb-morph),
+::view-transition-old(.yb-morph-tag),
+::view-transition-new(.yb-morph-tag) {
   animation-duration: var(--yb-motion-enter);
   animation-timing-function: var(--yb-ease-move);
+}
+
+::view-transition-group(.yb-morph-tag) {
+  z-index: 51;
 }
 
 /* 2d. Filter (/projekte, /blog): nur das Raster blendet über, Kein Seitenübergang.
@@ -279,14 +327,20 @@ html[data-yb-instant] *::after {
    Startseite spielt die Choreografie nicht erneut (M3), die Seite kommt per View Transition.
    Ohne JS läuft sie trotzdem (reines CSS) und endet sichtbar – nichts bleibt unsichtbar. */
 @media (prefers-reduced-motion: no-preference) {
+  /* Choreografie ≤ 600ms (MOT8): 350ms je Element, 40ms Versatz, Terminal zuletzt */
   html:not([data-yb-nav]) .yb-enter > *,
   html:not([data-yb-nav]) .yb-hero-terminal {
     --yb-vt-x: 0;
-    --yb-vt-y: calc(var(--yb-motion-distance) * 0.67);
+    --yb-vt-y: calc(var(--yb-motion-distance) * 0.5);
     animation:
-      var(--yb-motion-emphasis) var(--yb-ease-enter) both yb-fade-in,
-      var(--yb-motion-emphasis) var(--yb-ease-enter) both yb-shift-in;
-    animation-delay: calc(var(--yb-step, 0) * var(--yb-motion-stagger) * 1.5);
+      var(--duration-medium) var(--yb-ease-enter) both yb-fade-in,
+      var(--duration-medium) var(--yb-ease-enter) both yb-shift-in;
+    animation-delay: calc(var(--yb-step, 0) * var(--yb-motion-stagger));
+  }
+
+  /* Die H1 blendet nur von 0,3 aus ein: nie unsichtbar, bleibt LCP-Element (MOT8) */
+  html:not([data-yb-nav]) .yb-enter > h1 {
+    animation-name: yb-fade-in-soft, yb-shift-in;
   }
 
   .yb-enter > :nth-child(2) {
@@ -316,16 +370,18 @@ html[data-yb-instant] *::after {
     animation:
       var(--yb-motion-micro) var(--yb-ease-enter) both yb-fade-in,
       var(--yb-motion-micro) var(--yb-ease-enter) both yb-shift-in;
-    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--yb-motion-emphasis) + var(--yb-motion-exit));
+    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--duration-medium));
   }
 
   html:not([data-yb-nav]) .yb-term-typed {
-    animation: yb-terminal-type calc(var(--yb-chars) * var(--yb-motion-stagger) * 0.3) steps(var(--yb-chars), end) both;
-    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--yb-motion-emphasis) + var(--yb-motion-exit));
+    animation: yb-terminal-type calc(var(--yb-chars) * var(--duration-fast) * 0.12) steps(var(--yb-chars), end) both;
+    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--duration-medium));
   }
 
+  /* Cursor blinkt viermal (4 × 1s) und steht dann ruhig (WCAG 2.2.2: Blinken endet vor 5s,
+     A115/COD14/MOT8). Die Keyframes enden bei voller Deckkraft. */
   .yb-term-cursor {
-    animation: yb-terminal-blink calc(var(--duration-slow) * 1.25) steps(1, end) infinite;
+    animation: yb-terminal-blink calc(var(--duration-slow) * 1.25) steps(1, end) 4;
   }
 }
 
@@ -377,15 +433,17 @@ html[data-yb-instant] *::after {
     transition-timing-function: var(--yb-ease-enter);
   }
 
-  .yb-card .yb-cover > div {
-    transition: scale var(--yb-motion-enter) var(--yb-ease-enter);
+  /* .yb-cover-media: eigenes Zoom-Ziel (Bild bzw. CoverArt), nicht das interne Kind von
+     AspectRatio (COD4) */
+  .yb-card .yb-cover-media {
+    transition: scale var(--duration-medium) var(--yb-ease-enter);
   }
 
   .yb-card:has(:focus-visible) {
     translate: 0 calc(-1 * var(--yb-lift));
   }
 
-  .yb-card:has(:focus-visible) .yb-cover > div {
+  .yb-card:has(:focus-visible) .yb-cover-media {
     scale: 1.03;
   }
 
@@ -404,7 +462,7 @@ html[data-yb-instant] *::after {
       height: calc(var(--yb-lift) + var(--border-width) * 2);
     }
 
-    .yb-card:hover .yb-cover > div {
+    .yb-card:hover .yb-cover-media {
       scale: 1.03;
     }
   }
@@ -471,7 +529,7 @@ html[data-yb-instant] *::after {
   /* 5c. Theme-Schalter: Sonne/Mond drehen und blenden ineinander */
   .yb-theme-icon-part {
     transition-property: opacity, rotate, scale;
-    transition-duration: var(--yb-motion-enter);
+    transition-duration: var(--duration-medium);
     transition-timing-function: var(--yb-ease-enter);
   }
 

@@ -22,3 +22,14 @@
 .notice {
   background-color: var(--color-background-muted);
 }
+
+/*
+ * Inhaltsbereich (VIS2): Astryx kollabiert das obere Padding von LayoutContent, sobald ein
+ * LayoutHeader ohne Trennlinie existiert (hier die Hinweiszeile), veröffentlicht aber weiter
+ * --container-padding-block-start = 16px. Die erste Section zieht sich damit 16px unter den
+ * Sticky-Header (margin-top: calc(-1 * var(--container-padding-block-start))). Variable an das
+ * tatsächliche Padding (0) angleichen; den Kopfabstand besitzen PageHero bzw. der Home-Hero.
+ */
+.content {
+  --container-padding-block-start: 0px;
+}

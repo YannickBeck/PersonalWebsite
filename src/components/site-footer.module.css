@@ -13,3 +13,12 @@
   align-items: center;
   min-height: var(--size-element-sm);
 }
+
+/* Touch (A122): Zeile 44px (--size-element-sm, Touch-Adaptation im Theme), der Link füllt sie */
+@media (pointer: coarse) {
+  .item :global(a) {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--size-element-sm);
+  }
+}

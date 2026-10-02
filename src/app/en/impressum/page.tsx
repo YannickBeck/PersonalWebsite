@@ -23,7 +23,7 @@ export default function Page() {
     <>
       <PageHero title={page.title} lede={page.lede} />
       <Section>
-        <VStack gap={8} maxWidth={680}>
+        <VStack gap={8} maxWidth={640}>
           <Banner
             status="note"
             title={dict.demoNoticeTitle}
@@ -31,18 +31,18 @@ export default function Page() {
           />
           <VStack gap={2}>
             <Heading level={2}>Information according to § 5 TMG</Heading>
-            <Text>[Add full name]</Text>
-            <Text>[Add street and number]</Text>
-            <Text>[Add postal code and city]</Text>
+            <Text type="code" color="secondary">[Add full name]</Text>
+            <Text type="code" color="secondary">[Add street and number]</Text>
+            <Text type="code" color="secondary">[Add postal code and city]</Text>
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Contact</Heading>
-            <Text>[Add email address]</Text>
-            <Text>[Add phone number — optional but recommended]</Text>
+            <Text type="code" color="secondary">[Add email address]</Text>
+            <Text type="code" color="secondary">[Add phone number — optional but recommended]</Text>
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Responsible for content (§ 55 II RStV)</Heading>
-            <Text>[Add name and address]</Text>
+            <Text type="code" color="secondary">[Add name and address]</Text>
           </VStack>
         </VStack>
       </Section>

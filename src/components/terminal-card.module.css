@@ -5,6 +5,8 @@
  */
 .terminal {
   overflow: hidden;
+  /* Terminal-Schrift skaliert leicht mit (VIS7): 13px auf schmalen Handys, 15px ab Desktop */
+  --text-code-size: var(--yb-terminal-size);
   border-color: var(--yb-terminal-border);
   background-color: var(--yb-terminal-background);
   color: var(--yb-terminal-text);
@@ -31,17 +33,28 @@
   min-height: calc(var(--spacing-12) * 4);
 }
 
+/* Ein Terminal bricht nicht um (VIS7): Zeilen bleiben einzeilig, zu lange enden mit „…“ */
+.command,
+.output {
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .command {
   color: var(--yb-terminal-text);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
 }
 
 .output {
   color: var(--yb-terminal-muted);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
   padding-bottom: var(--spacing-1-5);
+}
+
+/* Tablet (einspaltiger Hero): keine 736px breite Fläche mit kurzen Zeilen (VIS7) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .terminal {
+    max-inline-size: 34rem;
+  }
 }
 
 .prompt {

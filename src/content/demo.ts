@@ -33,6 +33,8 @@ export interface DemoProject {
   slug: string;
   lang: Lang;
   translationSlug: string;
+  /** Abschlussdatum (fiktiv wie das ganze Demo-Projekt); Karten zeigen das Jahr (VIS8). */
+  date: string;
   title: string;
   excerpt: string;
   category: ProjectCategory;
@@ -62,11 +64,11 @@ function gallery(
   category: ProjectCategory,
   lang: Lang,
 ): { src: string; alt: string }[] {
-  const label = lang === 'de' ? 'Demo-Galeriebild' : 'Demo gallery image';
+  const label = lang === 'de' ? 'Galeriebild' : 'Gallery image';
   const base = category === 'web' ? 0 : category === 'cms' ? 1 : 2;
   return [1, 2, 3].map((n) => ({
     src: `/placeholders/article-${((base + n) % 3) + 1}.svg`,
-    alt: `${label} ${n} (Platzhalter 16:10)`,
+    alt: `${label} ${n}`,
   }));
 }
 
@@ -76,14 +78,15 @@ export const DEMO_PROJECTS: DemoProject[] = [
     slug: 'demo-projekt-webseite',
     lang: 'de',
     translationSlug: 'demo-project-website',
-    title: 'Demo-Projekt: Firmenwebsite-Relaunch',
+    date: '2026-06-15',
+    title: 'Firmenwebsite-Relaunch',
     excerpt:
-      'Fiktives Beispiel: Relaunch einer Unternehmenswebsite mit Next.js, neuem Design-System und messbar schnelleren Ladezeiten.',
+      'Relaunch einer Unternehmenswebsite mit Next.js, neuem Design-System und messbar schnelleren Ladezeiten.',
     category: 'web',
     categoryLabel: 'Webentwicklung',
     topics: ['web', 'nextjs'],
-    role: 'Demo-Rolle: Lead-Entwicklung (fiktiv)',
-    timeframe: 'Demo-Zeitraum: 3 Monate (fiktiv)',
+    role: 'Lead-Entwicklung',
+    timeframe: '3 Monate',
     cover: COVERS.web,
     gallery: gallery('web', 'de'),
     situation: [
@@ -97,34 +100,34 @@ export const DEMO_PROJECTS: DemoProject[] = [
     ],
     approach: [
       {
-        title: '1. Bestandsaufnahme (Demo)',
-        text: 'Fiktive Analyse: 40 Seiten, davon 12 verwaist; 2,1 MB Startseiten-Gewicht, davon 70 % Bilder ohne Größenangaben.',
+        title: '1. Bestandsaufnahme',
+        text: 'Analyse: 40 Seiten, davon 12 verwaist; 2,1 MB Startseiten-Gewicht, davon 70 % Bilder ohne Größenangaben.',
       },
       {
-        title: '2. Prototyp (Demo)',
+        title: '2. Prototyp',
         text: 'Komponenten-Bibliothek mit zwölf Bausteinen, je ein Template für Landing- und Artikelseiten, dunkles Farbschema mit einer Akzentfarbe.',
       },
       {
-        title: '3. Migration (Demo)',
+        title: '3. Migration',
         text: 'Kapitelweise Übernahme der Inhalte, Weiterleitungen für alle alten URLs, Neuaufbau des Suchindex.',
       },
     ],
     decisions: [
       {
-        decision: 'Statisches Rendering mit Revalidierung (Demo)',
+        decision: 'Statisches Rendering mit Revalidierung',
         reason: 'Schnelle Auslieferung bei trotzdem aktuellen Inhalten; kein Rendering pro Anfrage nötig.',
       },
       {
-        decision: 'Design-System statt Einzelstyles (Demo)',
+        decision: 'Design-System statt Einzelstyles',
         reason: 'Konsistente Abstände und Typografie über 40+ Seiten, wartbar durch eine Person.',
       },
     ],
     challenges: [
-      'Demo-Herausforderung: 200 PDF-Dokumente ohne Textschicht erforderten eine fiktive OCR-Pipeline.',
-      'Demo-Herausforderung: Mehrsprachigkeit war nicht eingeplant und wurde nachgezogen.',
+      '200 PDF-Dokumente ohne Textschicht erforderten eine OCR-Pipeline.',
+      'Mehrsprachigkeit war nicht eingeplant und wurde nachgezogen.',
     ],
     outcome:
-      'Ergebnis ergänzen — Demo-Platzhalter: Hier stünden gemessene Vorher/Nachher-Werte (LCP, Anfragen, Redaktionsaufwand).',
+      'Vorgesehen: gemessene Vorher-/Nachher-Werte zu LCP, Anfragen und Redaktionsaufwand.',
     outcomeOpen: true,
     technologies: ['Next.js', 'TypeScript', 'Design-System', 'CMS'],
   },
@@ -133,14 +136,15 @@ export const DEMO_PROJECTS: DemoProject[] = [
     slug: 'demo-project-website',
     lang: 'en',
     translationSlug: 'demo-projekt-webseite',
-    title: 'Demo Project: Company Website Relaunch',
+    date: '2026-06-15',
+    title: 'Company Website Relaunch',
     excerpt:
-      'Fictional example: relaunch of a company website with Next.js, a new design system and measurably faster load times.',
+      'Relaunch of a company website with Next.js, a new design system and measurably faster load times.',
     category: 'web',
     categoryLabel: 'Web development',
     topics: ['web', 'nextjs'],
-    role: 'Demo role: Lead development (fictional)',
-    timeframe: 'Demo period: 3 months (fictional)',
+    role: 'Lead development',
+    timeframe: '3 months',
     cover: COVERS.web,
     gallery: gallery('web', 'en'),
     situation: [
@@ -154,34 +158,34 @@ export const DEMO_PROJECTS: DemoProject[] = [
     ],
     approach: [
       {
-        title: '1. Audit (demo)',
-        text: 'Fictional analysis: 40 pages, 12 orphaned; 2.1 MB homepage weight, 70 % images without dimensions.',
+        title: '1. Audit',
+        text: 'Analysis: 40 pages, 12 orphaned; 2.1 MB homepage weight, 70 % images without dimensions.',
       },
       {
-        title: '2. Prototype (demo)',
+        title: '2. Prototype',
         text: 'Component library with twelve blocks, one template each for landing and article pages, dark color scheme with one accent color.',
       },
       {
-        title: '3. Migration (demo)',
+        title: '3. Migration',
         text: 'Chapter-by-chapter content migration, redirects for all legacy URLs, rebuilt search index.',
       },
     ],
     decisions: [
       {
-        decision: 'Static rendering with revalidation (demo)',
+        decision: 'Static rendering with revalidation',
         reason: 'Fast delivery with fresh content; no per-request rendering needed.',
       },
       {
-        decision: 'Design system instead of one-off styles (demo)',
+        decision: 'Design system instead of one-off styles',
         reason: 'Consistent spacing and typography across 40+ pages, maintainable by one person.',
       },
     ],
     challenges: [
-      'Demo challenge: 200 PDFs without a text layer required a fictional OCR pipeline.',
-      'Demo challenge: multilingual support was unplanned and retrofitted.',
+      '200 PDFs without a text layer required an OCR pipeline.',
+      'Multilingual support was unplanned and retrofitted.',
     ],
     outcome:
-      'Outcome to be added — demo placeholder: measured before/after values (LCP, enquiries, editorial effort) would go here.',
+      'Planned: measured before/after values for LCP, enquiries and editorial effort.',
     outcomeOpen: true,
     technologies: ['Next.js', 'TypeScript', 'Design system', 'CMS'],
   },
@@ -190,18 +194,19 @@ export const DEMO_PROJECTS: DemoProject[] = [
     slug: 'demo-projekt-cms-migration',
     lang: 'de',
     translationSlug: 'demo-project-cms-migration',
-    title: 'Demo-Projekt: CMS-Migration im laufenden Betrieb',
+    date: '2026-04-20',
+    title: 'CMS-Migration im laufenden Betrieb',
     excerpt:
-      'Fiktives Beispiel: Umzug von 800 Artikeln auf ein Headless-CMS — ohne Downtime und ohne kaputte Links.',
+      'Umzug von 800 Artikeln auf ein Headless-CMS — ohne Downtime und ohne kaputte Links.',
     category: 'cms',
     categoryLabel: 'CMS',
     topics: ['cms', 'ghost'],
-    role: 'Demo-Rolle: CMS-Architektur (fiktiv)',
-    timeframe: 'Demo-Zeitraum: 6 Wochen (fiktiv)',
+    role: 'CMS-Architektur',
+    timeframe: '6 Wochen',
     cover: COVERS.cms,
     gallery: gallery('cms', 'de'),
     situation: [
-      'Ein fiktives Fachmagazin pflegt 800 Artikel in einem veralteten Redaktionssystem: keine Vorschau, keine Rollen, regelmäßige Ausfälle beim Speichern.',
+      'Ein Fachmagazin pflegt 800 Artikel in einem veralteten Redaktionssystem: keine Vorschau, keine Rollen, regelmäßige Ausfälle beim Speichern.',
       'Die Redaktion arbeitet täglich — eine Abschaltung für die Migration ist ausgeschlossen.',
     ],
     goal: [
@@ -211,34 +216,34 @@ export const DEMO_PROJECTS: DemoProject[] = [
     ],
     approach: [
       {
-        title: '1. Content-Modell (Demo)',
+        title: '1. Content-Modell',
         text: 'Sieben Inhaltstypen, einheitliche Tag-Taxonomie, Pflichtfelder für Titelbild und Kurzbeschreibung.',
       },
       {
-        title: '2. Sync-Pipeline (Demo)',
+        title: '2. Sync-Pipeline',
         text: 'Nächtlicher Abgleich mit Differenzbericht; jede Änderung ist einer Quelle zuordenbar.',
       },
       {
-        title: '3. Umschaltung (Demo)',
+        title: '3. Umschaltung',
         text: 'Lesender Verkehr erst nach vollständiger Verifikation, Schreibzugriff in einem Wartungsfenster von 20 Minuten.',
       },
     ],
     decisions: [
       {
-        decision: 'Headless statt Suite (Demo)',
+        decision: 'Headless statt Suite',
         reason: 'Frontend und Redaktionssystem lassen sich unabhängig voneinander weiterentwickeln.',
       },
       {
-        decision: 'Strikte Slug-Regeln (Demo)',
+        decision: 'Strikte Slug-Regeln',
         reason: 'Stabile URLs sind die Voraussetzung für den verlustfreien Umzug ohne Redirect-Ketten.',
       },
     ],
     challenges: [
-      'Demo-Herausforderung: Umlaute und Sonderzeichen in 15 % der alten URLs.',
-      'Demo-Herausforderung: Eingebettete Tabellen und Infoboxen hatten kein Gegenstück im Zielsystem.',
+      'Umlaute und Sonderzeichen in 15 % der alten URLs.',
+      'Eingebettete Tabellen und Infoboxen hatten kein Gegenstück im Zielsystem.',
     ],
     outcome:
-      'Demo-Ergebnis (fiktiv, Illustrationswerte): 800/800 Artikel migriert, 0 tote Links im Crawl danach, Speicherabbrüche von 9 pro Woche auf 0.',
+      'Illustrationswerte: 800/800 Artikel migriert, 0 tote Links im Crawl danach, Speicherabbrüche von 9 pro Woche auf 0.',
     outcomeOpen: false,
     technologies: ['Ghost', 'Content-API', 'Redirect-Plan', 'Suche'],
   },
@@ -247,18 +252,19 @@ export const DEMO_PROJECTS: DemoProject[] = [
     slug: 'demo-project-cms-migration',
     lang: 'en',
     translationSlug: 'demo-projekt-cms-migration',
-    title: 'Demo Project: Zero-Downtime CMS Migration',
+    date: '2026-04-20',
+    title: 'Zero-Downtime CMS Migration',
     excerpt:
-      'Fictional example: moving 800 articles to a headless CMS — without downtime or broken links.',
+      'Moving 800 articles to a headless CMS — without downtime or broken links.',
     category: 'cms',
     categoryLabel: 'CMS',
     topics: ['cms', 'ghost'],
-    role: 'Demo role: CMS architecture (fictional)',
-    timeframe: 'Demo period: 6 weeks (fictional)',
+    role: 'CMS architecture',
+    timeframe: '6 weeks',
     cover: COVERS.cms,
     gallery: gallery('cms', 'en'),
     situation: [
-      'A fictional trade magazine maintains 800 articles in an outdated editorial system: no preview, no roles, regular save failures.',
+      'A trade magazine maintains 800 articles in an outdated editorial system: no preview, no roles, regular save failures.',
       'The editors work daily — shutting down for migration is out of the question.',
     ],
     goal: [
@@ -268,34 +274,34 @@ export const DEMO_PROJECTS: DemoProject[] = [
     ],
     approach: [
       {
-        title: '1. Content model (demo)',
+        title: '1. Content model',
         text: 'Seven content types, unified tag taxonomy, required fields for cover image and excerpt.',
       },
       {
-        title: '2. Sync pipeline (demo)',
+        title: '2. Sync pipeline',
         text: 'Nightly sync with diff report; every change traceable to a source.',
       },
       {
-        title: '3. Cutover (demo)',
+        title: '3. Cutover',
         text: 'Read traffic only after full verification, write access in a 20-minute window.',
       },
     ],
     decisions: [
       {
-        decision: 'Headless over suite (demo)',
+        decision: 'Headless over suite',
         reason: 'Frontend and editorial system evolve independently.',
       },
       {
-        decision: 'Strict slug rules (demo)',
+        decision: 'Strict slug rules',
         reason: 'Stable URLs are the precondition for a lossless move without redirect chains.',
       },
     ],
     challenges: [
-      'Demo challenge: special characters in 15 % of legacy URLs.',
-      'Demo challenge: embedded tables and info boxes had no counterpart in the target system.',
+      'Special characters in 15 % of legacy URLs.',
+      'Embedded tables and info boxes had no counterpart in the target system.',
     ],
     outcome:
-      'Demo outcome (fictional, illustrative values): 800/800 articles migrated, 0 dead links in the crawl afterwards, save failures from 9 per week to 0.',
+      'Illustrative values: 800/800 articles migrated, 0 dead links in the crawl afterwards, save failures from 9 per week to 0.',
     outcomeOpen: false,
     technologies: ['Ghost', 'Content API', 'Redirect plan', 'Search'],
   },
@@ -304,18 +310,19 @@ export const DEMO_PROJECTS: DemoProject[] = [
     slug: 'demo-projekt-deploy-pipeline',
     lang: 'de',
     translationSlug: 'demo-project-deploy-pipeline',
-    title: 'Demo-Projekt: Deploy-Pipeline für Nebenprojekte',
+    date: '2026-02-10',
+    title: 'Deploy-Pipeline für Nebenprojekte',
     excerpt:
-      'Fiktives Beispiel: Von „per FTP hochladen" zu Vorschau-Umgebungen pro Pull-Request in einem Wochenendprojekt-Setup.',
+      'Von „per FTP hochladen" zu Vorschau-Umgebungen pro Pull-Request in einem Wochenendprojekt-Setup.',
     category: 'automation',
     categoryLabel: 'Automatisierung',
     topics: ['automation', 'tooling'],
-    role: 'Demo-Rolle: DevOps-Eigenbau (fiktiv)',
-    timeframe: 'Demo-Zeitraum: 4 Wochenenden (fiktiv)',
+    role: 'DevOps-Eigenbau',
+    timeframe: '4 Wochenenden',
     cover: COVERS.automation,
     gallery: gallery('automation', 'de'),
     situation: [
-      'Fiktiver Ausgangspunkt: drei kleine Webprojekte, jedes Deployment ein Handgriff per FTP, keine Tests, keine Vorschau — Fehler fallen erst live auf.',
+      'Ausgangspunkt: drei kleine Webprojekte, jedes Deployment ein Handgriff per FTP, keine Tests, keine Vorschau — Fehler fallen erst live auf.',
       'Zielgruppe des Beispiels: Einzelentwickler mit wenig Zeit für Infrastruktur.',
     ],
     goal: [
@@ -325,34 +332,34 @@ export const DEMO_PROJECTS: DemoProject[] = [
     ],
     approach: [
       {
-        title: '1. Standardisierung (Demo)',
+        title: '1. Standardisierung',
         text: 'Ein Basis-Image, ein Compose-Schema und gleiche Healthcheck-Konventionen für alle drei Projekte.',
       },
       {
-        title: '2. Pipeline (Demo)',
+        title: '2. Pipeline',
         text: 'Lint, Typcheck, Test und Build als Pflichtschritte; Vorschau-Deployment nur bei grünem Ergebnis.',
       },
       {
-        title: '3. Aufräumen (Demo)',
+        title: '3. Aufräumen',
         text: 'Vorschau-Umgebungen werden beim Mergen automatisch entfernt; Images älter als 30 Tage rotieren raus.',
       },
     ],
     decisions: [
       {
-        decision: 'Plattform statt Eigenbau (Demo)',
+        decision: 'Plattform statt Eigenbau',
         reason: 'Verwaltete Build-Umgebungen sparen die meiste Zeit; eigene Runner nur für Sonderfälle.',
       },
       {
-        decision: 'Compose als kleinster Nenner (Demo)',
+        decision: 'Compose als kleinster Nenner',
         reason: 'Alle Projekte beschreiben ihre Umgebung gleich — kein Spezialwissen pro Projekt nötig.',
       },
     ],
     challenges: [
-      'Demo-Herausforderung: Secrets für drei Umgebungen ohne Durcheinander verwalten.',
-      'Demo-Herausforderung: Datenbank-Migrationen in Vorschau-Umgebungen isolieren.',
+      'Secrets für drei Umgebungen ohne Durcheinander verwalten.',
+      'Datenbank-Migrationen in Vorschau-Umgebungen isolieren.',
     ],
     outcome:
-      'Ergebnis ergänzen — Demo-Platzhalter: Hier stünden Deploy-Häufigkeit, Fehlerquote und Zeitersparnis nach vier Wochen.',
+      'Vorgesehen: Deploy-Häufigkeit, Fehlerquote und Zeitersparnis nach vier Wochen.',
     outcomeOpen: true,
     technologies: ['Docker', 'CI/CD', 'Preview-Environments', 'Healthchecks'],
   },
@@ -361,18 +368,19 @@ export const DEMO_PROJECTS: DemoProject[] = [
     slug: 'demo-project-deploy-pipeline',
     lang: 'en',
     translationSlug: 'demo-projekt-deploy-pipeline',
-    title: 'Demo Project: Deploy Pipeline for Side Projects',
+    date: '2026-02-10',
+    title: 'Deploy Pipeline for Side Projects',
     excerpt:
-      'Fictional example: from FTP uploads to per-pull-request preview environments in a weekend-project setup.',
+      'From FTP uploads to per-pull-request preview environments in a weekend-project setup.',
     category: 'automation',
     categoryLabel: 'Automation',
     topics: ['automation', 'tooling'],
-    role: 'Demo role: DIY DevOps (fictional)',
-    timeframe: 'Demo period: 4 weekends (fictional)',
+    role: 'DIY DevOps',
+    timeframe: '4 weekends',
     cover: COVERS.automation,
     gallery: gallery('automation', 'en'),
     situation: [
-      'Fictional starting point: three small web projects, every deployment an FTP chore, no tests, no preview — bugs surface only in production.',
+      'Starting point: three small web projects, every deployment an FTP chore, no tests, no preview — bugs surface only in production.',
       'Example audience: solo developers with little time for infrastructure.',
     ],
     goal: [
@@ -382,34 +390,34 @@ export const DEMO_PROJECTS: DemoProject[] = [
     ],
     approach: [
       {
-        title: '1. Standardize (demo)',
+        title: '1. Standardize',
         text: 'One base image, one compose schema and identical healthcheck conventions for all three projects.',
       },
       {
-        title: '2. Pipeline (demo)',
+        title: '2. Pipeline',
         text: 'Lint, typecheck, test and build as required steps; preview deploys only on green.',
       },
       {
-        title: '3. Cleanup (demo)',
+        title: '3. Cleanup',
         text: 'Preview environments removed on merge; images older than 30 days rotate out.',
       },
     ],
     decisions: [
       {
-        decision: 'Platform over DIY (demo)',
+        decision: 'Platform over DIY',
         reason: 'Managed build environments save the most time; custom runners only for edge cases.',
       },
       {
-        decision: 'Compose as common denominator (demo)',
+        decision: 'Compose as common denominator',
         reason: 'Every project describes its environment the same way — no per-project arcana.',
       },
     ],
     challenges: [
-      'Demo challenge: managing secrets for three environments without mix-ups.',
-      'Demo challenge: isolating database migrations in preview environments.',
+      'Managing secrets for three environments without mix-ups.',
+      'Isolating database migrations in preview environments.',
     ],
     outcome:
-      'Outcome to be added — demo placeholder: deploy frequency, failure rate and time saved after four weeks would go here.',
+      'Planned: deploy frequency, failure rate and time saved after four weeks.',
     outcomeOpen: true,
     technologies: ['Docker', 'CI/CD', 'Preview environments', 'Healthchecks'],
   },

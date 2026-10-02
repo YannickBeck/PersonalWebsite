@@ -4,6 +4,7 @@ import { Grid } from '@astryxdesign/core/Grid';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Card } from '@astryxdesign/core/Card';
+import { HStack } from '@astryxdesign/core/HStack';
 import { Banner } from '@astryxdesign/core/Banner';
 import { List, ListItem } from '@astryxdesign/core/List';
 import { PageHero } from '@/components/page-hero';
@@ -25,7 +26,7 @@ export function ServicesContent({ lang }: { lang: Lang }) {
     <>
       <PageHero title={page.title} lede={page.lede} />
       <Section paddingBlockEnd={0}>
-        <VStack maxWidth={760}>
+        <VStack maxWidth={640}>
           <Banner status="note" title={dict.demoNoticeTitle} description={services[0]?.openNote} />
         </VStack>
       </Section>
@@ -55,7 +56,15 @@ export function ServicesContent({ lang }: { lang: Lang }) {
             </List>
           </Grid>
           <Card variant="muted">
-            <List header={<Heading level={3}>{dict.processTitle}</Heading>} hasDividers>
+            {/* Kopf auf der Inset-Kante der Einträge (VIS12: ListItem rückt 8px ein) */}
+            <List
+              header={
+                <HStack paddingInline={2}>
+                  <Heading level={3}>{dict.processTitle}</Heading>
+                </HStack>
+              }
+              hasDividers
+            >
               {s.steps.map((step) => (
                 <ListItem
                   key={step.title}

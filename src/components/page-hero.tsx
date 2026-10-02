@@ -3,6 +3,10 @@ import { Section } from '@astryxdesign/core/Section';
 import { VStack } from '@astryxdesign/core/VStack';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
+import styles from './page-hero.module.css';
+
+/** Kopfabstand unter dem Header (VIS2), auch für Home-Hero und 404. */
+export const PAGE_TOP = styles.top;
 
 /**
  * Seitenkopf der Unterseiten: H1 (fließend 31→39px), Lede in Lesebreite.
@@ -23,7 +27,7 @@ export function PageHero({
   display?: boolean;
 }) {
   return (
-    <Section paddingBlockEnd={0}>
+    <Section paddingBlockEnd={0} className={styles.top}>
       {/* .yb-enter: gestaffelter Einstieg beim ersten Laden (motion.css §3) */}
       <VStack gap={4} maxWidth={760} className="yb-enter">
         {eyebrow}

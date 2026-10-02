@@ -9,10 +9,16 @@
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   }
 
-  /* Hero bekommt mehr Luft als normale Sections (80px statt 40px oben). Section legt
-     className auf den äußeren Wrapper, die Padding-Variablen gelten am inneren .astryx-section. */
+  /* Kopfabstand oben wie alle Seitenköpfe (PAGE_TOP, page-hero.module.css); unten etwas mehr
+     Luft vor der ersten Kartenreihe. Section legt className auf den äußeren Wrapper, die
+     Padding-Variablen gelten am inneren .astryx-section. */
   .heroSection > :global(.astryx-section) {
-    --astryx-section-padding-block-start: calc(var(--spacing-10) * 2);
     --astryx-section-padding-block-end: var(--spacing-12);
   }
+}
+
+/* Leistungs-Zeilen (VIS13): Nummer und Pfeil an der Titelzeile statt mittig neben einem
+   mehrzeiligen Block (ListItem hat keine align-Prop; .astryx-list-item ist das Theming-Ziel). */
+.services :global(.astryx-list-item) {
+  align-items: flex-start;
 }

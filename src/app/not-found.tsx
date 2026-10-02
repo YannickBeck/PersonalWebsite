@@ -4,19 +4,22 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
+import { Link } from '@astryxdesign/core/Link';
+import { PAGE_TOP } from '@/components/page-hero';
 import { getDictionary } from '@/i18n/dictionaries';
 
 /**
- * Sprachneutrale 404-Seite (DE+EN), vollständig serverseitig gerendert (Top-Level-404).
- * Der Sprachwechsel im Header führt hier auf die anderssprachige Startseite, nicht auf
- * eine weitere 404 (switchTarget, T6).
+ * Sprachneutrale 404-Seite, vollständig serverseitig gerendert (Top-Level-404). Deutsch als
+ * Hauptsprache; Englisch als EINE ruhige Zeile mit Link (VIS19) statt zweiter Überschrift
+ * und zweitem Button-Set, ausgezeichnet mit lang="en" (A120).
+ * Der Sprachwechsel im Header führt hier auf die anderssprachige Startseite (switchTarget, T6).
  */
 export default function NotFound() {
   const de = getDictionary('de');
   const en = getDictionary('en');
   return (
-    <Section>
-      <VStack gap={8} maxWidth={680}>
+    <Section className={PAGE_TOP}>
+      <VStack gap={8} maxWidth={640}>
         <VStack gap={4}>
           <Text type="code" color="accent" weight="semibold">
             404
@@ -33,13 +36,15 @@ export default function NotFound() {
           <Button label={de.pages.projekte.title} variant="secondary" size="lg" href="/projekte" />
           <Button label={de.pages.blog.title} variant="secondary" size="lg" href="/blog" />
         </HStack>
-        <VStack gap={3}>
-          <Heading level={2}>{en.notFoundTitle}</Heading>
-          <Text color="secondary">{en.notFoundText}</Text>
-          <HStack gap={3} wrap="wrap">
-            <Button label={en.notFoundHome} variant="secondary" href="/en" />
-          </HStack>
-        </VStack>
+        {/* lang am <span>: Astryx-Text reicht lang nicht durch (BaseProps) */}
+        <Text as="p" color="secondary">
+          <span lang="en">
+            {en.notFoundTitle} —{' '}
+            <Link href="/en" hasUnderline color="primary">
+              {en.otherLangHome}
+            </Link>
+          </span>
+        </Text>
       </VStack>
     </Section>
   );

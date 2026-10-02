@@ -3,6 +3,7 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { Text } from '@astryxdesign/core/Text';
 import { Token } from '@astryxdesign/core/Token';
 import { Card } from '@astryxdesign/core/Card';
+import { Banner } from '@astryxdesign/core/Banner';
 import { List, ListItem } from '@astryxdesign/core/List';
 import { PageHero } from '@/components/page-hero';
 import { SplitSection } from '@/components/split-section';
@@ -19,7 +20,6 @@ export function CvContent({ lang }: { lang: Lang }) {
   const page = dict.pages.cv;
   const stations = cvByLang(lang);
   const skills = skillsByLang(lang);
-  const stationsTitle = lang === 'de' ? 'Stationen (Demo)' : 'Positions (demo)';
   return (
     <>
       <PageHero
@@ -31,7 +31,9 @@ export function CvContent({ lang }: { lang: Lang }) {
           </HStack>
         }
       />
-      <SplitSection title={stationsTitle}>
+      <SplitSection title={dict.cvStationsTitle}>
+        {/* Ein Hinweis je Seite (VIS1) statt „(Demo)“/„(fiktiv)“ an jeder Station */}
+        <Banner status="note" title={dict.demoNoticeTitle} description={dict.cvDemoNote} />
         <Card padding={2}>
           <List hasDividers density="spacious">
             {stations.map((s) => (

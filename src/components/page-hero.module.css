@@ -1,0 +1,22 @@
+/*
+ * Kopfabstand der ersten Section unter dem Sticky-Header (VIS2): Seitenköpfe (PageHero,
+ * 404) und der Home-Hero teilen einen Rhythmus – mobil 32px, Tablet 48px, ab 1024px 64px.
+ * Abweichung von AGENTS.md (dokumentiert): Section-Props enden bei 40px (paddingBlockStart
+ * 10); Section legt className auf den äußeren Wrapper, die Padding-Variable gilt am inneren
+ * .astryx-section (wie home.module.css). Nur Spacing-Tokens.
+ */
+.top > :global(.astryx-section) {
+  --astryx-section-padding-block-start: var(--spacing-8);
+}
+
+@media (min-width: 768px) {
+  .top > :global(.astryx-section) {
+    --astryx-section-padding-block-start: var(--spacing-12);
+  }
+}
+
+@media (min-width: 1024px) {
+  .top > :global(.astryx-section) {
+    --astryx-section-padding-block-start: calc(var(--spacing-8) * 2);
+  }
+}

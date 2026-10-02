@@ -4,7 +4,7 @@ import { Token } from '@astryxdesign/core/Token';
 import { PageHero } from '@/components/page-hero';
 import { ArticleBody, tocFromArticle } from '@/components/article-body';
 import { ItemCover } from '@/components/item-cover';
-import { coverMeta, formatDate } from '@/components/content-card';
+import { coverMeta, coverSeed, formatDate } from '@/components/content-card';
 import { RelatedCarousel } from '@/components/carousel-row';
 import { MorphTarget } from '@/components/morph';
 import { BackLink, ReadingLayout } from '@/components/reading-layout';
@@ -40,10 +40,15 @@ export async function ArticleDetail({ lang, item }: { lang: Lang; item: DemoArti
           </HStack>
         }
       />
-      <ReadingLayout toc={tocFromArticle(item)} tocTitle={dict.tocTitle}>
-        <MorphTarget morphKey={withLang(`/blog/${item.slug}`, lang)}>
-          <ItemCover src={item.image} seed={item.slug} label={cover.label} motif={cover.motif} variant="hero" priority />
-        </MorphTarget>
+      <ReadingLayout
+        toc={tocFromArticle(item)}
+        tocTitle={dict.tocTitle}
+        cover={
+          <MorphTarget morphKey={withLang(`/blog/${item.slug}`, lang)}>
+            <ItemCover src={item.image} seed={coverSeed(item.slug, lang)} label={cover.label} motif={cover.motif} variant="hero" eager />
+          </MorphTarget>
+        }
+      >
         <ArticleBody article={item} />
       </ReadingLayout>
 

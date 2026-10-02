@@ -1,0 +1,12 @@
+/*
+ * Abschnittskopf (VIS10): mobil steht die Weiterführung immer in einer eigenen Zeile unter
+ * Titel/Lede – vorher hing es an der Textlänge, ob sie daneben oder darunter landete.
+ * Ausnahme .inline (z. B. Karussell-Pfeile): bleibt neben dem Titel.
+ * Abweichung von AGENTS.md (dokumentiert): HStack hat keine responsive Richtungs-Prop.
+ */
+@media (max-width: 767px) {
+  .head:not(.inline) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

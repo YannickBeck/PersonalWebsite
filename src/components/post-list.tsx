@@ -82,7 +82,7 @@ export function PostList({
       </VStack>
       {topics.length > 0 && (
         <div className={styles.clip}>
-        <TabList value={topic} onChange={setTopic} overflow="scroll">
+        <TabList value={topic} onChange={setTopic} overflow="scroll" aria-label={dict.postFilterLabel}>
           <Tab value="all" label={dict.filterAll} />
           {topics.map((t) => (
             <Tab key={t.value} value={t.value} label={t.label} />
@@ -110,18 +110,24 @@ export function PostList({
         </VStack>
       ) : (
         <Grid columns={CARD_COLUMNS} gap={4}>
-          {filtered.map((p) => (
-            <ContentCard key={p.slug} item={p} lang={lang} headingAccessibilityLevel={2} />
+          {filtered.map((p, i) => (
+            <ContentCard
+              key={p.slug}
+              item={p}
+              lang={lang}
+              headingAccessibilityLevel={2}
+              eager={i < 3}
+              compactOnMobile
+            />
           ))}
         </Grid>
       )}
-      {isFiltered && filtered.length > 0 && (
-        <Text type="supporting">
-          {filtered.length} / {posts.length}
-        </Text>
-      )}
       </VStack>
       </ViewTransition>
+      {/* Dauerhaft eingehängte Trefferzahl (A119): Filter und Suche werden angesagt */}
+      <Text type="supporting" color="secondary" role="status">
+        {isFiltered ? `${dict.resultCount(filtered.length, 'post')} / ${posts.length}` : dict.resultCount(posts.length, 'post')}
+      </Text>
     </VStack>
   );
 }

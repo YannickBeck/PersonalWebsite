@@ -5,6 +5,7 @@ import { CodeBlock } from '@astryxdesign/core/CodeBlock';
 import { ItemCover } from '@/components/item-cover';
 import type { TocEntry } from '@/components/reading-layout';
 import { realImage } from '@/lib/images';
+import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import type { ArticleBlock, DemoArticle } from '@/content/demo-articles';
 import styles from './article-body.module.css';
 
@@ -19,7 +20,7 @@ function slugify(s: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
-function Block({ block, seed }: { block: ArticleBlock; seed: string }) {
+function Block({ block, seed, lang }: { block: ArticleBlock; seed: string; lang: Lang }) {
   switch (block.type) {
     case 'intro':
       return (
@@ -43,6 +44,9 @@ function Block({ block, seed }: { block: ArticleBlock; seed: string }) {
       return <Blockquote cite={block.cite}>{block.text}</Blockquote>;
     case 'table':
       return (
+        // Breite Tabellen scrollen in sich (Reflow); die Tabelle selbst bleibt display:table (VIS4).
+        // Per Tastatur scrollbar: tabIndex + Region mit Namen (axe scrollable-region-focusable).
+        <div className={styles.tableScroll} tabIndex={0} role="region" aria-label={getDictionary(lang).tableRegion}>
         <table>
           <thead>
             <tr>
@@ -63,6 +67,7 @@ function Block({ block, seed }: { block: ArticleBlock; seed: string }) {
             ))}
           </tbody>
         </table>
+        </div>
       );
     case 'code':
       return (
@@ -92,7 +97,7 @@ function Block({ block, seed }: { block: ArticleBlock; seed: string }) {
           ) : (
             <ItemCover src={null} seed={`${seed}-figure`} variant="hero" motif="article" />
           )}
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {src && block.caption ? <figcaption>{block.caption}</figcaption> : null}
         </figure>
       );
     }
@@ -111,7 +116,7 @@ export function ArticleBody({ article }: { article: DemoArticle }) {
   return (
     <article className={styles.prose}>
       {article.blocks.map((b, i) => (
-        <Block key={i} block={b} seed={article.slug} />
+        <Block key={i} block={b} seed={article.slug} lang={article.lang} />
       ))}
     </article>
   );

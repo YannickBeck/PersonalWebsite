@@ -2,11 +2,15 @@ import type { CSSProperties } from 'react';
 import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Text } from '@astryxdesign/core/Text';
+import { MorphTag } from '@/components/morph';
 import styles from './cover-art.module.css';
 
 export type CoverMotif = 'web' | 'cms' | 'automation' | 'code' | 'article';
 
 const PATTERNS = ['grid', 'dots', 'lines', 'rings'] as const;
+
+/** Bildaufbau des Motivs (VIS8): Variation über Komposition und Ausschnitt statt Farbe (E3). */
+const COMPOSITIONS = ['corner', 'side', 'crop'] as const;
 
 /** Linien-Motive (24er-Raster, eigene Zeichnung). Strichstärke bleibt beim Skalieren gleich. */
 const MOTIF_PATHS: Record<CoverMotif, React.ReactNode> = {
@@ -68,7 +72,8 @@ function MotifSvg({ motif, className }: { motif: CoverMotif; className: string }
  * Generatives Cover (V6, LV2): EIN Bildsystem für Projekte und Artikel ohne echtes Bild.
  * Verlauf + Muster aus dem Akzent-Token (hell/dunkel automatisch über light-dark()),
  * großes Linienmotiv und eine lesbare Kategorie-Marke – kein Mikrotext, kein Pseudo-Code.
- * Variation je Slug: Muster, Lichtpunkt, Verlaufswinkel. Füllt seinen Rahmen
+ * Variation je Seed: Muster, Komposition, Lichtpunkt, Verlaufswinkel. Der Seed ist
+ * sprachunabhängig (coverSeed in content-card.tsx), DE und EN sehen gleich aus. Füllt seinen Rahmen
  * (AspectRatio in ItemCover). Rein dekorativ: Titel steht immer als Text daneben.
  */
 export function CoverArt({
@@ -90,8 +95,9 @@ export function CoverArt({
   } as CSSProperties;
   return (
     <VStack
-      className={styles.cover}
+      className={`${styles.cover} yb-cover-media`}
       data-pattern={PATTERNS[h % PATTERNS.length]}
+      data-composition={COMPOSITIONS[(h >> 7) % COMPOSITIONS.length]}
       data-size={size}
       style={vars}
       justify="between"
@@ -99,12 +105,14 @@ export function CoverArt({
       aria-hidden="true"
     >
       {label ? (
-        <HStack className={styles.tag} gap={1.5} vAlign="center">
-          <MotifSvg motif={motif} className={styles.tagIcon} />
-          <Text type="label" weight="semibold">
-            {label}
-          </Text>
-        </HStack>
+        <MorphTag>
+          <HStack className={styles.tag} gap={1.5} vAlign="center">
+            <MotifSvg motif={motif} className={styles.tagIcon} />
+            <Text type="label" weight="semibold">
+              {label}
+            </Text>
+          </HStack>
+        </MorphTag>
       ) : null}
       <MotifSvg motif={motif} className={styles.motif} />
     </VStack>

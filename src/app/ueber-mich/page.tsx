@@ -12,12 +12,12 @@ export const metadata: Metadata = pageMeta({
 });
 
 const BIO = [
-  'Demo-Bio (fiktiv): Ich entwickle seit über zehn Jahren Websites und Web-Anwendungen — vom ersten statischen Auftritt bis zu mehrsprachigen Portalen mit eigenem Design-System.',
-  'Demo-Bio (fiktiv): Mir ist wichtig, dass Technik im Hintergrund verschwindet: schnelle Seiten, verständliche Texte, Barrieren wo immer möglich abgebaut. Diese Website ist mein Schaufenster und mein Notizbuch zugleich.',
-  'Demo-Bio (fiktiv): Wenn ich nicht programmiere, lese ich Fachbücher, pflege meine Werkzeugkiste oder schreibe — zum Beispiel hier im Blog.',
+  'Ich entwickle seit über zehn Jahren Websites und Web-Anwendungen — vom ersten statischen Auftritt bis zu mehrsprachigen Portalen mit eigenem Design-System.',
+  'Mir ist wichtig, dass Technik im Hintergrund verschwindet: schnelle Seiten, verständliche Texte, Barrieren wo immer möglich abgebaut. Diese Website ist mein Schaufenster und mein Notizbuch zugleich.',
+  'Wenn ich nicht programmiere, lese ich Fachbücher, pflege meine Werkzeugkiste oder schreibe — zum Beispiel hier im Blog.',
 ];
 
-const WORKSTYLE = ['Demo-Arbeitsweise: kleine Schritte, sichtbare Zwischenstände, ehrliche Schätzungen.'];
+const WORKSTYLE = ['Arbeitsweise: kleine Schritte, sichtbare Zwischenstände, ehrliche Schätzungen.'];
 
 export default function Page() {
   return <AboutContent lang="de" bio={BIO} workstyle={WORKSTYLE[0]} />;

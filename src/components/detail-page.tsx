@@ -5,12 +5,13 @@ import { Token } from '@astryxdesign/core/Token';
 import { PageHero } from '@/components/page-hero';
 import { GhostHtml } from '@/components/ghost-html';
 import { ItemCover } from '@/components/item-cover';
-import { coverMeta, formatDate } from '@/components/content-card';
+import { coverMeta, coverSeed, formatDate } from '@/components/content-card';
 import { RelatedCarousel } from '@/components/carousel-row';
 import { MorphTarget } from '@/components/morph';
 import { BackLink, ReadingLayout, tocFromHtml } from '@/components/reading-layout';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
-import { getPostCards, getProjectCards, ghostTopics } from '@/lib/items';
+import { getPostCards, getProjectCards, ghostCategory, ghostTopics } from '@/lib/items';
+import { TOPIC_LABELS } from '@/content/demo';
 import type { GhostItem } from '@/lib/ghost';
 
 function isProject(item: GhostItem): boolean {
@@ -25,8 +26,19 @@ export async function DetailBody({ lang, item }: { lang: Lang; item: GhostItem }
   const topics = ghostTopics(item, lang);
   const pool = project ? await getProjectCards(lang) : await getPostCards(lang);
   const related = pool.filter((p) => p.slug !== item.slug).slice(0, 6);
+  // Gleiche Kategorie-Marke wie auf der Karte (getProjectCards, FUN6) – sonst morpht das Cover
+  // in eine andere Marke.
+  const category = project ? ghostCategory(item) : undefined;
   const cover = coverMeta(
-    { kind: project ? 'project' : 'post', slug: item.slug, title: item.title ?? item.slug, href: '', topics },
+    {
+      kind: project ? 'project' : 'post',
+      slug: item.slug,
+      title: item.title ?? item.slug,
+      href: '',
+      topics,
+      category,
+      categoryLabel: category ? TOPIC_LABELS[lang][category] : undefined,
+    },
     lang,
   );
   const meta = [
@@ -60,19 +72,24 @@ export async function DetailBody({ lang, item }: { lang: Lang; item: GhostItem }
           ) : undefined
         }
       />
-      <ReadingLayout toc={tocFromHtml(item.html)} tocTitle={dict.tocTitle}>
-        <MorphTarget morphKey={withLang(`/${kindPath}/${item.slug}`, lang)}>
-          <ItemCover
-            src={item.feature_image}
-            alt={item.feature_image_alt ?? ''}
-            seed={item.slug}
-            label={cover.label}
-            motif={cover.motif}
-            variant="hero"
-            priority
-          />
-        </MorphTarget>
-        {item.html && <GhostHtml html={item.html} />}
+      <ReadingLayout
+        toc={tocFromHtml(item.html)}
+        tocTitle={dict.tocTitle}
+        cover={
+          <MorphTarget morphKey={withLang(`/${kindPath}/${item.slug}`, lang)}>
+            <ItemCover
+              src={item.feature_image}
+              alt={item.feature_image_alt ?? ''}
+              seed={coverSeed(item.slug, lang)}
+              label={cover.label}
+              motif={cover.motif}
+              variant="hero"
+              eager
+            />
+          </MorphTarget>
+        }
+      >
+        {item.html && <GhostHtml html={item.html} lang={lang} />}
       </ReadingLayout>
       <RelatedCarousel title={dict.relatedTitle} items={related} lang={lang} />
     </>

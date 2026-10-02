@@ -23,7 +23,7 @@ export default function Page() {
     <>
       <PageHero title={page.title} lede={page.lede} />
       <Section>
-        <VStack gap={8} maxWidth={680}>
+        <VStack gap={8} maxWidth={640}>
           <Banner
             status="note"
             title={dict.demoNoticeTitle}
@@ -31,18 +31,18 @@ export default function Page() {
           />
           <VStack gap={2}>
             <Heading level={2}>Angaben gemäß § 5 TMG</Heading>
-            <Text>[Vorname Nachname ergänzen]</Text>
-            <Text>[Straße Hausnummer ergänzen]</Text>
-            <Text>[PLZ Ort ergänzen]</Text>
+            <Text type="code" color="secondary">[Vorname Nachname ergänzen]</Text>
+            <Text type="code" color="secondary">[Straße Hausnummer ergänzen]</Text>
+            <Text type="code" color="secondary">[PLZ Ort ergänzen]</Text>
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Kontakt</Heading>
-            <Text>[E-Mail-Adresse ergänzen]</Text>
-            <Text>[Telefonnummer ergänzen — Angabe freiwillig, aber empfohlen]</Text>
+            <Text type="code" color="secondary">[E-Mail-Adresse ergänzen]</Text>
+            <Text type="code" color="secondary">[Telefonnummer ergänzen — Angabe freiwillig, aber empfohlen]</Text>
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Verantwortlich für den Inhalt nach § 55 II RStV</Heading>
-            <Text>[Name und Anschrift ergänzen]</Text>
+            <Text type="code" color="secondary">[Name und Anschrift ergänzen]</Text>
           </VStack>
         </VStack>
       </Section>

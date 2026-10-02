@@ -4,16 +4,29 @@
  *
  * Lesebreite (E7 „~68ch“, L5): In Fustat ist 1ch (Ziffer 0) etwa 1,38 Durchschnitts-
  * zeichen breit; max-width: 68ch ergäbe ~94 Zeichen pro Zeile (L5-Verifier). Ziel sind
- * ~68 Zeichen, daher 50ch (bei 18px Fließtext ≈ 576px).
+ * ~68 Zeichen, daher 50ch (bei 18px Fließtext ≈ 576px). Randspalte 25ch (≈ 288px).
  */
 /* Schriftgröße am Grid, damit auch die Spurbreite (50ch) in der Lesegröße gerechnet wird */
 .reading {
   font-size: var(--yb-prose-size);
 }
 
-.main {
+.main,
+.cover {
   min-width: 0;
   max-width: 50ch;
+}
+
+/* Ein Prosa-Token für alle Detailtexte (VIS4): Absätze und Listenzeilen der Fallstudien
+   (Astryx-Text) in derselben Lesegröße wie Demo- und Ghost-Artikel */
+.main p,
+.main li,
+.main [data-list-style='disc'] :global(.astryx-text) {
+  font-size: var(--yb-prose-size);
+}
+
+.main p {
+  line-height: 1.7;
 }
 
 .aside {
@@ -32,25 +45,64 @@
   align-items: center;
   min-height: var(--size-element-sm);
   padding-left: var(--spacing-3);
+  /* Akzent-Strich des aktiven Abschnitts liegt auf der Linie der Liste */
+  margin-left: calc(-1 * var(--border-width));
+  border-left: calc(var(--border-width) * 2) solid transparent;
 }
 
-/* Mobil/Tablet: Inhaltsverzeichnis vor dem Text, kompakt */
+.tocActive {
+  border-left-color: var(--color-accent);
+}
+
+/* Mobil/Tablet (VIS15): Cover direkt nach dem Kopf, dann Randspalte (Fakten), dann Text */
 @media (max-width: 1023px) {
+  .cover {
+    order: -2;
+  }
+
   .aside {
     order: -1;
+  }
+
+  .tocShort {
+    display: none;
   }
 }
 
 @media (min-width: 1024px) {
+  /* Randspalte an der rechten Rahmenkante (VIS3): kein totes Band rechts */
   .withAside {
-    grid-template-columns: minmax(0, 50ch) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 50ch) minmax(0, 25ch);
+    grid-template-areas:
+      'cover aside'
+      'main aside';
+    justify-content: space-between;
     align-items: start;
   }
 
+  .withAside .cover {
+    grid-area: cover;
+  }
+
+  .withAside .main {
+    grid-area: main;
+  }
+
   .aside {
+    grid-area: aside;
     position: sticky;
     top: calc(var(--size-element-md) + var(--spacing-12));
-    max-width: 18rem;
     width: 100%;
+  }
+}
+
+/* Touch (A122): Zurück-Link ≥ 44px hoch; Inhaltsverzeichnis-Zeilen über --size-element-sm
+   (Touch-Adaptation im Theme = 44px), der Link füllt die Zeile */
+@media (pointer: coarse) {
+  .tocItem :global(a),
+  .backLink {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--size-element-md);
   }
 }

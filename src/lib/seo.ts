@@ -1,11 +1,21 @@
 import type { Metadata } from 'next';
 import type { Lang } from '@/i18n/dictionaries';
+import { counterpartPath } from '@/lib/routes';
 
 const SITE = 'https://yannick-beck.de';
 
+function url(lang: Lang, bare: string): string {
+  const clean = bare === '/' ? '' : bare;
+  return lang === 'en' ? `${SITE}/en${clean}` : `${SITE}${clean === '' ? '/' : clean}`;
+}
+
 /**
  * Einheitliche SEO-Angaben: Canonical + hreflang (de/en/x-default) + OG-Basis.
- * path ohne Sprachpräfix, z. B. '/', '/projekte', '/blog/mein-artikel'.
+ * path ohne Sprachpräfix in der Sprache der Seite, z. B. '/', '/projekte',
+ * '/blog/mein-artikel' (EN: '/blog/my-article').
+ *
+ * hreflang zeigt nur auf existierende Gegenstücke (FUN4): Detailseiten über die
+ * Übersetzungszuordnung (TRANSLATION_MAP); ohne Gegenstück nur die eigene Sprache.
  */
 export function pageMeta({
   lang,
@@ -20,17 +30,21 @@ export function pageMeta({
   description?: string;
   noindex?: boolean;
 }): Metadata {
-  const clean = path === '/' ? '' : path;
-  const deUrl = `${SITE}${clean === '' ? '/' : clean}`;
-  const enUrl = `${SITE}/en${clean}`;
-  const canonical = lang === 'en' ? enUrl : deUrl;
+  const canonical = url(lang, path);
+  const otherLang: Lang = lang === 'de' ? 'en' : 'de';
+  const other = counterpartPath(path);
+  const languages: Record<string, string> = { [lang]: canonical };
+  if (other) {
+    languages[otherLang] = url(otherLang, other);
+  }
+  const deUrl = languages.de;
+  if (deUrl) {
+    languages['x-default'] = deUrl;
+  }
   return {
     title,
     description,
-    alternates: {
-      canonical,
-      languages: { de: deUrl, en: enUrl, 'x-default': deUrl },
-    },
+    alternates: { canonical, languages },
     openGraph: {
       title,
       description,

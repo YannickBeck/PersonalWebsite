@@ -1,25 +1,12 @@
 import type { MetadataRoute } from 'next';
 import { getPostSlugs, getProjectSlugs } from '@/lib/ghost';
+import { PUBLIC_ROUTES } from '@/lib/routes';
 
 const SITE = 'https://yannick-beck.de';
 
-const STATIC_DE = [
-  '/',
-  '/projekte',
-  '/blog',
-  '/leistungen',
-  '/cv',
-  '/ueber-mich',
-  '/uses',
-  '/kontakt',
-  '/newsletter',
-  '/impressum',
-  '/datenschutz',
-];
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
-  for (const p of STATIC_DE) {
+  for (const p of PUBLIC_ROUTES) {
     entries.push({ url: `${SITE}${p}`, lastModified: new Date() });
     entries.push({ url: `${SITE}/en${p === '/' ? '' : p}`, lastModified: new Date() });
   }

@@ -41,3 +41,16 @@
     width: 84cqi;
   }
 }
+
+/* Scroller ist ein Tab-Stopp (APG): deutlicher Fokusring innen, statt des dünnen UA-Rings (A112) */
+.row > :global(.astryx-carousel-scroller):focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--focus-outline-color);
+  outline-offset: calc(var(--border-width) * -2);
+}
+
+/* Kein Überlauf (z. B. 3 Karten am Desktop): keine Pfeile – die Weiterführung steht dann
+   bündig rechts. Sie erscheinen erst, wenn es etwas zu blättern gibt (nach dem Messen; sie
+   verschieben dabei nichts, weil sie am Ende der Zeile angehängt werden). */
+.controlsIdle {
+  display: none;
+}

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, type MouseEvent } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { TopNav, TopNavHeading, TopNavItem } from '@astryxdesign/core/TopNav';
 import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
@@ -14,31 +14,11 @@ import { MobileNav } from '@astryxdesign/core/MobileNav';
 import { SideNavItem } from '@astryxdesign/core/SideNav';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { BrandMark } from '@/components/brand-mark';
-import {
-  getDictionary,
-  langFromPath,
-  mirrorPath,
-  withLang,
-  type Lang,
-} from '@/i18n/dictionaries';
-import { TRANSLATION_MAP } from '@/i18n/translations';
+import { getDictionary, langFromPath, withLang, type Lang } from '@/i18n/dictionaries';
+import { counterpartPath } from '@/lib/routes';
+import { navTransitionTypes } from '@/lib/transitions';
+import { markNavigationStart } from '@/components/route-transition';
 import styles from './site-header.module.css';
-
-/** Statische Routen, die es in beiden Sprachen gibt (ohne /en-Präfix). */
-const KNOWN_PATHS = new Set([
-  '/',
-  '/projekte',
-  '/blog',
-  '/leistungen',
-  '/cv',
-  '/kontakt',
-  '/ueber-mich',
-  '/uses',
-  '/newsletter',
-  '/impressum',
-  '/datenschutz',
-  '/content-status',
-]);
 
 /**
  * Sprachwechsel über Übersetzungszuordnung: Detailseiten springen zum
@@ -48,13 +28,24 @@ const KNOWN_PATHS = new Set([
 export function switchTarget(pathname: string, target: Lang): string {
   const home = target === 'en' ? '/en' : '/';
   const segs = pathname.split('/').filter(Boolean);
-  const noPrefix = segs[0] === 'en' ? segs.slice(1) : segs;
-  if ((noPrefix[0] === 'projekte' || noPrefix[0] === 'blog') && noPrefix.length === 2) {
-    const counterpart = TRANSLATION_MAP[noPrefix[1]];
-    return counterpart ? withLang(`/${noPrefix[0]}/${counterpart}`, target) : home;
+  const bare = `/${(segs[0] === 'en' ? segs.slice(1) : segs).join('/')}`;
+  const other = counterpartPath(bare);
+  return other ? withLang(other, target) : home;
+}
+
+/**
+ * Wartezeit, bis der Drawer zu ist (MOT2): Astryx schließt den <dialog> nach 60 % seiner
+ * Haltezeit (--duration-medium, MobileNav resolveCloseDelay); bis dahin ist die Slide-out-
+ * Bewegung (ease-standard) fast fertig. Danach erst navigieren – sonst verschwanden Drawer
+ * und Abdunklung hart, die alte Seite blitzte ungedimmt auf und es folgte ein Leerbild.
+ */
+function drawerCloseMs(): number {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return 0;
   }
-  const bare = `/${noPrefix.join('/')}`;
-  return KNOWN_PATHS.has(bare) ? mirrorPath(pathname, target) : home;
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--duration-medium').trim();
+  const ms = raw.endsWith('ms') ? parseFloat(raw) : raw.endsWith('s') ? parseFloat(raw) * 1000 : NaN;
+  return Number.isFinite(ms) ? Math.round(ms * 0.6) : 210;
 }
 
 /** Aktive Seite: exakter Treffer oder Unterseite (Projekt-/Artikel-Detail markiert „Projekte“/„Blog“). */
@@ -73,6 +64,24 @@ export function SiteHeader() {
   const setMenuOpen = (open: boolean) => setMenuPath(open ? pathname : null);
   const homeHref = lang === 'en' ? '/en' : '/';
   const langHref = switchTarget(pathname, dict.switcherTarget);
+  const router = useRouter();
+
+  // Links im Drawer: erst schließen, dann navigieren (MOT2). Modifier-Klicks (neuer Tab)
+  // bleiben beim Browser.
+  const navigateFromDrawer = (href: string) => (event: MouseEvent) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    setMenuOpen(false);
+    if (href === pathname) {
+      return;
+    }
+    window.setTimeout(() => {
+      markNavigationStart();
+      router.push(href, { transitionTypes: navTransitionTypes(pathname, href) });
+    }, drawerCloseMs());
+  };
 
   return (
     <header>
@@ -95,7 +104,15 @@ export function SiteHeader() {
         ))}
         endContent={
           <HStack gap={1} vAlign="center">
-            <Button className={styles.langInBar} variant="ghost" label={dict.switcherLabel} href={langHref} />
+            {/* Sichtbar „EN“/„DE“, Name „English (EN)“/„Deutsch (DE)“ (A124, enthält das sichtbare
+                Kürzel); hrefLang/lang setzt TransitionLink für Links in die andere Sprache. */}
+            <Button
+              className={styles.langInBar}
+              variant="ghost"
+              label={dict.switcherLabel}
+              aria-label={dict.switcherName}
+              href={langHref}
+            />
             <ThemeToggle lang={lang} />
             <IconButton
               className={styles.mobileOnly}
@@ -119,6 +136,7 @@ export function SiteHeader() {
                 href={item.href}
                 size="lg"
                 isSelected={isActive(pathname, item.href)}
+                onClick={navigateFromDrawer(item.href)}
               />
             ))}
           </VStack>
@@ -133,7 +151,13 @@ export function SiteHeader() {
             <Text type="label" color="secondary">
               {dict.languageLabel}
             </Text>
-            <Button variant="ghost" label={dict.switcherLabel} href={langHref} />
+            <Button
+              variant="ghost"
+              label={dict.switcherLabel}
+              aria-label={dict.switcherName}
+              href={langHref}
+              onClick={navigateFromDrawer(langHref)}
+            />
           </HStack>
         </VStack>
       </MobileNav>

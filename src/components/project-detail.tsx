@@ -8,7 +8,7 @@ import { List, ListItem } from '@astryxdesign/core/List';
 import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { PageHero } from '@/components/page-hero';
 import { ItemCover } from '@/components/item-cover';
-import { coverMeta } from '@/components/content-card';
+import { coverMeta, coverSeed } from '@/components/content-card';
 import { GalleryCarousel, RelatedCarousel } from '@/components/carousel-row';
 import { MorphTarget } from '@/components/morph';
 import { BackLink, ReadingLayout } from '@/components/reading-layout';
@@ -57,6 +57,11 @@ export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProj
       />
       <ReadingLayout
         tocTitle={dict.tocTitle}
+        cover={
+          <MorphTarget morphKey={withLang(`/projekte/${item.slug}`, lang)}>
+            <ItemCover src={item.cover} seed={coverSeed(item.slug, lang)} label={cover.label} motif={cover.motif} variant="hero" eager />
+          </MorphTarget>
+        }
         aside={
           <Card>
             <MetadataList label={{ position: 'top' }}>
@@ -77,9 +82,6 @@ export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProj
           </Card>
         }
       >
-        <MorphTarget morphKey={withLang(`/projekte/${item.slug}`, lang)}>
-          <ItemCover src={item.cover} seed={item.slug} label={cover.label} motif={cover.motif} variant="hero" priority />
-        </MorphTarget>
         <Block title={dict.sectionSituation}>
           {item.situation.map((p, i) => (
             <Text key={i} as="p" textWrap="pretty">
@@ -139,7 +141,7 @@ export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProj
         </Block>
       </ReadingLayout>
 
-      <GalleryCarousel title={dict.galleryTitle} images={gallery} />
+      <GalleryCarousel title={dict.galleryTitle} images={gallery} lang={lang} />
       <RelatedCarousel title={dict.relatedTitle} items={related} lang={lang} />
     </>
   );

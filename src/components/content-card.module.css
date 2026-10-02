@@ -1,0 +1,10 @@
+/*
+ * Kompakte Zeilenansicht für lange Listen auf dem Handy (VIS9, /blog): ohne Cover nur
+ * Meta-Zeile, Titel und Auszug – eine Karte ist dann ~200 statt ~430px hoch.
+ * Abweichung von AGENTS.md (dokumentiert): Sichtbarkeit je Breite per Media Query.
+ */
+@media (max-width: 767px) {
+  .compact :global(.yb-cover) {
+    display: none;
+  }
+}
