@@ -4,7 +4,8 @@ import { usePathname } from 'next/navigation';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Text } from '@astryxdesign/core/Text';
 import { Link } from '@astryxdesign/core/Link';
-import { getDictionary, langFromPath, withLang } from '@/i18n/dictionaries';
+import { getDictionary, withLang } from '@/i18n/dictionaries';
+import { useRouteLang } from '@/i18n/route-lang';
 
 /**
  * Seitenweiter Demo-Hinweis (E1, L10/V2/T1/TV3): eine schlanke Textzeile statt eines
@@ -14,7 +15,7 @@ import { getDictionary, langFromPath, withLang } from '@/i18n/dictionaries';
  */
 export function DemoNotice() {
   const pathname = usePathname();
-  const lang = langFromPath(pathname);
+  const lang = useRouteLang();
   const dict = getDictionary(lang);
   const statusHref = withLang('/content-status', lang);
   return (

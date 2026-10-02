@@ -7,6 +7,7 @@ import { armMorph } from '@/components/morph';
 import { markNavigationStart, rememberScroll } from '@/components/route-transition';
 import { isInternalPath, morphKeyFor, navTransitionTypes } from '@/lib/transitions';
 import { langFromPath } from '@/i18n/dictionaries';
+import { useRouteLang } from '@/i18n/route-lang';
 
 type TransitionLinkProps = ComponentProps<typeof NextLink> & { to?: string };
 
@@ -29,11 +30,12 @@ type TransitionLinkProps = ComponentProps<typeof NextLink> & { to?: string };
 export function TransitionLink({ to: _to, href, transitionTypes, onClick, ...rest }: TransitionLinkProps) {
   void _to;
   const pathname = usePathname();
+  const currentLang = useRouteLang();
   const target = typeof href === 'string' ? href : (href.pathname ?? '');
   const types = transitionTypes ?? navTransitionTypes(pathname, target);
   const targetLang = isInternalPath(target) ? langFromPath(target.split(/[?#]/)[0]) : null;
   const langProps =
-    targetLang && targetLang !== langFromPath(pathname) ? { hrefLang: targetLang, lang: targetLang } : null;
+    targetLang && targetLang !== currentLang ? { hrefLang: targetLang, lang: targetLang } : null;
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);

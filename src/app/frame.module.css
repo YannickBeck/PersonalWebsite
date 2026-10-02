@@ -33,3 +33,27 @@
 .content {
   --container-padding-block-start: 0px;
 }
+
+/*
+ * 404 auf /en/<unbekannt> (JURY1-1): Das statische /_not-found-HTML ist deutsch, das Boot-Script
+ * setzt auf /en-Pfaden aber schon vor dem ersten Paint <html lang="en">. Bis Providers nach der
+ * Hydration auf Englisch umgeschaltet hat (src/i18n/route-lang.ts), bleibt der Seitenrahmen
+ * unsichtbar – kein sichtbarer Sprachwechsel Deutsch → Englisch; der Hintergrund (body) bleibt
+ * im Theme. .notFoundDe trägt nur die deutsche Fassung (not-found-content.tsx).
+ * - Ohne JS läuft das Boot-Script nicht: lang bleibt "de", die deutsche 404 ist sichtbar.
+ * - Lädt JS nicht, zeigt die Animation den deutschen Stand nach spätestens 2 s (keine Bewegung,
+ *   nur ein Sichtbarkeitswechsel – deshalb nicht in motion.css).
+ * - Ohne :has() (Firefox < 121) erscheint der deutsche Zwischenstand kurz, sonst nichts.
+ * Hier statt in einem eigenen Modul: frame.module.css lädt das Root-Layout ohnehin (keine
+ * zusätzliche CSS-Datei auf jeder Seite).
+ */
+:global(html:lang(en)) :global(.print-area):has(.notFoundDe) {
+  visibility: hidden;
+  animation: not-found-fallback 0s linear 2s forwards;
+}
+
+@keyframes not-found-fallback {
+  to {
+    visibility: visible;
+  }
+}

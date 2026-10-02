@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FocusEvent, type ReactNode } from 'react';
-import { Carousel, type CarouselHandle } from '@astryxdesign/core/Carousel';
+import { Carousel } from '@astryxdesign/core/Carousel';
 import { HStack } from '@astryxdesign/core/HStack';
 import { VStack } from '@astryxdesign/core/VStack';
 import { IconButton } from '@astryxdesign/core/IconButton';
@@ -26,10 +26,10 @@ function itemStart(scroller: HTMLElement, item: Element): number {
  * IconButtons rechts im SectionHeader – im DOM vor dem Scroller, normal im Fluss
  * (Fokus sichtbar), Größe md (Touch: 44px über die Theme-Adaptation).
  *
- * Schrittweite über handleRef.scrollTo(Index ± sichtbare Folien) statt scrollBy um eine
- * Breite: das Ziel ist immer eine Folienkante, also ein Snap-Punkt – WebKit blieb nach
- * smooth scrollBy zwischen zwei Snap-Punkten stehen (MOT7). Unter Reduced Motion springt
- * Astryx selbst (behavior auto).
+ * Schrittweite: scrollTo auf den Snap-Punkt der Folie (Index ± sichtbare Folien) statt
+ * scrollBy um eine Breite – das Ziel ist immer ein Snap-Punkt; WebKit blieb nach smooth
+ * scrollBy zwischen zwei Snap-Punkten stehen (MOT7). Der Snap-Punkt berücksichtigt das
+ * scroll-padding des Überstands (JURY1-2). Unter Reduced Motion springt es (behavior auto).
  *
  * Randmaske aus (hasEdgeFade={false}): Sie schnitt die rechte Kartenkontur ab; ob es
  * weitergeht, zeigen die Pfeile im Kopf bzw. mobil die angeschnittene nächste Karte.
@@ -47,7 +47,6 @@ export function CarouselShell({
   children: ReactNode;
 }) {
   const dict = getDictionary(lang);
-  const handle = useRef<CarouselHandle>(null);
   const root = useRef<HTMLDivElement>(null);
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -96,7 +95,12 @@ export function CarouselShell({
     const visible = Math.max(1, Math.floor((scroller.clientWidth + gap + 1) / (width + gap)));
     const current = Math.max(0, starts.findIndex((s) => s >= scroller.scrollLeft - 2));
     const target = Math.min(items.length - 1, Math.max(0, current + direction * visible));
-    handle.current?.scrollTo(target);
+    // Ziel = Snap-Punkt der Folie: Startkante minus scroll-padding (Polster für Lift/Schatten,
+    // carousel-row.module.css). Astryx' handle.scrollTo richtet an der Rahmenkante aus und
+    // landete damit um das Polster daneben (WebKit bleibt dort stehen, MOT7).
+    const pad = parseFloat(getComputedStyle(scroller).scrollPaddingInlineStart) || 0;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scroller.scrollTo({ left: Math.max(0, starts[target] - pad), behavior: reduce ? 'auto' : 'smooth' });
   };
 
   // Welcher Pfeil den Fokus hält (für die Übergabe am Rand, Effekt oben)
@@ -149,7 +153,6 @@ export function CarouselShell({
         hasButtons={false}
         hasEdgeFade={false}
         gap={4}
-        handleRef={handle}
         className={styles.row}
       >
         {children}

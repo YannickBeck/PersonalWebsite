@@ -9,9 +9,43 @@
   container-type: inline-size;
 }
 
+/*
+ * Überstand für Hover-Lift, Fokusring und Schatten (JURY1-2). Der Scroller ist ein
+ * Scroll-Container (overflow-x auto ⇒ overflow-y hidden) und schneidet an seiner
+ * Padding-Kante: Ohne Polster fehlten beim Lift (translate −3px, motion.css .yb-card) die
+ * oberen 3px samt Ecken und Fokusring, der Schatten (--shadow-high 0 8px 24px) war rundum
+ * gekappt. Polster rundum + gleich großer negativer Rand: Die Karten bleiben auf der
+ * Inhaltslinie, das Layout springt nicht. Unten mehr Platz, weil der Schatten 8px nach unten
+ * versetzt ist (Rest bei 16px/32px < 3 % der Schattendeckkraft).
+ * - inline = Kartenabstand (gap 4): Die Nachbarkarte endet genau an der Scroller-Kante – am
+ *   Desktop kein Anschnitt im Seitenrand, mobil reicht die angeschnittene Karte bis zum Rand
+ *   des Viewports (16px Seitenrand = Polster, kein horizontaler Überlauf).
+ * - scroll-padding = Polster: Snap-Punkte liegen auf der Inhaltslinie (Schritt in
+ *   carousel-shell.tsx rechnet es heraus).
+ * - oben 16px: VStack-Abstand zum Abschnittskopf ist 24px, der Polster-Bereich überdeckt die
+ *   Pfeile/Weiterführung im Kopf also nicht.
+ * Nicht über die Carousel-Prop `padding`: Die setzt nur inline, ohne Gegenrand.
+ */
+.row {
+  --yb-carousel-bleed-inline: var(--spacing-4);
+  --yb-carousel-bleed-start: var(--spacing-4);
+  --yb-carousel-bleed-end: var(--spacing-8);
+}
+
+/* Astryx-Wurzel clippt (overflow clip, 1px Rand) – sonst wäre der Überstand dort wieder weg.
+   Zwei Klassen: schlägt die atomare StyleX-Klasse unabhängig von der Reihenfolge. */
+.row:global(.astryx-carousel) {
+  overflow: visible;
+}
+
 /* Folien gleich hoch (Carousel zentriert sonst vertikal) */
 .row > :global(.astryx-carousel-scroller) {
   align-items: stretch;
+  padding-block: var(--yb-carousel-bleed-start) var(--yb-carousel-bleed-end);
+  padding-inline: var(--yb-carousel-bleed-inline);
+  margin-block: calc(-1 * var(--yb-carousel-bleed-start)) calc(-1 * var(--yb-carousel-bleed-end));
+  margin-inline: calc(-1 * var(--yb-carousel-bleed-inline));
+  scroll-padding-inline: var(--yb-carousel-bleed-inline);
 }
 
 .card {

@@ -10,13 +10,12 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { flushSync } from 'react-dom';
-import { usePathname } from 'next/navigation';
 import { Theme } from '@astryxdesign/core/theme';
 import { LinkProvider } from '@astryxdesign/core/Link';
 import { InternationalizationProvider } from '@astryxdesign/core/i18n';
 import { ybTheme } from '../theme/yb';
 import { THEME_STORAGE_KEY } from '../theme/theme-boot';
-import { langFromPath } from '@/i18n/dictionaries';
+import { RouteLangContext, useResolvedRouteLang } from '@/i18n/route-lang';
 import { ASTRYX_DE } from '@/i18n/astryx-de';
 import { TransitionLink } from '@/components/transition-link';
 import { suppressTransitions } from '@/lib/instant';
@@ -120,7 +119,8 @@ function readStoredMode(): ThemeMode | null {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const lang = langFromPath(usePathname());
+  // Seitensprache für alle Client-Komponenten (route-lang.ts, JURY1-1)
+  const lang = useResolvedRouteLang();
   const [mode, setMode] = useState<ThemeMode>('system');
   const systemScheme = useSyncExternalStore<ResolvedThemeMode | null>(
     subscribeSystemScheme,
@@ -159,12 +159,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({ mode, resolvedMode, toggleMode }), [mode, resolvedMode, toggleMode]);
 
   return (
-    <ThemeModeContext.Provider value={value}>
-      <Theme theme={ybTheme} mode={mode}>
-        <InternationalizationProvider locale={lang === 'en' ? 'en' : 'de-DE'} messages={ASTRYX_MESSAGES}>
-          <LinkProvider component={TransitionLink}>{children}</LinkProvider>
-        </InternationalizationProvider>
-      </Theme>
-    </ThemeModeContext.Provider>
+    <RouteLangContext.Provider value={lang}>
+      <ThemeModeContext.Provider value={value}>
+        <Theme theme={ybTheme} mode={mode}>
+          <InternationalizationProvider locale={lang === 'en' ? 'en' : 'de-DE'} messages={ASTRYX_MESSAGES}>
+            <LinkProvider component={TransitionLink}>{children}</LinkProvider>
+          </InternationalizationProvider>
+        </Theme>
+      </ThemeModeContext.Provider>
+    </RouteLangContext.Provider>
   );
 }

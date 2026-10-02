@@ -14,7 +14,8 @@ import { MobileNav } from '@astryxdesign/core/MobileNav';
 import { SideNavItem } from '@astryxdesign/core/SideNav';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { BrandMark } from '@/components/brand-mark';
-import { getDictionary, langFromPath, withLang, type Lang } from '@/i18n/dictionaries';
+import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
+import { useRouteLang } from '@/i18n/route-lang';
 import { counterpartPath } from '@/lib/routes';
 import { navTransitionTypes } from '@/lib/transitions';
 import { markNavigationStart } from '@/components/route-transition';
@@ -55,7 +56,7 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const lang = langFromPath(pathname);
+  const lang = useRouteLang();
   const dict = getDictionary(lang);
   // Drawer gilt nur für den Pfad, auf dem er geöffnet wurde: Navigation schließt ihn
   // ohne Effekt (kein setState im Effekt, react-hooks/set-state-in-effect).

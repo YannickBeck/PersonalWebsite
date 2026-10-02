@@ -7,7 +7,8 @@ import { Grid } from '@astryxdesign/core/Grid';
 import { Text } from '@astryxdesign/core/Text';
 import { Link } from '@astryxdesign/core/Link';
 import { BrandMark } from '@/components/brand-mark';
-import { getDictionary, langFromPath, type Lang } from '@/i18n/dictionaries';
+import { getDictionary, type Lang } from '@/i18n/dictionaries';
+import { useRouteLang } from '@/i18n/route-lang';
 import styles from './site-footer.module.css';
 
 type FooterGroup = { title: string; links: { label: string; href: string }[] };
@@ -98,7 +99,7 @@ const GROUPS: Record<Lang, FooterGroup[]> = {
 
 export function SiteFooter() {
   const pathname = usePathname();
-  const lang = langFromPath(pathname);
+  const lang = useRouteLang();
   const dict = getDictionary(lang);
   const isCurrent = (href: string) => pathname === href;
   return (
