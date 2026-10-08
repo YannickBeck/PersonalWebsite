@@ -10,14 +10,14 @@ import { PageHero } from '@/components/page-hero';
 import { ContactForm } from '@/components/contact-form';
 import { Gap } from '@/components/gap';
 import { ExternalArrow } from '@/components/icons';
-import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
+import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { FOCUS_AREAS, LINKEDIN_URL, PERSON } from '@/content/profile';
-import { Link } from '@astryxdesign/core/Link';
 import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 
 /**
  * Kontakt: Formular (höchstens 640px) und LinkedIn als zweiter Weg (Nutzerentscheidung –
- * keine öffentliche E-Mail-Adresse). Der echte Versand folgt (Lücke contact-delivery).
+ * keine öffentliche E-Mail-Adresse). Versand über /api/kontakt (Resend); ohne Konfiguration
+ * zeigt das Formular den ehrlichen Zustand (Lücke contact-delivery).
  */
 export function ContactContent({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
@@ -64,12 +64,6 @@ export function ContactContent({ lang }: { lang: Lang }) {
                 <Text>{FOCUS_AREAS.map((a) => a.title[lang]).join(' · ')}</Text>
               </MetadataListItem>
             </MetadataList>
-            <Text color="secondary">
-              {dict.contactPrivacy}{' '}
-              <Link href={withLang('/datenschutz', lang)} hasUnderline color="primary">
-                {dict.contactPrivacyLink}
-              </Link>
-            </Text>
           </VStack>
           </VStack>
         </Grid>

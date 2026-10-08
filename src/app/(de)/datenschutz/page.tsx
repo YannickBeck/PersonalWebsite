@@ -38,9 +38,33 @@ const SERVICES = [
     name: 'Analyse',
     text: 'Derzeit ist kein Analyse-Dienst aktiv (Platzhalter für Cloudflare Web Analytics vorgesehen). Es werden keine Tracking-Cookies gesetzt. [Stand prüfen und ergänzen]',
   },
+];
+
+/**
+ * Kontaktformular: beschreibt, was der Code tatsächlich tut (src/lib/contact-server.ts,
+ * docs/kontaktformular.md). Rechtliche Einordnung bleibt OFFEN (eckige Klammern).
+ */
+const CONTACT_FORM: { text: string; open?: string }[] = [
   {
-    name: 'Kontaktformular',
-    text: 'Das Formular versendet derzeit nichts und speichert nichts — Eingaben bleiben im Browser. [Bei Anbindung: Auftragsverarbeitung und Speicherdauer ergänzen]',
+    text: 'Übertragen werden Name, E-Mail-Adresse, optional ein Anliegen, die Nachricht und deine Einwilligung. Die Angaben gehen verschlüsselt an den Server dieser Website und von dort als E-Mail an mich. Antworten gehen an die angegebene E-Mail-Adresse.',
+  },
+  {
+    text: 'Die E-Mail verschickt der Dienst Resend über seine Programmierschnittstelle.',
+    open: '[Anbieter, Sitz, Auftragsverarbeitungsvertrag und ggf. Grundlage für die Übermittlung in ein Drittland ergänzen]',
+  },
+  {
+    text: 'Diese Website speichert keine Nachrichten und schreibt keine Inhalte, Namen oder Adressen in Protokolle. Die Nachricht liegt danach in meinem E-Mail-Postfach.',
+    open: '[Speicherdauer im Postfach und beim Versanddienst ergänzen]',
+  },
+  {
+    text: 'Gegen massenhaften Versand zählt der Server Anfragen je IP-Adresse. Die Adresse wird dafür nur als gesalzener Prüfwert (Hash) im Arbeitsspeicher gehalten, rund zehn Minuten lang, und nirgends gespeichert. Ein unsichtbares Feld und eine Mindest-Ausfüllzeit helfen zusätzlich gegen Bots.',
+  },
+  {
+    text: 'Grundlage der Verarbeitung ist deine Einwilligung im Formular; du kannst sie jederzeit widerrufen.',
+    open: '[Rechtsgrundlage und Widerrufsweg rechtlich prüfen lassen]',
+  },
+  {
+    text: 'Ohne Formular erreichst du mich über LinkedIn; dort gelten die Datenschutzbestimmungen von LinkedIn.',
   },
 ];
 
@@ -67,6 +91,19 @@ export default function Page() {
               <VStack key={s.name} gap={1}>
                 <Heading level={3}>{s.name}</Heading>
                 <Text>{s.text}</Text>
+              </VStack>
+            ))}
+          </VStack>
+          <VStack gap={3}>
+            <Heading level={2}>Kontaktformular</Heading>
+            {CONTACT_FORM.map((p) => (
+              <VStack key={p.text.slice(0, 32)} gap={1}>
+                <Text>{p.text}</Text>
+                {p.open ? (
+                  <Text type="code" color="secondary">
+                    {p.open}
+                  </Text>
+                ) : null}
               </VStack>
             ))}
           </VStack>

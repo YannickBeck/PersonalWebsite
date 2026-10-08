@@ -10,10 +10,21 @@
 
 .hero,
 .sections {
-  --yb-header: var(--yb-header-h, calc(var(--size-element-md) + var(--spacing-5)));
+  /* = gemessene Header-Höhe (Bedienelement + 2 × 8px + 1px Linie: 53px, Touch 61px) → kein
+     Sprung, wenn section-nav.tsx --yb-header-h nachträglich setzt (CLS 0) */
+  --yb-header: var(--yb-header-h, calc(var(--size-element-md) + var(--spacing-4) + var(--border-width)));
 }
 
-/* ---------- 00 Einstieg ---------- */
+/* ---------- 00 Einstieg ----------
+ * Bühne mit festen Maßen aus Variablen (kein Layout-Shift, alles im Server-CSS):
+ *   --stage-h   Bühnenhöhe: fast eine Bildschirmhöhe, nie absurd hoch
+ *   --person-h  Höhe der Person (unten angeschnitten), --person-w aus dem Bildformat 482 × 974
+ *   --person-x  horizontale Mitte der Person (Desktop: knapp rechts der Mitte – der Kopf steht
+ *               dann zwischen „YANNICK“ und „BECK“, rechts bleibt Platz für die Aktionen)
+ * Die Rolle links unten bekommt genau den Platz links neben der Person; ihre Schriftgröße
+ * folgt daraus („CONSULTANT“ ≈ 4,05 em breit in der Display-Schrift, gemessen), zweizeilig,
+ * höchstens 7,5 rem.
+ */
 .hero {
   container-type: inline-size;
   padding-inline: var(--spacing-4);
@@ -26,16 +37,24 @@
 }
 
 .heroStage {
+  --stage-h: clamp(34rem, calc(100svh - var(--yb-header) - var(--spacing-4)), 56rem);
+  --person-h: calc(var(--stage-h) * 0.92);
+  --person-w: calc(var(--person-h) * 482 / 974);
+  --person-x: 54cqi;
+  --hero-gap: var(--spacing-6);
+  --role-room: calc(var(--person-x) - var(--person-w) / 2 - var(--hero-gap));
   position: relative;
-  /* Bühne: fast eine Bildschirmhöhe, nie absurd hoch auf großen Monitoren */
-  height: clamp(34rem, calc(100svh - var(--yb-header) - var(--spacing-4)), 56rem);
+  height: var(--stage-h);
   overflow: clip;
 }
 
-.heroName {
+.heroNameLayer {
   position: absolute;
   inset-inline: 0;
   top: var(--spacing-4);
+}
+
+.heroName {
   margin: 0;
   display: flex;
   justify-content: center;
@@ -50,15 +69,23 @@
   pointer-events: none;
 }
 
-.heroPortrait {
+.heroPersonLayer {
   position: absolute;
   z-index: 1;
   bottom: 0;
-  left: 60%;
-  height: 90%;
-  width: auto;
-  max-width: none;
-  translate: -50% 0;
+  left: calc(var(--person-x) - var(--person-w) / 2);
+  width: var(--person-w);
+  height: var(--person-h);
+}
+
+.heroPortrait {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .heroText {
@@ -66,17 +93,17 @@
   z-index: 2;
   left: 0;
   bottom: var(--spacing-10);
+  width: var(--role-room);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
-  max-width: 44%;
 }
 
 .heroRole {
   margin: 0;
   font-family: var(--yb-font-display);
   font-weight: 800;
-  font-size: clamp(3.5rem, 1.5rem + 6cqi, 7.5rem);
+  font-size: clamp(3rem, calc(var(--role-room) / 4.15), 7.5rem);
   line-height: 0.84;
   letter-spacing: -0.005em;
   text-transform: uppercase;
@@ -85,6 +112,7 @@
 
 .heroFocus {
   font-weight: var(--font-weight-medium);
+  text-wrap: balance;
 }
 
 .heroActions {
@@ -94,15 +122,14 @@
   bottom: var(--spacing-10);
 }
 
-/* Tablet: Person weiter rechts, Rolle zweizeilig, Aktionen unter der Rolle (links) */
+/* Tablet: Person rechts der Mitte, Aktionen unter der Rolle (links) */
 @media (max-width: 1023px) {
-  .heroPortrait {
-    left: 70%;
-    height: 80%;
+  .heroStage {
+    --person-h: calc(var(--stage-h) * 0.82);
+    --person-x: 66cqi;
   }
 
   .heroText {
-    max-width: 40%;
     bottom: calc(var(--spacing-10) + var(--size-element-lg) + var(--spacing-6));
   }
 
@@ -112,41 +139,46 @@
   }
 }
 
-/* Mobil: Bühne mit Namenszug und Person, Text und Aktionen darunter – nichts liegt über
-   dem Foto (Lesbarkeit auf dunkler Hose/Jacke). */
+/* Mobil: Namenszug zweizeilig und groß, die Person steht davor (überlappt ihn), Rolle und
+   Aktionen darunter – nichts liegt über dem Foto (Lesbarkeit auf Jacke/Hose). */
 @media (max-width: 767px) {
   .heroStage {
+    --person-w: min(62cqi, calc(70svh * 482 / 974));
     height: auto;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: clip;
+    padding-block-start: var(--spacing-2);
+  }
+
+  .heroNameLayer {
+    position: relative;
+    top: 0;
   }
 
   .heroName {
-    position: relative;
-    top: 0;
-    font-size: 33cqi;
-    margin-block-start: var(--spacing-2);
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    font-size: 38cqi;
+    line-height: 0.8;
   }
 
-  .heroPortrait {
+  .heroPersonLayer {
     position: relative;
     left: auto;
-    translate: none;
     align-self: center;
+    width: var(--person-w);
     height: auto;
-    width: 64cqi;
-    margin-block-start: -15cqi;
-    /* Person wird am unteren Rand angeschnitten: Bühnen-Unterkante = Linie */
-    max-height: 70svh;
-    object-fit: contain;
-    object-position: bottom;
+    aspect-ratio: 482 / 974;
+    /* Der Kopf ragt in die zweite Zeile („BECK“), die Schultern beginnen darunter */
+    margin-block-start: -22cqi;
   }
 
   .heroText,
   .heroActions {
     position: static;
-    max-width: none;
+    width: auto;
   }
 
   .heroText {
@@ -154,7 +186,7 @@
   }
 
   .heroRole {
-    font-size: clamp(3.25rem, 0.5rem + 15cqi, 5rem);
+    font-size: clamp(3.25rem, 19cqi, 5.5rem);
   }
 
   .heroActions {
@@ -325,36 +357,6 @@
   }
 }
 
-.idCard {
-  margin: 0;
-  justify-self: center;
-  width: min(100%, 18rem);
-  padding: var(--spacing-3);
-  border-radius: var(--radius-container);
-  background-color: var(--color-background-card);
-  box-shadow: var(--yb-shadow-ring);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-3);
-}
-
-.idCardPhoto {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  /* konzentrisch: Karte 20px − Innenabstand 12px = 8px */
-  border-radius: calc(var(--radius-container) - var(--spacing-3));
-}
-
-.idCardCaption {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-0-5);
-  padding: 0 var(--spacing-1) var(--spacing-1);
-}
-
 /* ---------- 02 Fähigkeiten (Gerüst) ---------- */
 .skillList {
   list-style: none;
@@ -416,5 +418,37 @@
 @media (max-width: 599px) {
   .timelineItem {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- 06 Kontakt ---------- */
+.contactGrid {
+  display: grid;
+  gap: var(--spacing-8);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.contactForm {
+  max-width: 640px;
+}
+
+.contactAvatar {
+  width: var(--size-element-lg);
+  height: var(--size-element-lg);
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+@media (min-width: 900px) {
+  .contactGrid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--spacing-10);
+  }
+
+  /* LinkedIn bleibt beim Ausfüllen in Sicht */
+  .contactAside {
+    position: sticky;
+    top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
   }
 }

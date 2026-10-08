@@ -1,0 +1,54 @@
+/*
+ * Kontaktformular (contact-form.tsx). Abweichung von AGENTS.md („kein eigenes CSS“),
+ * dokumentiert: Für den Hinweis „Versand nicht verfügbar“ ÜBER dem Formular (absolut, damit
+ * nichts verrutscht – kein Layout-Shift, wenn die Statusabfrage zurückkommt) und für das
+ * unsichtbare Honeypot-Feld hat Astryx keine Props. Nur Tokens.
+ */
+.wrap {
+  position: relative;
+}
+
+/* Datenschutz-Link unter der Einwilligung: etwas eingerückt auf die Label-Kante der Checkbox */
+.privacy {
+  margin-block-start: calc(-1 * var(--spacing-3));
+}
+
+/* Ohne Konfiguration: Formular gedämpft und inert, Hinweis darüber */
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: start center;
+  padding: var(--spacing-8) var(--spacing-4);
+  pointer-events: none;
+}
+
+.wrap[data-unavailable] .form {
+  opacity: 0.35;
+  filter: grayscale(0.4);
+  user-select: none;
+}
+
+.wrap[data-unavailable] .veil {
+  pointer-events: auto;
+}
+
+.veilCard {
+  width: min(100%, 28rem);
+}
+
+/* Honeypot: außerhalb des sichtbaren Bereichs (nicht display:none – manche Bots überspringen
+   versteckte Felder), aus dem Accessibility-Baum (aria-hidden) und der Tab-Reihenfolge */
+.hp {
+  position: absolute;
+  inset-inline-start: -10000px;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+}
+
+/* Ergebnis-Meldung: beim Hineinscrollen Abstand zum klebenden Header lassen */
+.result {
+  scroll-margin-block: var(--spacing-8);
+}

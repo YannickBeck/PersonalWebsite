@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { Section } from '@astryxdesign/core/Section';
 import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
@@ -18,14 +17,45 @@ import {
   LINKEDIN_URL,
   PERSON,
   PHOTOS,
+  STATIONS,
 } from '@/content/profile';
+import { formatYears } from '@/lib/period';
+import { IdBadge, type IdBadgeData } from './id-badge';
 import styles from './home.module.css';
 
+/** Daten der Ausweiskarte (nur Serialisierbares an die Client-Komponente, kein Content-Modell im Bundle). */
+function badgeData(lang: Lang): IdBadgeData {
+  const dict = getDictionary(lang);
+  return {
+    photo: { src: PHOTOS.card.src, width: PHOTOS.card.width, height: PHOTOS.card.height, alt: PHOTOS.card.alt[lang] },
+    name: PERSON.name,
+    role: PERSON.role.value[lang],
+    org: PERSON.employer.value,
+    stations: STATIONS.map((s) => ({
+      id: s.id,
+      years: formatYears(s.start, s.end, lang),
+      title: s.short[lang],
+      org: s.org,
+    })),
+    languages: LANGUAGES.value.map((l) => ({ name: l.name[lang], level: l.level[lang] })),
+    linkedin: LINKEDIN_URL,
+    labels: {
+      group: `${dict.home.badgeLabel}: ${PERSON.name}`,
+      flip: dict.home.badgeFlip,
+      hint: dict.home.badgeHint,
+      stations: dict.home.badgeStations,
+      languages: dict.home.badgeLanguages,
+      linkedin: dict.linkedinLabel,
+      linkedinExternal: dict.linkedinExternal,
+    },
+  };
+}
+
 /**
- * 01 Über mich – Gerüst (B1): links Begrüßung, Kurzvorstellung (LinkedIn-Zusammenfassung,
- * gekürzt) und Links; Mitte die Ausweiskarte (statisch – die dreh-/schwenkbare Fassung am
- * Band folgt als eigene Client-Komponente); rechts kompakte Angaben. Mobil gestapelt.
- * Überschrift des Abschnitts ist die Begrüßung (H2), damit kein zweiter Titel nötig ist.
+ * 01 Über mich: links Begrüßung, Kurzvorstellung (LinkedIn-Zusammenfassung, gekürzt) und
+ * Links; Mitte die Ausweiskarte am Band (Client-Blatt, Vorderseite Foto/Name/Rolle, Rückseite
+ * Stationen kurz, Sprachen, LinkedIn); rechts kompakte Angaben. Tablet: Text | Karte, Angaben
+ * darunter; mobil gestapelt. Überschrift des Abschnitts ist die Begrüßung (H2).
  */
 export function AboutSection({ id, number, lang }: { id: string; number: string; lang: Lang }) {
   const dict = getDictionary(lang);
@@ -62,23 +92,8 @@ export function AboutSection({ id, number, lang }: { id: string; number: string;
             </HStack>
           </VStack>
 
-          {/* Ausweiskarte (statisch). Ersetzt durch die interaktive Karte am Band. */}
-          <figure className={styles.idCard} aria-label={`${PERSON.name}, ${PERSON.role.value[lang]}`}>
-            <Image
-              src={PHOTOS.card.src}
-              width={PHOTOS.card.width}
-              height={PHOTOS.card.height}
-              alt={PHOTOS.card.alt[lang]}
-              sizes="(max-width: 767px) 70vw, 280px"
-              className={`${styles.idCardPhoto} yb-image-outline`}
-            />
-            <figcaption className={styles.idCardCaption}>
-              <Text weight="semibold">{PERSON.name}</Text>
-              <Text type="supporting" color="secondary">
-                {PERSON.role.value[lang]} · {PERSON.employer.value}
-              </Text>
-            </figcaption>
-          </figure>
+          {/* Ausweiskarte am Band: dreh-/schwenkbar (Ziehen, Tippen, Tastatur), id-badge.tsx */}
+          <IdBadge data={badgeData(lang)} />
 
           <VStack gap={4} className={styles.aboutFacts}>
             <Text type="label" color="secondary">

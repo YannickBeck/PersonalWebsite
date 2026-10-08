@@ -319,7 +319,8 @@ html[data-yb-instant] *::after {
     animation:
       var(--duration-medium) var(--yb-ease-enter) both yb-fade-in,
       var(--duration-medium) var(--yb-ease-enter) both yb-shift-in;
-    animation-delay: calc(var(--yb-step, 0) * var(--yb-motion-stagger));
+    /* --yb-enter-delay: Versatz ganzer Gruppen (Einstieg der Startseite, §3b) */
+    animation-delay: calc(var(--yb-enter-delay, 0ms) + var(--yb-step, 0) * var(--yb-motion-stagger));
   }
 
   /* Die H1 blendet nur von 0,3 aus ein: nie unsichtbar, bleibt LCP-Element (MOT8) */
@@ -341,6 +342,95 @@ html[data-yb-instant] *::after {
 
   .yb-enter > :nth-child(n + 5) {
     --yb-step: 4;
+  }
+}
+
+/* ---------- 3b. Startseite: Bühne des Einstiegs (src/components/home/hero.tsx) ----------
+   Drei Bewegungen, je eine eigene Eigenschaft bzw. Ebene, damit nichts kollidiert:
+   - Einblenden (nur erstes Laden, wie §3): Namenszug von 0, Person von Deckkraft 0,3 (bleibt
+     LCP-Kandidat, MOT8) mit kurzem Aufstieg; danach Rolle und Aktionen über .yb-enter.
+     Gesamt ≈ 600ms + 60ms Versatz.
+   - Zeiger-Parallaxe (hero-stage.tsx setzt --yb-px/--yb-py, −1 … 1): Namenszug und Person
+     verschieben sich minimal gegeneinander (`translate` am Layer, weiche Transition, die bei
+     jeder Bewegung neu ansetzt). Nur Maus (hover + pointer: fine).
+   - Scroll-Drift (Scroll-Timeline des Einstiegs, nur mit Support): beim Hinausscrollen sinkt
+     der Namenszug langsamer mit (45 % seiner Höhe), die Person wächst um 4 % vom unteren Rand
+     – Tiefe ohne Bewegung der Person selbst. `transform` am Layer.
+   Unter Reduced Motion existiert nichts davon: die Bühne steht. */
+@keyframes yb-hero-name-in {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--yb-motion-distance) * -0.5);
+  }
+}
+
+@keyframes yb-hero-person-in {
+  from {
+    opacity: 0.3;
+    translate: 0 4%;
+  }
+}
+
+@keyframes yb-hero-name-drift {
+  to {
+    transform: translateY(45%);
+  }
+}
+
+@keyframes yb-hero-person-drift {
+  to {
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-yb-nav]) .yb-hero-name {
+    animation: var(--duration-slow-min) var(--yb-ease-enter) both yb-hero-name-in;
+  }
+
+  html:not([data-yb-nav]) .yb-hero-person {
+    animation: var(--duration-slow-min) var(--yb-ease-enter) calc(var(--yb-motion-stagger) * 1.5) both yb-hero-person-in;
+  }
+
+  .yb-hero-text {
+    --yb-enter-delay: calc(var(--yb-motion-stagger) * 3);
+  }
+
+  .yb-hero-actions {
+    --yb-enter-delay: calc(var(--yb-motion-stagger) * 5);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .yb-hero-name-layer {
+      translate: calc(var(--yb-px, 0) * -1 * var(--spacing-3)) calc(var(--yb-py, 0) * -1 * var(--spacing-1-5));
+      transition: translate var(--duration-slow) var(--yb-ease-enter);
+    }
+
+    .yb-hero-person-layer {
+      translate: calc(var(--yb-px, 0) * var(--spacing-2)) calc(var(--yb-py, 0) * var(--spacing-1));
+      transition: translate var(--duration-slow) var(--yb-ease-enter);
+    }
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .yb-hero {
+      view-timeline: --yb-hero block;
+    }
+
+    .yb-hero-name-layer {
+      animation: yb-hero-name-drift linear both;
+      animation-timeline: --yb-hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    .yb-hero-person-layer {
+      transform-origin: 50% 100%;
+      animation: yb-hero-person-drift linear both;
+      animation-timeline: --yb-hero;
+      animation-range: exit 0% exit 100%;
+    }
   }
 }
 

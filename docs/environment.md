@@ -10,9 +10,23 @@ lokal in `.env.local` – nie ins Repository.
 | `REVALIDATE_SECRET` | Laufzeit | für Webhook | Geheimnis für `/api/revalidate` (Ghost-Webhook `site.changed`). |
 | `NEXT_PUBLIC_SHOW_GAPS` | **Build** | nein | `1` = Vorschau-Build: offene Angaben aus `src/content/profile.ts` erscheinen als gestrichelte „OFFEN: …“-Platzhalter, dazu Vorschau-Hinweiszeile, `/content-status` im Footer, Formular-Zustandsvorschau und Demo-Artikel. Leer = Produktion: offene Angaben fehlen vollständig. Wird beim Build in den Code eingesetzt – Umschalten erfordert einen neuen Build. |
 | `NEXT_PUBLIC_CF_BEACON_TOKEN` | Build | nein | Cloudflare Web Analytics; ohne Wert kein Skript. |
+| `CONTACT_RESEND_API_KEY` | Laufzeit | für Formularversand | Resend-API-Key (`re_…`), nur serverseitig. Leitet zusätzlich den Schlüssel für die Formular-Tokens ab. Ohne Wert zeigt das Formular „Versand gerade nicht verfügbar“ mit LinkedIn-Weg. |
+| `CONTACT_FROM` | Laufzeit | für Formularversand | Absender, z. B. `Website <kontakt@DOMAIN>` – die Domain muss bei Resend bestätigt sein. |
+| `CONTACT_TO` | Laufzeit | für Formularversand | Empfängeradresse(n), mehrere mit Komma getrennt. Erscheint nirgends auf der Website. |
+| `CONTACT_RESEND_BASE_URL` | Laufzeit | nein | Nur für Tests: Basis-URL eines lokalen Resend-Mocks (Standard `https://api.resend.com`). |
 
 Hinweise
 
 - `NEXT_PUBLIC_*` landet im Browser-Bundle – dort nie Geheimnisse ablegen.
 - Lokale Prüfung beider Varianten: zwei Builds (mit und ohne `NEXT_PUBLIC_SHOW_GAPS=1`), Screenshot-Gate je Build (AGENTS.md).
-- Kontaktformular-Versand (Resend) folgt mit eigenen Variablen; sie werden hier ergänzt, sobald die Anbindung steht.
+- Kontaktformular: Versand nur, wenn `CONTACT_RESEND_API_KEY`, `CONTACT_FROM` und `CONTACT_TO` gesetzt sind. Die Werte werden zur Laufzeit gelesen (`/api/kontakt` ist dynamisch), ein neuer Build ist nicht nötig, ein Neustart schon. Ablauf, Spam-Schutz und Tests: `docs/kontaktformular.md`.
+- `.env.example` konnte in B2 nicht ergänzt werden (Lese-/Schreibsperre für `.env*` in den Agent-Einstellungen). OFFEN: die vier `CONTACT_*`-Zeilen ohne Werte dort nachtragen:
+
+  ```sh
+  # Kontaktformular (Resend) – nur Laufzeit, nie committen
+  CONTACT_RESEND_API_KEY=
+  CONTACT_FROM=
+  CONTACT_TO=
+  # nur für lokale Tests gegen einen Mock
+  CONTACT_RESEND_BASE_URL=
+  ```

@@ -211,11 +211,14 @@ export const GAPS: GapEntry[] = [
   },
   {
     id: 'contact-delivery',
-    label: { de: 'Versand des Kontaktformulars konfigurieren', en: 'Configure contact form delivery' },
-    where: { de: '/kontakt, Startseite Abschnitt 06', en: '/en/kontakt, homepage section 06' },
+    label: {
+      de: 'Versand des Kontaktformulars in der Produktion einrichten',
+      en: 'Set up contact form delivery in production',
+    },
+    where: { de: '/kontakt, Startseite Abschnitt Kontakt', en: '/en/kontakt, homepage section Contact' },
     need: {
-      de: 'Resend-API-Key, Absender- und Zieladresse als Umgebungsvariablen (docs/)',
-      en: 'Resend API key, sender and recipient address as environment variables (docs/)',
+      de: 'Resend-Konto mit bestätigter Absender-Domain; CONTACT_RESEND_API_KEY, CONTACT_FROM und CONTACT_TO in der Deploy-Umgebung setzen (docs/kontaktformular.md). Bis dahin zeigt das Formular „Versand gerade nicht verfügbar“ mit LinkedIn-Weg.',
+      en: 'Resend account with a verified sender domain; set CONTACT_RESEND_API_KEY, CONTACT_FROM and CONTACT_TO in the deploy environment (docs/kontaktformular.md). Until then the form shows “sending unavailable” with the LinkedIn route.',
     },
   },
   {
@@ -412,6 +415,8 @@ export interface Station extends Beleg {
   id: 'bechtle-consultant' | 'bechtle-studium' | 'bechtle-junior' | 'bechtle-ausbildung' | 'gebhardt';
   org: string;
   role: L;
+  /** Kurzform der Rolle (Ausweiskarte, Startseite 01) – gekürzt aus `role`, nichts ergänzt. */
+  short: L;
   start: YearMonth;
   /** null = heute */
   end: YearMonth | null;
@@ -454,6 +459,7 @@ export const STATIONS: Station[] = [
     fundstelle: 'Berufserfahrung',
     org: 'Bechtle Mannheim',
     role: { de: 'IT-Consultant', en: 'IT Consultant' },
+    short: { de: 'IT-Consultant', en: 'IT Consultant' },
     start: '2026-10',
     end: null,
     place: MANNHEIM,
@@ -469,6 +475,7 @@ export const STATIONS: Station[] = [
       de: 'Duales Studium Wirtschaftsinformatik – Sales & Consulting',
       en: 'Dual study programme, Business Informatics – Sales & Consulting',
     },
+    short: { de: 'Duales Studium Wirtschaftsinformatik', en: 'Dual study, business informatics' },
     start: '2023-10',
     end: '2026-10',
     place: MANNHEIM,
@@ -503,6 +510,7 @@ export const STATIONS: Station[] = [
     fundstelle: 'Berufserfahrung („Junior Information Technology Consultant“)',
     org: 'Bechtle Mannheim',
     role: { de: 'Junior IT Consultant', en: 'Junior IT Consultant' },
+    short: { de: 'Junior IT Consultant', en: 'Junior IT Consultant' },
     start: '2023-07',
     end: '2023-10',
     summary: {
@@ -538,6 +546,7 @@ export const STATIONS: Station[] = [
       de: 'Ausbildung Fachinformatiker Systemintegration',
       en: 'Apprenticeship, IT specialist for system integration',
     },
+    short: { de: 'Ausbildung Fachinformatiker', en: 'Apprenticeship, IT specialist' },
     start: '2020-08',
     end: '2023-07',
     place: MANNHEIM,
@@ -575,6 +584,7 @@ export const STATIONS: Station[] = [
     fundstelle: 'Berufserfahrung',
     org: 'GEBHARDT Fördertechnik GmbH',
     role: { de: 'Elektrotechniker – Automatisierung', en: 'Electrical engineering – automation' },
+    short: { de: 'Elektrotechniker – Automatisierung', en: 'Electrical engineering – automation' },
     start: '2018-08',
     end: '2020-01',
     place: { de: 'Sinsheim', en: 'Sinsheim' },
