@@ -7,6 +7,7 @@ import { Banner } from '@astryxdesign/core/Banner';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { Metadata } from 'next';
 import { pageMeta } from '@/lib/seo';
+import { Gap } from '@/components/gap';
 
 const meta = getDictionary('en').pages.impressum;
 export const metadata: Metadata = pageMeta({
@@ -21,12 +22,12 @@ export default function Page() {
   const dict = getDictionary('en');
   return (
     <>
-      <PageHero title={page.title} lede={page.lede} />
+      <PageHero title={page.title} lede={page.lede} meta={<Gap id="legal-imprint" lang="en" block />} />
       <Section>
         <VStack gap={8} maxWidth={640}>
           <Banner
             status="note"
-            title={dict.demoNoticeTitle}
+            title={dict.templateNoticeTitle}
             description="Editorial template — not legal advice. Replace all bracketed items with real data before publishing."
           />
           <VStack gap={2}>

@@ -1,84 +1,52 @@
-import { Section } from '@astryxdesign/core/Section';
-import { VStack } from '@astryxdesign/core/VStack';
-import { Grid } from '@astryxdesign/core/Grid';
-import { Heading } from '@astryxdesign/core/Heading';
-import { Text } from '@astryxdesign/core/Text';
-import { Card } from '@astryxdesign/core/Card';
 import { HStack } from '@astryxdesign/core/HStack';
-import { Banner } from '@astryxdesign/core/Banner';
-import { List, ListItem } from '@astryxdesign/core/List';
+import { Token } from '@astryxdesign/core/Token';
+import { Text } from '@astryxdesign/core/Text';
+import { VStack } from '@astryxdesign/core/VStack';
 import { PageHero } from '@/components/page-hero';
 import { SplitSection } from '@/components/split-section';
 import { CtaCard } from '@/components/cta-card';
+import { Gap } from '@/components/gap';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
-import { servicesByLang } from '@/content/pages';
+import { FOCUS_AREAS, skillById } from '@/content/profile';
 
 /**
- * Leistungen (L7, VV4): je Angebot ein Abschnitt mit echten Listen statt „•“-Text und
- * Karten je Ablaufschritt; Demo-Hinweis EINMAL oben statt je Angebot (T1/L10).
- * Anker #beratung/#umsetzung/#begleitung für die Startseite.
+ * Schwerpunkte (Route /leistungen bleibt): Themen aus dem LinkedIn-Profil statt erfundener
+ * Leistungspakete – je Thema ein belegter Satz und die zugehörigen Fähigkeiten. Ob es ein
+ * konkretes Angebot gibt, ist offen (Lücke services-offer, nur Vorschau).
+ * Anker #cloud/#identity/#ai/#consulting.
  */
 export function ServicesContent({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
   const page = dict.pages.leistungen;
-  const services = servicesByLang(lang);
   return (
     <>
-      <PageHero title={page.title} lede={page.lede} />
-      <Section paddingBlockEnd={0}>
-        <VStack maxWidth={640}>
-          <Banner status="note" title={dict.demoNoticeTitle} description={services[0]?.openNote} />
-        </VStack>
-      </Section>
-      {services.map((s, i) => (
+      <PageHero title={page.title} lede={page.lede} meta={<Gap id="services-offer" lang={lang} block />} />
+      {FOCUS_AREAS.map((area, i) => (
         <SplitSection
-          key={s.slug}
-          id={s.slug}
+          key={area.id}
+          id={area.id}
           index={String(i + 1).padStart(2, '0')}
-          title={s.title}
-          lede={s.problem}
+          title={area.title[lang]}
           hasDivider={i > 0}
         >
-          <Grid columns={{ minWidth: 260, max: 2 }} gap={6}>
-            <List header={<Heading level={3}>{dict.tasksTitle}</Heading>} listStyle="disc" density="compact">
-              {s.tasks.map((t) => (
-                <ListItem key={t} label={<Text>{t}</Text>} />
+          <Text as="p" textWrap="pretty" type="large">
+            {area.text.value[lang]}
+          </Text>
+          <VStack gap={2}>
+            <Text type="label" color="secondary">
+              {dict.servicesSkills}
+            </Text>
+            <HStack gap={2} wrap="wrap">
+              {area.skills.map((id) => (
+                <Token key={id} label={skillById(id).name[lang]} size="lg" />
               ))}
-            </List>
-            <List
-              header={<Heading level={3}>{dict.deliverablesTitle}</Heading>}
-              listStyle="disc"
-              density="compact"
-            >
-              {s.deliverables.map((d) => (
-                <ListItem key={d} label={<Text>{d}</Text>} />
-              ))}
-            </List>
-          </Grid>
-          <Card variant="muted">
-            {/* Kopf auf der Inset-Kante der Einträge (VIS12: ListItem rückt 8px ein) */}
-            <List
-              header={
-                <HStack paddingInline={2}>
-                  <Heading level={3}>{dict.processTitle}</Heading>
-                </HStack>
-              }
-              hasDividers
-            >
-              {s.steps.map((step) => (
-                <ListItem
-                  key={step.title}
-                  label={<Text weight="semibold">{step.title}</Text>}
-                  description={<Text color="secondary">{step.text}</Text>}
-                />
-              ))}
-            </List>
-          </Card>
+            </HStack>
+          </VStack>
         </SplitSection>
       ))}
       <CtaCard
-        title={dict.homeContactTitle}
-        text={dict.homeContactLede}
+        title={dict.home.contactTitle.replace(/\*/g, '')}
+        text={dict.home.contactLede}
         label={dict.contact}
         href={withLang('/kontakt', lang)}
       />

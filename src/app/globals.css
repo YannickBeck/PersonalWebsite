@@ -14,9 +14,50 @@ body {
   color: var(--color-text-primary);
 }
 
-/* Sticky-Header verdeckt sonst Sprungziele (#main, Inhaltsverzeichnis-Anker) */
+/* Sticky-Header verdeckt sonst Sprungziele (#main, Inhaltsverzeichnis-Anker).
+   Schrift-Glättung auf macOS (Make-Interfaces-Feel-Better: Text wirkt sonst zu schwer). */
 html {
   scroll-padding-top: calc(var(--size-element-md) + var(--spacing-12));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Akzent-Wort in Überschriften (src/components/emphasis.tsx): feine Kursiv-Serif, optisch
+   etwas größer, damit sie neben der Grotesk nicht kleiner wirkt; Gewicht folgt nicht der
+   Überschrift (Serif bleibt fein). */
+.yb-serif {
+  font-family: var(--yb-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.08em;
+  letter-spacing: 0;
+  font-optical-sizing: auto;
+}
+
+/* Display-Schrift (Namenszug, Abschnittsnummern, Rolle im Einstieg) */
+.yb-display {
+  font-family: var(--yb-font-display);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bilder: neutrale 1px-Kontur nach innen (schwarz bzw. weiß 10 %, nie getönt) */
+.yb-image-outline {
+  outline: var(--border-width) solid var(--yb-image-outline);
+  outline-offset: calc(-1 * var(--border-width));
+}
+
+/* Nur für Screenreader (z. B. Name in der H1 des Einstiegs) */
+.yb-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /*

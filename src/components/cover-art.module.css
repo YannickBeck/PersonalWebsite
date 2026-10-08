@@ -1,7 +1,8 @@
 /*
  * Generatives Cover (V6). Abweichung von AGENTS.md (dokumentiert): Verlauf und Muster
  * sind Hintergrundgrafik – dafür gibt es keine Astryx-Prop. Nur Tokens; Farben über
- * color-mix() aus --color-accent und den Hintergrund-Tokens (hell/dunkel automatisch).
+ * color-mix() (hell/dunkel automatisch). Redesign: Tinte auf Papier, das Violett nur als
+ * schwacher Lichtpunkt – der Akzent bleibt sparsam (Anti-Slop „Excessive Accent“).
  */
 .cover {
   position: relative;
@@ -13,12 +14,12 @@
   background:
     radial-gradient(
       120% 95% at var(--yb-cover-x) var(--yb-cover-y),
-      color-mix(in srgb, var(--color-accent) 34%, transparent),
-      transparent 64%
+      color-mix(in srgb, var(--color-accent) 13%, transparent),
+      transparent 62%
     ),
     linear-gradient(
       var(--yb-cover-angle),
-      color-mix(in srgb, var(--color-accent) 14%, var(--color-background-muted)),
+      color-mix(in srgb, var(--color-text-primary) 5%, var(--color-background-muted)),
       var(--color-background-muted) 70%
     );
 }
@@ -29,7 +30,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  --yb-cover-ink: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  --yb-cover-ink: color-mix(in srgb, var(--color-text-primary) 13%, transparent);
   -webkit-mask-image: radial-gradient(
     90% 90% at var(--yb-cover-x) var(--yb-cover-y),
     black,
@@ -75,7 +76,7 @@
   z-index: -1;
   height: 86%;
   aspect-ratio: 1;
-  stroke: color-mix(in srgb, var(--color-accent) 72%, var(--color-text-primary));
+  stroke: color-mix(in srgb, var(--color-text-primary) 78%, var(--color-accent));
   stroke-width: var(--yb-stroke-motif);
   opacity: 0.85;
 }

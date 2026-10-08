@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { pageMeta } from '@/lib/seo';
-import { HomeContent } from '@/app/page';
+import { HomeContent } from '@/components/home/home-content';
 
 export default function EnglishHome() {
   return <HomeContent lang="en" />;
@@ -11,8 +11,10 @@ export const metadata: Metadata = {
   ...pageMeta({
     lang: 'en',
     path: '/',
-    title: 'Yannick Beck',
-    description: 'Personal website by Yannick Beck — projects, blog and contact.',
+    title: 'Yannick Beck – IT Consultant',
+    description:
+      'Yannick Beck, IT consultant from Sandhausen, Germany: Microsoft Cloud & AI, Modern Workplace, identity & security. Career, projects and contact.',
+    type: 'profile',
   }),
-  title: { absolute: 'Yannick Beck' },
+  title: { absolute: 'Yannick Beck – IT Consultant' },
 };

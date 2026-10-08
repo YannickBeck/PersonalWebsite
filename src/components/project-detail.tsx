@@ -4,18 +4,21 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Card } from '@astryxdesign/core/Card';
 import { Token } from '@astryxdesign/core/Token';
+import { Link } from '@astryxdesign/core/Link';
 import { List, ListItem } from '@astryxdesign/core/List';
 import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { PageHero } from '@/components/page-hero';
 import { ItemCover } from '@/components/item-cover';
 import { coverMeta, coverSeed } from '@/components/content-card';
-import { GalleryCarousel, RelatedCarousel } from '@/components/carousel-row';
+import { RelatedCarousel } from '@/components/carousel-row';
 import { MorphTarget } from '@/components/morph';
 import { BackLink, ReadingLayout } from '@/components/reading-layout';
+import { Gap } from '@/components/gap';
+import { SHOW_GAPS } from '@/lib/gaps';
+import { ExternalArrow } from '@/components/icons';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
-import { getProjectCards } from '@/lib/items';
-import { realImage } from '@/lib/images';
-import type { DemoProject } from '@/content/demo';
+import { PROJECTS, type Project } from '@/content/profile';
+import { projectCard } from '@/content/profile-view';
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -26,122 +29,132 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
+const SOURCE_LABEL: Record<string, string> = {
+  linkedin: 'LinkedIn',
+  'github:YannickBeck/Abgabe_Orbitalis': 'GitHub · Abgabe_Orbitalis',
+  'github:YannickBeck/OrbitalisTicketSystem': 'GitHub · OrbitalisTicketSystem',
+};
+
 /**
- * Demo-Projekt als Fallstudie: Lesespalte mit Abschnitten, Fakten in der Randspalte
- * (mobil vor dem Text). Statt Card je Schritt/Entscheidung echte Listen (L7/VV4).
- * Galerie nur mit echten Bildern – Platzhalter-SVGs gelten als „kein Bild“ (V6).
- * B3: Galerie und „Das könnte dich auch interessieren“ als Karussell, Hero-Cover ist
- * Ziel des Morphs von der geklickten Karte.
+ * Projekt-Detailseite aus dem Content-Modell (Orbitalis, Bachelorarbeit): Lesespalte mit
+ * Ausgangslage, Beitrag, Ergebnis; Fakten und Quellcode-Links in der Randspalte (mobil vor
+ * dem Text). Offene Angaben erscheinen nur in der Vorschau. Cover generativ (kein echtes Bild),
+ * Ziel des Morphs von der Karte.
  */
-export async function ProjectDetail({ lang, item }: { lang: Lang; item: DemoProject }) {
+export function ProjectDetail({ lang, project }: { lang: Lang; project: Project }) {
   const dict = getDictionary(lang);
-  const related = (await getProjectCards(lang)).filter((p) => p.slug !== item.slug).slice(0, 6);
-  const cover = coverMeta(
-    { kind: 'project', slug: item.slug, title: item.title, href: '', category: item.category, categoryLabel: item.categoryLabel },
-    lang,
-  );
-  const gallery = item.gallery.filter((g) => realImage(g.src));
+  const card = projectCard(project, lang);
+  const cover = coverMeta(card, lang);
+  const related = PROJECTS.filter((p) => p.id !== project.id).map((p) => projectCard(p, lang));
+  const period = project.period.status === 'belegt' ? project.period.value[lang] : null;
+  const context = project.context.status === 'belegt' ? project.context.value[lang] : null;
 
   return (
     <>
       <PageHero
         eyebrow={<BackLink href={withLang('/projekte', lang)} label={dict.backToProjects} />}
-        title={item.title}
-        lede={item.excerpt}
+        title={project.title[lang]}
+        lede={project.teaser[lang]}
         meta={
           <HStack gap={1.5} wrap="wrap">
-            <Token label={dict.demoToken} size="sm" className="print-hide" />
-            <Token label={item.categoryLabel} size="sm" />
+            <Token label={project.kind[lang]} size="sm" />
+            {period ? <Token label={period} size="sm" /> : null}
           </HStack>
         }
       />
       <ReadingLayout
         tocTitle={dict.tocTitle}
         cover={
-          <MorphTarget morphKey={withLang(`/projekte/${item.slug}`, lang)}>
-            <ItemCover src={item.cover} seed={coverSeed(item.slug, lang)} label={cover.label} motif={cover.motif} variant="hero" eager />
+          <MorphTarget morphKey={card.href}>
+            <ItemCover src={null} seed={coverSeed(card.slug, lang)} label={cover.label} motif={cover.motif} variant="hero" eager />
           </MorphTarget>
         }
         aside={
           <Card>
             <MetadataList label={{ position: 'top' }}>
-              <MetadataListItem label={dict.factsRole}>
-                <Text>{item.role}</Text>
+              <MetadataListItem label={dict.factsKind}>
+                <Text>{project.kind[lang]}</Text>
               </MetadataListItem>
-              <MetadataListItem label={dict.factsTimeframe}>
-                <Text>{item.timeframe}</Text>
-              </MetadataListItem>
+              {/* Offene Fakten: in Produktion ohne Zeile (kein leeres Label), in der Vorschau als Lücke */}
+              {period || SHOW_GAPS ? (
+                <MetadataListItem label={dict.factsPeriod}>
+                  {project.period.status === 'belegt' ? (
+                    <Text>{project.period.value[lang]}</Text>
+                  ) : (
+                    <Gap id={project.period.gap} lang={lang} />
+                  )}
+                </MetadataListItem>
+              ) : null}
+              {context || SHOW_GAPS ? (
+                <MetadataListItem label={dict.factsContext}>
+                  {project.context.status === 'belegt' ? (
+                    <Text>{project.context.value[lang]}</Text>
+                  ) : (
+                    <Gap id={project.context.gap} lang={lang} />
+                  )}
+                </MetadataListItem>
+              ) : null}
               <MetadataListItem label={dict.factsStack}>
                 <HStack gap={1.5} wrap="wrap">
-                  {item.technologies.map((t) => (
+                  {project.tags.map((t) => (
                     <Token key={t} label={t} size="sm" />
                   ))}
                 </HStack>
               </MetadataListItem>
+              {project.links.length > 0 ? (
+                <MetadataListItem label={dict.factsCode}>
+                  <VStack gap={1}>
+                    {project.links.map((l) => (
+                      <Link key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" color="primary" hasUnderline>
+                        <HStack gap={1} vAlign="center" as="span">
+                          {l.label[lang]}
+                          <ExternalArrow />
+                        </HStack>
+                      </Link>
+                    ))}
+                  </VStack>
+                </MetadataListItem>
+              ) : null}
             </MetadataList>
           </Card>
         }
       >
         <Block title={dict.sectionSituation}>
-          {item.situation.map((p, i) => (
-            <Text key={i} as="p" textWrap="pretty">
+          {project.situation.value[lang].map((p) => (
+            <Text key={p.slice(0, 32)} as="p" textWrap="pretty">
               {p}
             </Text>
           ))}
         </Block>
-        <Block title={dict.sectionGoal}>
+        <Block title={dict.sectionContribution}>
           <List listStyle="disc" density="compact">
-            {item.goal.map((g) => (
-              <ListItem key={g} label={<Text>{g}</Text>} />
+            {project.contribution.value[lang].map((c) => (
+              <ListItem key={c.slice(0, 32)} label={<Text textWrap="pretty">{c}</Text>} />
             ))}
           </List>
         </Block>
-        <Block title={dict.sectionApproach}>
-          <Card padding={2}>
-            <List hasDividers density="spacious">
-              {item.approach.map((a) => (
-                <ListItem
-                  key={a.title}
-                  label={<Text weight="semibold">{a.title}</Text>}
-                  description={<Text color="secondary">{a.text}</Text>}
-                />
-              ))}
-            </List>
-          </Card>
-        </Block>
-        <Block title={dict.sectionDecisions}>
-          <Card padding={2}>
-            <List hasDividers density="spacious">
-              {item.decisions.map((d) => (
-                <ListItem
-                  key={d.decision}
-                  label={<Text weight="semibold">{d.decision}</Text>}
-                  description={<Text color="secondary">{d.reason}</Text>}
-                />
-              ))}
-            </List>
-          </Card>
-        </Block>
-        <Block title={dict.sectionChallenges}>
-          <List listStyle="disc" density="compact">
-            {item.challenges.map((c) => (
-              <ListItem key={c} label={<Text>{c}</Text>} />
+        {project.result.status === 'belegt' ? (
+          <Block title={dict.sectionOutcome}>
+            {project.result.value[lang].map((p) => (
+              <Text key={p.slice(0, 32)} as="p" textWrap="pretty">
+                {p}
+              </Text>
             ))}
-          </List>
-        </Block>
-        <Block title={dict.sectionOutcome}>
-          {item.outcomeOpen ? (
-            <HStack>
-              <Token label={dict.outcomeOpenLabel} size="sm" className="print-hide" />
-            </HStack>
-          ) : null}
-          <Text as="p" textWrap="pretty">
-            {item.outcome}
-          </Text>
-        </Block>
+            {project.gaps
+              .filter((g) => g === 'orbitalis-result' || g === 'orbitalis-media')
+              .map((g) => (
+                <Gap key={g} id={g} lang={lang} block />
+              ))}
+          </Block>
+        ) : (
+          // Ergebnis offen: in Produktion entfällt der Block ganz (keine leere Überschrift)
+          <Gap id={project.result.gap} lang={lang} block />
+        )}
+        {project.gaps.includes('thesis-link') ? <Gap id="thesis-link" lang={lang} block /> : null}
+        <Text type="supporting" color="secondary">
+          {dict.factsSource}: {project.quellen.map((q) => SOURCE_LABEL[q] ?? q).join(' · ')}
+        </Text>
       </ReadingLayout>
-
-      <GalleryCarousel title={dict.galleryTitle} images={gallery} lang={lang} />
       <RelatedCarousel title={dict.relatedTitle} items={related} lang={lang} />
     </>
   );

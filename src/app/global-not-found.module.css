@@ -1,0 +1,62 @@
+/*
+ * Globale 404 (global-not-found.tsx): eine statische Seite für beide Sprachen. Jeder Text steht
+ * als .de und .en im HTML; html[data-yb-404="en"] (Boot-Script, vor dem ersten Paint) schaltet
+ * auf Englisch. Ohne JS bleibt die deutsche Fassung samt englischer Zeile sichtbar. Nur Tokens.
+ */
+.frame > :global(.astryx-section) {
+  --astryx-section-padding-block-start: var(--spacing-12);
+  max-width: calc(1120px + 2 * var(--spacing-4));
+  margin-inline: auto;
+}
+
+.en {
+  display: none;
+}
+
+:global(html[data-yb-404='en']) .en {
+  display: inline;
+}
+
+:global(html[data-yb-404='en']) .de {
+  display: none;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  min-height: var(--size-element-lg);
+}
+
+.links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-element-md);
+  min-width: var(--size-element-sm);
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.link:hover {
+  color: var(--color-text-accent);
+}
+
+.link:focus-visible,
+.brand:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  border-radius: var(--radius-inner);
+}
+
+:global(html[data-yb-404='en']) .otherLang {
+  display: none;
+}

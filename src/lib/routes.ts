@@ -18,6 +18,12 @@ export const PUBLIC_ROUTES = [
   '/datenschutz',
 ] as const;
 
+/**
+ * Erreichbar, aber nicht in der Sitemap: /uses hat noch keine belegten Inhalte (noindex,
+ * nicht in der Navigation – Nutzerentscheidung „URL erreichbar, aus Navigation/Sitemap nehmen“).
+ */
+export const UNLISTED_ROUTES: ReadonlySet<string> = new Set<string>(['/uses']);
+
 /** In beiden Sprachen vorhanden, aber nicht in der Sitemap (noindex). */
 export const NOINDEX_ROUTES = ['/content-status'] as const;
 

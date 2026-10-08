@@ -145,31 +145,31 @@
 
 @scope ([data-astryx-theme="yb"]) to ([data-astryx-theme]) {
   :scope {
-    --color-accent: light-dark(#5B3FE0, #9B7BFF);
+    --color-accent: light-dark(#5B3FE0, #A28CFF);
     --color-accent-muted: light-dark(color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 25%, transparent));
-    --color-on-accent: light-dark(#FFFFFF, #0B0F1C);
-    --color-neutral: light-dark(#1B1F3B0F, #A5B4FC1A);
-    --color-background-surface: light-dark(#FFFFFF, #0F1528);
-    --color-background-body: light-dark(#F6F7FB, #0A0E1A);
-    --color-overlay: light-dark(#0A0E1A66, #05070D99);
-    --color-overlay-hover: light-dark(#1B1F3B0D, #FFFFFF12);
-    --color-overlay-pressed: light-dark(#1B1F3B1A, #FFFFFF1F);
-    --color-background-muted: light-dark(#EEF0F7, #131A30);
-    --color-text-primary: light-dark(#141826, #E6E8F2);
-    --color-text-secondary: light-dark(#525868, #A3ABC0);
-    --color-text-disabled: light-dark(#9AA0B2, #5D6580);
+    --color-on-accent: light-dark(#FFFFFF, #121117);
+    --color-neutral: light-dark(#16151B0D, #EEEAE314);
+    --color-background-surface: light-dark(#FBF9F5, #17161D);
+    --color-background-body: light-dark(#F7F4EE, #121117);
+    --color-overlay: light-dark(#16151B66, #05050899);
+    --color-overlay-hover: light-dark(#16151B0D, #FFFFFF12);
+    --color-overlay-pressed: light-dark(#16151B1A, #FFFFFF1F);
+    --color-background-muted: light-dark(#EFEBE3, #1D1C24);
+    --color-text-primary: light-dark(#16151B, #EEEAE3);
+    --color-text-secondary: light-dark(#5C5850, #A9A49A);
+    --color-text-disabled: light-dark(#A29D93, #6A665E);
     --color-text-accent: var(--color-accent);
     --color-icon-accent: var(--color-accent);
-    --color-icon-primary: light-dark(#141826, #E6E8F2);
-    --color-icon-secondary: light-dark(#525868, #A3ABC0);
-    --color-icon-disabled: light-dark(#9AA0B2, #5D6580);
-    --color-background-card: light-dark(#FFFFFF, #18203A);
-    --color-background-popover: light-dark(#FFFFFF, #1E2744);
-    --color-background-inverted: light-dark(#141826, #F6F7FB);
-    --color-border: light-dark(#1B1F3B1A, #A5B4FC24);
-    --color-border-emphasized: light-dark(#858CA1, #626C8D);
-    --color-skeleton: light-dark(#D5D9E5, #2A3350);
-    --color-track: light-dark(#D5D9E5, #2A3350);
+    --color-icon-primary: light-dark(#16151B, #EEEAE3);
+    --color-icon-secondary: light-dark(#5C5850, #A9A49A);
+    --color-icon-disabled: light-dark(#A29D93, #6A665E);
+    --color-background-card: light-dark(#FFFFFF, #1C1B22);
+    --color-background-popover: light-dark(#FFFFFF, #23222B);
+    --color-background-inverted: light-dark(#16151B, #EEEAE3);
+    --color-border: light-dark(#16151B1A, #EEEAE31F);
+    --color-border-emphasized: light-dark(#8A857B, #77736B);
+    --color-skeleton: light-dark(#E3DED4, #2A2932);
+    --color-track: light-dark(#E3DED4, #2A2932);
     --color-shadow: light-dark(#0000001A, #0000004D);
     --color-tint-hover: light-dark(black, white);
     --font-size-4xs: 0.3125rem;
@@ -187,9 +187,9 @@
     --text-heading-1-size: clamp(var(--font-size-2xl), 1.625rem + 1vw, var(--font-size-3xl));
     --text-heading-1-weight: var(--font-weight-semibold);
     --text-heading-1-leading: 1.15;
-    --text-heading-2-size: var(--font-size-xl);
+    --text-heading-2-size: clamp(var(--font-size-xl), 1.3rem + 0.9vw, var(--font-size-2xl));
     --text-heading-2-weight: var(--font-weight-semibold);
-    --text-heading-2-leading: 1.28;
+    --text-heading-2-leading: 1.2;
     --text-heading-3-size: var(--font-size-lg);
     --text-heading-3-weight: var(--font-weight-semibold);
     --text-heading-3-leading: 1.4;
@@ -238,25 +238,39 @@
     --font-family-body: var(--font-fustat), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-family-heading: var(--font-fustat), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-family-code: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --color-syntax-keyword: #B49CFF;
-    --color-syntax-string: #B7C0D8;
-    --color-syntax-comment: #8590AD;
-    --color-syntax-number: #C9B8FF;
-    --color-syntax-function: #D9CCFF;
-    --color-syntax-type: #C3CCE6;
-    --color-syntax-variable: #E6E8F2;
-    --color-syntax-operator: #A3ABC0;
-    --color-syntax-constant: #C9B8FF;
-    --color-syntax-tag: #B49CFF;
-    --color-syntax-attribute: #D9CCFF;
-    --color-syntax-property: #C3CCE6;
-    --color-syntax-punctuation: #A3ABC0;
-    --color-syntax-background: #0B1020;
+    --color-syntax-keyword: #B7A6FF;
+    --color-syntax-string: #D9D2C5;
+    --color-syntax-comment: #9A958B;
+    --color-syntax-number: #C9BCFF;
+    --color-syntax-function: #E2DAFF;
+    --color-syntax-type: #D6D0C4;
+    --color-syntax-variable: #EEEAE3;
+    --color-syntax-operator: #B3AEA4;
+    --color-syntax-constant: #C9BCFF;
+    --color-syntax-tag: #B7A6FF;
+    --color-syntax-attribute: #E2DAFF;
+    --color-syntax-property: #D6D0C4;
+    --color-syntax-punctuation: #B3AEA4;
+    --color-syntax-background: #17161D;
     --focus-outline-color: var(--color-accent);
     --shadow-inset-selected: inset 0px 0px 0px 2px color-mix(in srgb, var(--color-accent) 55%, transparent);
+    --radius-inner: 6px;
+    --radius-element: 12px;
+    --radius-container: 20px;
+    --radius-page: 32px;
     --size-element-sm: 30px;
     --size-element-md: 36px;
     --size-element-lg: 44px;
+    --yb-font-display: var(--font-display), "Arial Narrow", "Roboto Condensed", sans-serif;
+    --yb-font-serif: var(--font-serif), Georgia, "Times New Roman", serif;
+    --yb-ring-color: light-dark(oklch(0 0 0 / 0.07), oklch(1 0 0 / 0.09));
+    --yb-ring-color-hover: light-dark(oklch(0 0 0 / 0.1), oklch(1 0 0 / 0.16));
+    --yb-lift-color: light-dark(oklch(0 0 0 / 0.07), transparent);
+    --yb-ambient-color: light-dark(oklch(0 0 0 / 0.05), transparent);
+    --yb-shadow-ring: 0px 0px 0px 1px var(--yb-ring-color), 0px 1px 2px -1px var(--yb-lift-color), 0px 2px 4px 0px var(--yb-ambient-color);
+    --yb-shadow-ring-hover: 0px 0px 0px 1px var(--yb-ring-color-hover), 0px 2px 4px -1px var(--yb-lift-color), 0px 8px 20px 0px var(--yb-ambient-color);
+    --yb-image-outline: light-dark(oklch(0 0 0 / 0.1), oklch(1 0 0 / 0.1));
+    --yb-name-ghost: light-dark(color-mix(in srgb, #16151B 7%, transparent), color-mix(in srgb, #EEEAE3 7%, transparent));
     --yb-motion-micro: var(--duration-fast);
     --yb-motion-exit: var(--duration-fast-min);
     --yb-motion-enter: var(--duration-medium-min);
@@ -270,15 +284,7 @@
     --yb-heading-tracking: -0.011em;
     --yb-stroke-motif: 1.5px;
     --yb-stroke-icon: 2px;
-    --yb-control-border: light-dark(#B9BFCF, #3D4766);
-    --yb-terminal-background: #0B1020;
-    --yb-terminal-bar: #111833;
-    --yb-terminal-border: light-dark(#1B1F3B26, #A5B4FC24);
-    --yb-terminal-text: #E6E8F2;
-    --yb-terminal-muted: #A3ABC0;
-    --yb-terminal-prompt: #9B7BFF;
-    --yb-terminal-dot: #3D4766;
-    --yb-terminal-size: clamp(var(--font-size-sm), 0.72rem + 0.32vw, calc(var(--font-size-base) * 0.9375));
+    --yb-control-border: light-dark(#CFC9BD, #3A3942);
   }
 
   :scope {
@@ -414,15 +420,28 @@
   }
 
   .astryx-card {
+    border-color: transparent;
+    box-shadow: var(--yb-shadow-ring);
     --astryx-card-padding: var(--spacing-5);
+  }
+
+  .astryx-card[data-variant="muted"] {
+    box-shadow: none;
   }
 
   .astryx-button {
     font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-full);
+    --_button-radius: var(--radius-full);
+  }
+
+  .astryx-button[data-variant="primary"] {
+    background-color: var(--color-background-inverted);
+    color: var(--color-background-body);
   }
 
   .astryx-button[data-variant="primary"]:hover:where(:not(:disabled,[aria-disabled="true"])) {
-    background-color: light-dark(color-mix(in srgb, var(--color-accent) 86%, black), color-mix(in srgb, var(--color-accent) 82%, white));
+    background-color: color-mix(in srgb, var(--color-background-inverted) 84%, var(--color-accent));
   }
 
   .astryx-button[data-variant="secondary"] {
@@ -434,7 +453,7 @@
   }
 
   .astryx-button[data-variant="secondary"]:hover:where(:not(:disabled,[aria-disabled="true"])) {
-    background-color: light-dark(var(--color-background-muted), var(--color-neutral));
+    background-color: light-dark(var(--color-background-muted), var(--color-overlay-hover));
   }
 
   .astryx-list-item:last-child {

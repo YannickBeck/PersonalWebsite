@@ -1,6 +1,8 @@
 import { PageHero } from '@/components/page-hero';
 import { Section } from '@astryxdesign/core/Section';
 import { PostList } from '@/components/post-list';
+import { VStack } from '@astryxdesign/core/VStack';
+import { Gap } from '@/components/gap';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { Metadata } from 'next';
 import { pageMeta } from '@/lib/seo';
@@ -20,7 +22,10 @@ export default async function BlogPageEn() {
     <>
       <PageHero title={dict.pages.blog.title} lede={dict.pages.blog.lede} />
       <Section>
-        <PostList lang="en" posts={posts} />
+        <VStack gap={6}>
+          <Gap id="blog-posts" lang="en" block />
+          <PostList lang="en" posts={posts} />
+        </VStack>
       </Section>
     </>
   );

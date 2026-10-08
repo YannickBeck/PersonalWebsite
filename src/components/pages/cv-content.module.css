@@ -1,0 +1,48 @@
+/*
+ * Lebenslauf-Einträge (cv-content.tsx): Zeitraum-Spalte + Inhalt, Trennlinien zwischen den
+ * Einträgen; mobil gestapelt. Abweichung von AGENTS.md (dokumentiert): native Listen (ol/ul)
+ * mit zweispaltigem Raster – List/ListItem kürzt bzw. kennt kein Zeitraum-Feld.
+ * Anker-Ziele (#bechtle-studium …) halten Abstand zum Sticky-Header. Nur Tokens.
+ */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  gap: var(--spacing-2) var(--spacing-6);
+  padding-block: var(--spacing-5);
+  border-top: var(--border-width) solid var(--color-border);
+  scroll-margin-top: calc(var(--size-element-md) + var(--spacing-12));
+  break-inside: avoid;
+}
+
+.entry:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.when {
+  padding-top: var(--spacing-1);
+}
+
+.thesis {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-element);
+  background-color: var(--color-background-muted);
+}
+
+.entry:target {
+  border-radius: var(--radius-element);
+  box-shadow: inset 0 0 0 var(--border-width) color-mix(in srgb, var(--color-accent) 40%, transparent);
+  padding-inline: var(--spacing-3);
+}
+
+@media (max-width: 599px) {
+  .entry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

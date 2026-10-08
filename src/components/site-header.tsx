@@ -127,7 +127,18 @@ export function SiteHeader() {
           </HStack>
         }
       />
-      <MobileNav isOpen={menuOpen} onOpenChange={setMenuOpen} side="end" header={dict.menuTitle}>
+      {/* header als Element statt String: sonst rendert Astryx eine (versteckte) H2 „Navigation“
+          vor der H1 jeder Seite – Agenten/Crawler sähen eine falsche Überschriftenfolge. */}
+      <MobileNav
+        isOpen={menuOpen}
+        onOpenChange={setMenuOpen}
+        side="end"
+        header={
+          <Text type="label" weight="semibold">
+            {dict.menuTitle}
+          </Text>
+        }
+      >
         <VStack gap={4}>
           <VStack gap={0.5} as="nav" aria-label={dict.menuTitle}>
             {dict.nav.map((item) => (

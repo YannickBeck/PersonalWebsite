@@ -94,21 +94,6 @@
   }
 }
 
-@keyframes yb-terminal-type {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes yb-terminal-blink {
-  50% {
-    opacity: 0;
-  }
-}
-
 /* ---------- 2. View Transitions ---------- */
 
 /* Klicks während eines Übergangs erreichen die Seite */
@@ -327,9 +312,8 @@ html[data-yb-instant] *::after {
    Startseite spielt die Choreografie nicht erneut (M3), die Seite kommt per View Transition.
    Ohne JS läuft sie trotzdem (reines CSS) und endet sichtbar – nichts bleibt unsichtbar. */
 @media (prefers-reduced-motion: no-preference) {
-  /* Choreografie ≤ 600ms (MOT8): 350ms je Element, 40ms Versatz, Terminal zuletzt */
-  html:not([data-yb-nav]) .yb-enter > *,
-  html:not([data-yb-nav]) .yb-hero-terminal {
+  /* Choreografie ≤ 600ms (MOT8): 350ms je Element, 40ms Versatz */
+  html:not([data-yb-nav]) .yb-enter > * {
     --yb-vt-x: 0;
     --yb-vt-y: calc(var(--yb-motion-distance) * 0.5);
     animation:
@@ -357,31 +341,6 @@ html[data-yb-instant] *::after {
 
   .yb-enter > :nth-child(n + 5) {
     --yb-step: 4;
-  }
-
-  .yb-hero-terminal {
-    --yb-step: 4;
-  }
-
-  /* Terminal: Zeile für Zeile – Befehl tippen, dann Ausgabe einblenden */
-  html:not([data-yb-nav]) .yb-term-line {
-    --yb-vt-x: 0;
-    --yb-vt-y: calc(var(--yb-motion-distance) * 0.25);
-    animation:
-      var(--yb-motion-micro) var(--yb-ease-enter) both yb-fade-in,
-      var(--yb-motion-micro) var(--yb-ease-enter) both yb-shift-in;
-    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--duration-medium));
-  }
-
-  html:not([data-yb-nav]) .yb-term-typed {
-    animation: yb-terminal-type calc(var(--yb-chars) * var(--duration-fast) * 0.12) steps(var(--yb-chars), end) both;
-    animation-delay: calc(var(--yb-line) * var(--yb-motion-enter) + var(--duration-medium));
-  }
-
-  /* Cursor blinkt viermal (4 × 1s) und steht dann ruhig (WCAG 2.2.2: Blinken endet vor 5s,
-     A115/COD14/MOT8). Die Keyframes enden bei voller Deckkraft. */
-  .yb-term-cursor {
-    animation: yb-terminal-blink calc(var(--duration-slow) * 1.25) steps(1, end) 4;
   }
 }
 

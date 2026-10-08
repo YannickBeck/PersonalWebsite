@@ -1,0 +1,420 @@
+/*
+ * Startseite (src/components/home/*). Abweichung von AGENTS.md (dokumentiert): Der Einstieg
+ * ist eine art-direktierte Bühne (absolut positionierter Namenszug, Porträt, Rolle, Aktionen)
+ * und die Abschnittsnavigation klebt – dafür hat Astryx keine Props. Nur Tokens; strukturelle
+ * Maße (cqi, svh, Seitenverhältnisse) sind erlaubt.
+ *
+ * Kopfhöhe: --yb-header-h setzt die Abschnittsnavigation (ResizeObserver auf den Header);
+ * bis dahin gilt die Summe aus Bedienelement und Innenabstand der TopNav.
+ */
+
+.hero,
+.sections {
+  --yb-header: var(--yb-header-h, calc(var(--size-element-md) + var(--spacing-5)));
+}
+
+/* ---------- 00 Einstieg ---------- */
+.hero {
+  container-type: inline-size;
+  padding-inline: var(--spacing-4);
+  scroll-margin-top: var(--yb-header);
+}
+
+.hero:focus,
+.section:focus {
+  outline: none;
+}
+
+.heroStage {
+  position: relative;
+  /* Bühne: fast eine Bildschirmhöhe, nie absurd hoch auf großen Monitoren */
+  height: clamp(34rem, calc(100svh - var(--yb-header) - var(--spacing-4)), 56rem);
+  overflow: clip;
+}
+
+.heroName {
+  position: absolute;
+  inset-inline: 0;
+  top: var(--spacing-4);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.18em;
+  font-weight: 800;
+  font-size: 21.5cqi;
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  color: var(--yb-name-ghost);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
+.heroPortrait {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 60%;
+  height: 90%;
+  width: auto;
+  max-width: none;
+  translate: -50% 0;
+}
+
+.heroText {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  bottom: var(--spacing-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  max-width: 44%;
+}
+
+.heroRole {
+  margin: 0;
+  font-family: var(--yb-font-display);
+  font-weight: 800;
+  font-size: clamp(3.5rem, 1.5rem + 6cqi, 7.5rem);
+  line-height: 0.84;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.heroFocus {
+  font-weight: var(--font-weight-medium);
+}
+
+.heroActions {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: var(--spacing-10);
+}
+
+/* Tablet: Person weiter rechts, Rolle zweizeilig, Aktionen unter der Rolle (links) */
+@media (max-width: 1023px) {
+  .heroPortrait {
+    left: 70%;
+    height: 80%;
+  }
+
+  .heroText {
+    max-width: 40%;
+    bottom: calc(var(--spacing-10) + var(--size-element-lg) + var(--spacing-6));
+  }
+
+  .heroActions {
+    left: 0;
+    right: auto;
+  }
+}
+
+/* Mobil: Bühne mit Namenszug und Person, Text und Aktionen darunter – nichts liegt über
+   dem Foto (Lesbarkeit auf dunkler Hose/Jacke). */
+@media (max-width: 767px) {
+  .heroStage {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .heroName {
+    position: relative;
+    top: 0;
+    font-size: 33cqi;
+    margin-block-start: var(--spacing-2);
+  }
+
+  .heroPortrait {
+    position: relative;
+    left: auto;
+    translate: none;
+    align-self: center;
+    height: auto;
+    width: 64cqi;
+    margin-block-start: -15cqi;
+    /* Person wird am unteren Rand angeschnitten: Bühnen-Unterkante = Linie */
+    max-height: 70svh;
+    object-fit: contain;
+    object-position: bottom;
+  }
+
+  .heroText,
+  .heroActions {
+    position: static;
+    max-width: none;
+  }
+
+  .heroText {
+    margin-block-start: var(--spacing-6);
+  }
+
+  .heroRole {
+    font-size: clamp(3.25rem, 0.5rem + 15cqi, 5rem);
+  }
+
+  .heroActions {
+    margin-block: var(--spacing-5) var(--spacing-4);
+  }
+}
+
+/* ---------- Abschnitte 01 ff. + Abschnittsnavigation ---------- */
+.sections {
+  position: relative;
+}
+
+.section {
+  scroll-margin-top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-4));
+}
+
+.sectionNav {
+  position: sticky;
+  top: var(--yb-header);
+  z-index: 15;
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-3) var(--spacing-4);
+  pointer-events: none;
+  /* Papier blendet nach unten aus: Inhalt scrollt nicht hart sichtbar hinter der Leiste durch */
+  background: linear-gradient(
+    to bottom,
+    var(--color-background-body) 55%,
+    color-mix(in srgb, var(--color-background-body) 0%, transparent)
+  );
+}
+
+.sectionNavList {
+  pointer-events: auto;
+  display: flex;
+  gap: var(--spacing-1);
+  margin: 0;
+  padding: var(--spacing-1);
+  list-style: none;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--color-background-card) 88%, transparent);
+  -webkit-backdrop-filter: blur(var(--spacing-3)) saturate(1.3);
+  backdrop-filter: blur(var(--spacing-3)) saturate(1.3);
+  box-shadow: var(--yb-shadow-ring);
+}
+
+.sectionNavList::-webkit-scrollbar {
+  display: none;
+}
+
+.sectionNavLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1-5);
+  min-height: var(--size-element-md);
+  padding-inline: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  transition-property: background-color, color;
+  transition-duration: var(--yb-motion-micro);
+  transition-timing-function: var(--ease-standard);
+}
+
+.sectionNavNumber {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+@media (hover: hover) {
+  .sectionNavLink:hover {
+    background-color: var(--color-overlay-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.sectionNavLink:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  /* innerhalb der Leiste (overflow-x: auto würde einen äußeren Ring abschneiden) */
+  outline-offset: 0;
+}
+
+.sectionNavLink[aria-current='true'] {
+  background-color: var(--color-background-inverted);
+  color: var(--color-background-body);
+}
+
+.sectionNavLink[aria-current='true'] .sectionNavNumber {
+  color: color-mix(in srgb, var(--color-accent) 55%, var(--color-background-body));
+}
+
+@media (max-width: 767px) {
+  .sectionNav {
+    justify-content: flex-start;
+    padding-inline: var(--spacing-2);
+  }
+
+  /* Mobil: Pillen ohne Nummer, Leiste füllt die Breite und scrollt horizontal */
+  .sectionNavList {
+    width: 100%;
+  }
+
+  .sectionNavNumber {
+    display: none;
+  }
+
+  .sectionNavLink {
+    padding-inline: var(--spacing-3);
+  }
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+
+.sectionNumber {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.sectionTitle {
+  font-size: clamp(var(--font-size-2xl), 1.4rem + 1.6vw, var(--font-size-4xl));
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- 01 Über mich ---------- */
+.aboutGrid {
+  display: grid;
+  gap: var(--spacing-10);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .aboutGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  }
+
+  .aboutFacts {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1100px) {
+  .aboutGrid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) minmax(0, 0.9fr);
+  }
+
+  .aboutFacts {
+    grid-column: auto;
+  }
+}
+
+.idCard {
+  margin: 0;
+  justify-self: center;
+  width: min(100%, 18rem);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-container);
+  background-color: var(--color-background-card);
+  box-shadow: var(--yb-shadow-ring);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.idCardPhoto {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  /* konzentrisch: Karte 20px − Innenabstand 12px = 8px */
+  border-radius: calc(var(--radius-container) - var(--spacing-3));
+}
+
+.idCardCaption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-0-5);
+  padding: 0 var(--spacing-1) var(--spacing-1);
+}
+
+/* ---------- 02 Fähigkeiten (Gerüst) ---------- */
+.skillList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.skillItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-3) var(--spacing-1) var(--spacing-1);
+  border-radius: var(--radius-full);
+  background-color: var(--color-background-card);
+  box-shadow: var(--yb-shadow-ring);
+}
+
+.skillSymbol {
+  display: inline-grid;
+  place-items: center;
+  width: var(--size-element-sm);
+  height: var(--size-element-sm);
+  border-radius: var(--radius-full);
+  background-color: var(--color-background-muted);
+  font-size: var(--font-size-base);
+  font-weight: 800;
+  line-height: 1;
+  text-transform: none;
+}
+
+/* ---------- 04 Werdegang (Gerüst) ---------- */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.timelineItem {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: var(--spacing-2) var(--spacing-6);
+  padding-block: var(--spacing-4);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.timelineItem:last-child {
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.timelineWhen {
+  padding-top: var(--spacing-0-5);
+}
+
+@media (max-width: 599px) {
+  .timelineItem {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

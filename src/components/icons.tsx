@@ -25,6 +25,14 @@ function ArrowLeftSvg(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+function ExternalArrowSvg(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M8 16 16 8M9 8h7v7" />
+    </svg>
+  );
+}
+
 type IconColor = 'primary' | 'secondary' | 'accent' | 'inherit';
 
 export function ArrowRight({ color = 'inherit' }: { color?: IconColor }) {
@@ -33,4 +41,9 @@ export function ArrowRight({ color = 'inherit' }: { color?: IconColor }) {
 
 export function ArrowLeft({ color = 'inherit' }: { color?: IconColor }) {
   return <Icon icon={ArrowLeftSvg} size="sm" color={color} />;
+}
+
+/** Pfeil nach rechts oben: Link verlässt die Website (externes Ziel, z. B. LinkedIn, GitHub). */
+export function ExternalArrow({ color = 'inherit' }: { color?: IconColor }) {
+  return <Icon icon={ExternalArrowSvg} size="sm" color={color} />;
 }

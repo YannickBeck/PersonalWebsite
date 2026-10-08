@@ -10,6 +10,7 @@ import { TextArea } from '@astryxdesign/core/TextArea';
 import { Button } from '@astryxdesign/core/Button';
 import { Banner } from '@astryxdesign/core/Banner';
 import { FormPreview, type PreviewState } from '@/components/form-preview';
+import { SHOW_GAPS } from '@/lib/gaps';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 
 type Phase = 'idle' | 'sending' | 'error' | 'done';
@@ -80,7 +81,7 @@ export function ContactForm({ lang }: { lang: Lang }) {
 
   return (
     <VStack gap={6}>
-      <Banner status="note" title={dict.demoNoticeTitle} description={dict.formDemoNote} />
+      <Banner status="note" title={dict.formNotConnectedTitle} description={dict.formDemoNote} />
       <form
         ref={formRef}
         method="dialog"
@@ -155,6 +156,8 @@ export function ContactForm({ lang }: { lang: Lang }) {
       <noscript>
         <Text color="secondary">{dict.formNoScript}</Text>
       </noscript>
+      {/* Zustands-Vorschau nur in der Vorschau-Umgebung (NEXT_PUBLIC_SHOW_GAPS=1) */}
+      {SHOW_GAPS ? (
       <FormPreview
         lang={lang}
         value={preview}
@@ -165,6 +168,7 @@ export function ContactForm({ lang }: { lang: Lang }) {
           }
         }}
       />
+      ) : null}
     </VStack>
   );
 }

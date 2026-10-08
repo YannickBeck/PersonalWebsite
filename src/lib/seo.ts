@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
 import type { Lang } from '@/i18n/dictionaries';
 import { counterpartPath } from '@/lib/routes';
+import { OG_ALT, OG_SIZE } from '@/lib/og';
+
+/** Vorschaubild je Sprache (src/app/og/[lang]/route.ts). */
+export function ogImageUrl(lang: Lang): string {
+  return `${SITE}/og/${lang}`;
+}
 
 const SITE = 'https://yannick-beck.de';
 
@@ -10,7 +16,8 @@ function url(lang: Lang, bare: string): string {
 }
 
 /**
- * Einheitliche SEO-Angaben: Canonical + hreflang (de/en/x-default) + OG-Basis.
+ * Einheitliche SEO-Angaben: Canonical + hreflang (de/en/x-default) + OG-Basis. og:image kommt
+ * aus src/app/og/[lang]/route.ts (stabile URL je Sprache).
  * path ohne Sprachpräfix in der Sprache der Seite, z. B. '/', '/projekte',
  * '/blog/mein-artikel' (EN: '/blog/my-article').
  *
@@ -23,12 +30,15 @@ export function pageMeta({
   title,
   description,
   noindex = false,
+  type = 'website',
 }: {
   lang: Lang;
   path: string;
   title: string;
   description?: string;
   noindex?: boolean;
+  /** og:type – 'profile' für die Startseite (Person), 'article' für Beiträge. */
+  type?: 'website' | 'profile' | 'article';
 }): Metadata {
   const canonical = url(lang, path);
   const otherLang: Lang = lang === 'de' ? 'en' : 'de';
@@ -51,8 +61,10 @@ export function pageMeta({
       url: canonical,
       siteName: 'Yannick Beck',
       locale: lang === 'de' ? 'de_DE' : 'en_GB',
-      type: 'website',
+      type,
+      images: [{ url: ogImageUrl(lang), width: OG_SIZE.width, height: OG_SIZE.height, alt: OG_ALT[lang] }],
     },
+    twitter: { card: 'summary_large_image', title, description, images: [ogImageUrl(lang)] },
     ...(noindex ? { robots: { index: false } } : {}),
   };
 }

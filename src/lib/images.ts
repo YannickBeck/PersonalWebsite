@@ -11,7 +11,10 @@ export function realImage(src: string | null | undefined): string | null {
 }
 
 /**
- * Porträt nur mit echter Bildquelle rendern (E1). Solange null, zeigen Startseite und
- * „Über mich“ Text + Fakten statt eines Platzhalters.
+ * Porträt (Quelle: Foto des Nutzers, Metadaten entfernt). Alle Ausschnitte mit Maßen und
+ * Alt-Texten: PHOTOS in src/content/profile.ts. PORTRAIT_SRC bleibt als Kurzform für
+ * Komponenten, die nur „ein Porträt“ brauchen (quadratischer Kopf-Ausschnitt).
  */
-export const PORTRAIT_SRC: string | null = null;
+export const PORTRAIT_SRC = '/me/portrait-avatar.webp';
+export const PORTRAIT_CARD_SRC = '/me/portrait-card.webp';
+export const PORTRAIT_CUTOUT_SRC = '/me/portrait-cutout.webp';

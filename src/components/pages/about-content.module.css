@@ -1,0 +1,55 @@
+/*
+ * Über mich: Text (Lesebreite) + Randspalte mit Porträt und Fakten ab 900px, darunter gestapelt.
+ * Abweichung von AGENTS.md (dokumentiert): asymmetrische Spalten (Astryx-Grid nur gleich
+ * breit), Bildmaße, native Liste für den Kurz-Werdegang. Nur Tokens.
+ */
+.grid {
+  display: grid;
+  gap: var(--spacing-10);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+}
+
+.text {
+  max-width: 68ch;
+}
+
+.paragraph {
+  font-size: var(--yb-prose-size);
+  line-height: 1.65;
+}
+
+.side {
+  max-width: 22rem;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--radius-container);
+}
+
+.path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.pathItem {
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  gap: var(--spacing-4);
+  align-items: baseline;
+}

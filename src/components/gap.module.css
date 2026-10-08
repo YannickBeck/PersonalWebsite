@@ -1,0 +1,18 @@
+/*
+ * Vorschau-Platzhalter „OFFEN: …“ (nur mit NEXT_PUBLIC_SHOW_GAPS=1, src/components/gap.tsx).
+ * Dezent: gestrichelte Kontur in der Linienfarbe, keine Füllfarbe, kein Akzent – er soll
+ * auffallen, ohne mit Inhalten zu konkurrieren. Nur Tokens.
+ */
+.gap {
+  display: inline-block;
+  border: var(--border-width) dashed var(--color-border-emphasized);
+  border-radius: var(--radius-element);
+  padding: var(--spacing-0-5) var(--spacing-2);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.block {
+  display: block;
+  width: fit-content;
+}

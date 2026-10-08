@@ -7,6 +7,7 @@ import { Banner } from '@astryxdesign/core/Banner';
 import { getDictionary } from '@/i18n/dictionaries';
 import type { Metadata } from 'next';
 import { pageMeta } from '@/lib/seo';
+import { Gap } from '@/components/gap';
 
 const meta = getDictionary('en').pages.datenschutz;
 export const metadata: Metadata = pageMeta({
@@ -48,12 +49,12 @@ export default function Page() {
   const dict = getDictionary('en');
   return (
     <>
-      <PageHero title={page.title} lede={page.lede} />
+      <PageHero title={page.title} lede={page.lede} meta={<Gap id="legal-privacy" lang="en" block />} />
       <Section>
         <VStack gap={8} maxWidth={640}>
           <Banner
             status="note"
-            title={dict.demoNoticeTitle}
+            title={dict.templateNoticeTitle}
             description="Editorial template — not legal advice. Complete controller, legal bases and retention periods in brackets."
           />
           <VStack gap={2}>

@@ -1,16 +1,11 @@
 import type { Lang } from '@/i18n/dictionaries';
 import { withLang } from '@/i18n/dictionaries';
-import {
-  getPosts as getGhostPosts,
-  getProjects as getGhostProjects,
-  type GhostItem,
-} from '@/lib/ghost';
-import {
-  DEMO_PROJECTS,
-  TOPIC_LABELS,
-  type ProjectCategory,
-} from '@/content/demo';
+import { getPosts as getGhostPosts, type GhostItem } from '@/lib/ghost';
+import { TOPIC_LABELS, type ProjectCategory } from '@/content/demo';
 import { DEMO_ARTICLES } from '@/content/demo-articles';
+import { PROJECTS } from '@/content/profile';
+import { projectCard } from '@/content/profile-view';
+import { SHOW_GAPS } from '@/lib/gaps';
 
 export interface CardItem {
   kind: 'project' | 'post';
@@ -83,49 +78,30 @@ function demoTopics(slugs: string[], lang: Lang): { slug: string; label: string 
   return slugs.map((s) => ({ slug: s, label: TOPIC_LABELS[lang][s] ?? prettyTag(s) }));
 }
 
-/** Projekte: echte Ghost-Inhalte zuerst, dann Demo-Projekte. */
+/**
+ * Projekte: ausschließlich die zwei Projekte aus dem Content-Modell (Nutzerentscheidung:
+ * Orbitalis + Bachelorarbeit). Ghost-Beiträge mit Tag „project“ (derzeit nur der
+ * Beispielbeitrag „Me-Website“) erscheinen nicht in Listen; ihre Detail-URL bleibt erreichbar
+ * (noindex, nicht in der Sitemap). Demo-Projekte gibt es nicht mehr.
+ */
 export async function getProjectCards(lang: Lang): Promise<CardItem[]> {
-  const [ghost, demo] = await Promise.all([
-    getGhostProjects(lang),
-    Promise.resolve(DEMO_PROJECTS.filter((p) => p.lang === lang)),
-  ]);
-  const g: CardItem[] = ghost.map((p) => {
-    const category = ghostCategory(p);
+  return PROJECTS.map((p) => {
+    const card = projectCard(p, lang);
     return {
-      kind: 'project' as const,
-      slug: p.slug,
-      title: p.title ?? p.slug,
-      excerpt: p.custom_excerpt || p.excerpt || '',
-      date: p.published_at,
-      image: p.feature_image ?? null,
+      ...card,
+      image: null,
       demo: false,
-      category,
-      categoryLabel: category ? TOPIC_LABELS[lang][category] : undefined,
-      topics: ghostTopics(p, lang),
-      href: withLang(`/projekte/${p.slug}`, lang),
+      category: card.category as ProjectCategory | undefined,
+      topics: card.topics,
     };
   });
-  const d: CardItem[] = demo.map((p) => ({
-    kind: 'project' as const,
-    slug: p.slug,
-    title: p.title,
-    excerpt: p.excerpt,
-    date: p.date,
-    image: p.cover,
-    demo: true,
-    category: p.category,
-    categoryLabel: p.categoryLabel,
-    topics: demoTopics(p.topics, lang),
-    href: withLang(`/projekte/${p.slug}`, lang),
-  }));
-  return [...g, ...d];
 }
 
-/** Artikel: Ghost + Demo, nach Datum absteigend. */
+/** Artikel: Ghost (+ Demo-Artikel nur in der Vorschau, NEXT_PUBLIC_SHOW_GAPS=1), nach Datum absteigend. */
 export async function getPostCards(lang: Lang): Promise<CardItem[]> {
   const [ghost, demo] = await Promise.all([
     getGhostPosts(lang),
-    Promise.resolve(DEMO_ARTICLES.filter((a) => a.lang === lang)),
+    Promise.resolve(SHOW_GAPS ? DEMO_ARTICLES.filter((a) => a.lang === lang) : []),
   ]);
   const g: CardItem[] = ghost.map((p) => ({
     kind: 'post' as const,

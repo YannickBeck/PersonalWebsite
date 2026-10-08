@@ -102,7 +102,7 @@ export function ContentCard({
 }: {
   item: ContentCardData;
   lang: Lang;
-  /** z. B. 2, wenn die Karte direkt unter der H1 steht (T9: kein Sprung h1 → h3). */
+  /** Überschriften-Ebene, z. B. 2, wenn die Karte direkt unter der H1 steht (T9: kein Sprung h1 → h3). */
   headingAccessibilityLevel?: 2 | 3 | 4;
   showExcerpt?: boolean;
   /** Scroll-Reveal (false im Karussell: dort scrollt der Container horizontal). */
@@ -130,7 +130,9 @@ export function ContentCard({
             </Text>
             {item.demo ? <Token label={dict.demoToken} size="sm" className="print-hide" /> : null}
           </HStack>
-          <Heading level={3} accessibilityLevel={headingAccessibilityLevel} textWrap="balance">
+          {/* Element-Ebene = Dokumentstruktur (h2 direkt unter der H1, sonst h3), Optik immer
+              wie h3 (.title) – vorher nur aria-level, das Tag blieb h3 (Sprung H1→H3 im HTML). */}
+          <Heading level={headingAccessibilityLevel ?? 3} textWrap="balance" className={styles.title}>
             {item.title}
           </Heading>
           {showExcerpt && item.excerpt ? (

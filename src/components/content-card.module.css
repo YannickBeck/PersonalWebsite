@@ -8,3 +8,10 @@
     display: none;
   }
 }
+
+/* Kartentitel sieht immer wie eine H3 aus, auch wenn er als h2 ausgezeichnet ist (Struktur ≠ Optik) */
+.title {
+  font-size: var(--text-heading-3-size);
+  line-height: var(--text-heading-3-leading);
+  font-weight: var(--text-heading-3-weight);
+}

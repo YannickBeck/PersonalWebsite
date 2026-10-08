@@ -1,0 +1,18 @@
+import type { Metadata } from 'next';
+import { pageMeta } from '@/lib/seo';
+import { getDictionary } from '@/i18n/dictionaries';
+import { UsesContent } from '@/components/pages/uses-content';
+
+const meta = getDictionary('de').pages.uses;
+export const metadata: Metadata = pageMeta({
+  lang: 'de',
+  path: '/uses',
+  title: meta.title,
+  description: meta.lede,
+  // noch keine belegte Werkzeugliste: erreichbar, aber nicht im Index (routes.ts)
+  noindex: true,
+});
+
+export default function Page() {
+  return <UsesContent lang="de" />;
+}

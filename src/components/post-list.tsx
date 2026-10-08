@@ -35,7 +35,7 @@ export function PostList({
     }
     suppressTransitions();
   }, [topic]);
-  // Themen-Tabs als Filter-Transition (wie project-grid.tsx); die Suche filtert sofort
+  // Themen-Tabs als Filter-Transition (motion.css §2d); die Suche filtert sofort
   // (kein Überblenden bei jedem Tastendruck).
   const setTopic = (value: string) =>
     startTransition(() => {

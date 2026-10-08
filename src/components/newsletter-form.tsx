@@ -9,6 +9,7 @@ import { Banner } from '@astryxdesign/core/Banner';
 import { Text } from '@astryxdesign/core/Text';
 import { FormLayout } from '@astryxdesign/core/FormLayout';
 import { FormPreview, type PreviewState } from '@/components/form-preview';
+import { SHOW_GAPS } from '@/lib/gaps';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 
 type Phase = 'idle' | 'sending' | 'exists' | 'error' | 'confirm' | 'done';
@@ -118,6 +119,8 @@ export function NewsletterForm({ lang }: { lang: Lang }) {
       <noscript>
         <Text color="secondary">{dict.formNoScript}</Text>
       </noscript>
+      {/* Zustands-Vorschau nur in der Vorschau-Umgebung (NEXT_PUBLIC_SHOW_GAPS=1) */}
+      {SHOW_GAPS ? (
       <FormPreview
         lang={lang}
         value={preview}
@@ -128,6 +131,7 @@ export function NewsletterForm({ lang }: { lang: Lang }) {
           }
         }}
       />
+      ) : null}
     </VStack>
   );
 }

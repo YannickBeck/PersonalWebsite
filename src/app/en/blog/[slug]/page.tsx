@@ -1,18 +1,20 @@
 import type { Metadata } from 'next';
-import { pageMeta } from '@/lib/seo';
+import { ogImageUrl, pageMeta } from '@/lib/seo';
 import { detailOr404 } from '@/components/detail-page';
 import { ArticleDetail } from '@/components/article-detail';
 import { getBySlug, getPostSlugs } from '@/lib/ghost';
 import { demoArticleBySlug, demoArticlesByLang } from '@/content/demo-articles';
+import { SHOW_GAPS } from '@/lib/gaps';
 
 export async function generateStaticParams() {
   const ghost = await getPostSlugs('en');
-  const demo = demoArticlesByLang('en').map((a) => a.slug);
+  // Demo-Artikel nur in der Vorschau (NEXT_PUBLIC_SHOW_GAPS=1)
+  const demo = SHOW_GAPS ? demoArticlesByLang('en').map((a) => a.slug) : [];
   return [...ghost, ...demo].map((slug) => ({ slug }));
 }
 
 async function metaFor(slug: string): Promise<Metadata> {
-  const demo = demoArticleBySlug(slug, 'en');
+  const demo = SHOW_GAPS ? demoArticleBySlug(slug, 'en') : undefined;
   if (demo) {
     return {
       title: demo.title,
@@ -31,6 +33,7 @@ async function metaFor(slug: string): Promise<Metadata> {
     return {};
   }
   const canonical = pageMeta({
+    type: 'article',
     lang: 'en',
     path: '/blog/' + slug,
     title: post.title ?? slug,
@@ -43,7 +46,8 @@ async function metaFor(slug: string): Promise<Metadata> {
     openGraph: {
       title: post.title,
       description: post.custom_excerpt || post.excerpt || undefined,
-      images: post.feature_image ? [post.feature_image] : undefined,
+      type: 'article',
+      images: post.feature_image ? [post.feature_image] : [ogImageUrl('en')],
     },
   };
 }
@@ -63,7 +67,7 @@ export default async function BlogDetailEn({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const demo = demoArticleBySlug(slug, 'en');
+  const demo = SHOW_GAPS ? demoArticleBySlug(slug, 'en') : undefined;
   if (demo) {
     return <ArticleDetail lang="en" item={demo} />;
   }

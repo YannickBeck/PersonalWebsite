@@ -4,14 +4,11 @@
  * nicht die gesamten Demo-Inhalte bundeln.
  */
 export const TRANSLATION_MAP: Record<string, string> = {
-  // Demo-Projekte
-  'demo-projekt-webseite': 'demo-project-website',
-  'demo-project-website': 'demo-projekt-webseite',
-  'demo-projekt-cms-migration': 'demo-project-cms-migration',
-  'demo-project-cms-migration': 'demo-projekt-cms-migration',
-  'demo-projekt-deploy-pipeline': 'demo-project-deploy-pipeline',
-  'demo-project-deploy-pipeline': 'demo-projekt-deploy-pipeline',
-  // Demo-Artikel
+  // Projekte aus dem Content-Modell (src/content/profile.ts, PROJECTS[].slug)
+  orbitalis: 'orbitalis',
+  bachelorarbeit: 'bachelor-thesis',
+  'bachelor-thesis': 'bachelorarbeit',
+  // Demo-Artikel (nur Vorschau)
   'demo-warum-eigene-website': 'demo-why-own-website',
   'demo-why-own-website': 'demo-warum-eigene-website',
   'demo-ghost-headless': 'demo-ghost-headless-en',

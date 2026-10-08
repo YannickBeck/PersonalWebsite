@@ -15,7 +15,8 @@ import { LinkProvider } from '@astryxdesign/core/Link';
 import { InternationalizationProvider } from '@astryxdesign/core/i18n';
 import { ybTheme } from '../theme/yb';
 import { THEME_STORAGE_KEY } from '../theme/theme-boot';
-import { RouteLangContext, useResolvedRouteLang } from '@/i18n/route-lang';
+import { RouteLangContext } from '@/i18n/route-lang';
+import type { Lang } from '@/i18n/dictionaries';
 import { ASTRYX_DE } from '@/i18n/astryx-de';
 import { TransitionLink } from '@/components/transition-link';
 import { suppressTransitions } from '@/lib/instant';
@@ -118,9 +119,8 @@ function readStoredMode(): ThemeMode | null {
   }
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  // Seitensprache für alle Client-Komponenten (route-lang.ts, JURY1-1)
-  const lang = useResolvedRouteLang();
+export function Providers({ lang, children }: { lang: Lang; children: React.ReactNode }) {
+  // Seitensprache kommt vom Root-Layout (RootShell) – für alle Client-Komponenten (route-lang.ts)
   const [mode, setMode] = useState<ThemeMode>('system');
   const systemScheme = useSyncExternalStore<ResolvedThemeMode | null>(
     subscribeSystemScheme,

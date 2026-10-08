@@ -9,6 +9,8 @@ export const metadata: Metadata = pageMeta({
   path: '/uses',
   title: meta.title,
   description: meta.lede,
+  // noch keine belegte Werkzeugliste: erreichbar, aber nicht im Index (routes.ts)
+  noindex: true,
 });
 
 export default function Page() {

@@ -26,25 +26,32 @@ Zwei Quellen, klar getrennt:
 
 ## 2. Code (`/root/me-website`, GitHub `YannickBeck/PersonalWebsite`)
 
-- **Demo-Inhalte:** `src/content/demo.ts` (Projekte), `src/content/demo-articles.ts`
-  (Artikel), `src/content/pages.ts` (Leistungen, CV, Uses). Jeder Eintrag trägt
-  `demo: true`. **Ersetzen = Eintrag löschen** (Ghost-Inhalt mit gleichem Thema anlegen).
-- **UI-Texte:** `src/i18n/dictionaries.ts` (DE+EN nebeneinander).
+- **Inhalte über Yannick:** `src/content/profile.ts` – EINE Quelle (DE+EN) für Startseite, /cv,
+  /ueber-mich, /projekte, /leistungen, /uses, llms.txt, JSON-LD und Markdown-Antworten. Jede Angabe
+  trägt `quelle` (`linkedin` = LinkedIn-Export, `github:YannickBeck/<repo>`, `foto`) und `status`
+  (`belegt` | `offen`). Neue Angabe = mit Quelle eintragen; ohne Beleg nicht veröffentlichen.
+- **Offene Angaben:** `GAPS` in profile.ts (Kurztext, Fundstelle, benötigtes Format). Sie erscheinen
+  nur im Vorschau-Build (`NEXT_PUBLIC_SHOW_GAPS=1`, docs/environment.md) als gestrichelter
+  „OFFEN: …“-Platzhalter; in Produktion fehlen sie ganz. Sobald eine Angabe da ist: Wert in
+  profile.ts eintragen (`status: 'belegt'`), Lücke aus GAPS löschen.
+- **Erfolge (Startseite 05):** `ACHIEVEMENTS` in profile.ts – leer = Abschnitt und Navigationspunkt
+  fehlen; mit Einträgen erscheinen beide automatisch.
+- **Projekte:** nur `PROJECTS` in profile.ts (derzeit Orbitalis und Bachelorarbeit). Ghost-Beiträge
+  mit Tag `project` werden nicht gelistet (URL bleibt erreichbar, noindex).
+- **Demo-Artikel:** `src/content/demo-articles.ts` – nur im Vorschau-Build sichtbar (Token „Demo“).
+- **UI-Texte:** `src/i18n/dictionaries.ts` (DE+EN nebeneinander), nur Bedienung und Überschriften.
 - **Übersetzungszuordnung:** `src/i18n/translations.ts` (Slug-Paare beider Richtungen).
 - **Platzhalter-Bilder:** `public/placeholders/*.svg` werden im Frontend wie „kein Bild“
   behandelt (generatives Cover statt Platzhalter-Grafik, Galerie ausgeblendet).
-- **Porträt:** erscheint erst, wenn `PORTRAIT_SRC` in `src/lib/images.ts` auf eine echte
-  Bildquelle zeigt (z. B. `/portrait.jpg` in `public/`); bis dahin Text + Fakten.
-- **Demo-Hinweis:** eine schlanke Zeile über dem Header (`src/components/demo-notice.tsx`,
-  Text `demoNoticeLine` in den Dictionaries). Entfernen, sobald keine Demo-Inhalte mehr live sind.
-  Demo-Einträge selbst tragen KEINE Präfixe/Suffixe („Demo-Projekt:“, „(fiktiv)“ …):
-  Karten und Detailseiten zeigen dafür ein Token „Demo“ (über `demo: true`), Seiten mit
-  persönlichen Angaben (CV, Über mich, Uses, Leistungen) je einen ruhigen Hinweis.
+- **Fotos:** `public/me/` (vom Inhaber, Metadaten entfernt): `portrait.webp` (Original),
+  `portrait-cutout.webp` (freigestellt, Einstieg), `portrait-card.webp` (4:5), `portrait-avatar.webp`
+  (quadratisch). Maße/Alt-Texte in `PHOTOS` (profile.ts). Neue Ausschnitte nur aus dem Original,
+  ohne Hochskalieren und ohne Metadaten.
 - **Brand-Theme:** `src/theme/yb-theme.ts` — nach jeder Änderung
   `pnpm exec astryx theme build src/theme/yb-theme.ts` ausführen (erzeugt `yb.css`/`yb.js`/`yb.d.ts`/`yb.variants.d.ts`, alle committen).
   Farb-, Typo- und Motion-Entscheidungen stehen im Kopfkommentar der Theme-Datei.
 
 ## 3. Übersicht aller Lücken
 
-Seite `/content-status` (DE+EN, `noindex`): Fundstelle, benötigter Inhalt,
-Format/Umfang, Status — dort steht, was noch fehlt.
+Seite `/content-status` (DE+EN, `noindex`, im Footer nur im Vorschau-Build): alle Einträge aus
+`GAPS` mit Fundstelle und benötigtem Format, dazu die Quellen der veröffentlichten Angaben.
