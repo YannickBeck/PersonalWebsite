@@ -1,42 +1,65 @@
-import { VStack } from '@astryxdesign/core/VStack';
-import { Text } from '@astryxdesign/core/Text';
-import { Grid } from '@astryxdesign/core/Grid';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
-import { SKILLS, SKILL_CATEGORIES } from '@/content/profile';
+import { SKILL_CATEGORIES } from '@/content/profile';
+import { skillTiles } from '@/content/profile-view';
 import { HomeSection } from './home-section';
-import styles from './home.module.css';
+import { SkillTable } from './skill-table';
 
 /**
- * 02 Fähigkeiten – Gerüst (B1): Kacheln mit Kürzel je Kategorie als statische Liste (ohne JS
- * vollständig lesbar). Das interaktive Periodensystem mit Filter-Pillen, Tastatur-Auswahl und
- * Detailfeld („belegt durch“) ersetzt diese Darstellung; die Daten (Kürzel, Kategorie,
- * Belege) kommen schon jetzt aus SKILLS (profile.ts).
+ * 02 Fähigkeiten: Periodensystem aus dem Content-Modell (SKILLS, profile.ts) – quadratische
+ * Kacheln mit Nummer, Kürzel und Kurzname, farbig nach Kategorie; Filter-Pillen; Detailfeld mit
+ * Monogramm bzw. Logo, Kategorie und Belegen (Verweise auf Werdegang und Projekte der
+ * Startseite). Interaktion im Client-Blatt skill-table.tsx (Daten serialisiert, kein
+ * Content-Modell im Browser-Bundle).
+ *
+ * Darunter dieselben Angaben als reine Textliste für Screenreader (ohne Links, damit keine
+ * unsichtbaren Tab-Stopps entstehen) – auch für Agenten und ohne JavaScript im HTML.
  */
 export function SkillsSection({ id, number, lang }: { id: string; number: string; lang: Lang }) {
   const h = getDictionary(lang).home;
+  const tiles = skillTiles(lang);
+  const categories = SKILL_CATEGORIES.map((c) => ({ id: c.id, label: c.label[lang], short: c.short[lang] }));
   return (
     <HomeSection id={id} number={number} title={h.skillsTitle} lede={h.skillsLede}>
-      <Grid columns={{ minWidth: 300, max: 3 }} gap={8}>
-        {SKILL_CATEGORIES.map((cat) => (
-          <VStack key={cat.id} gap={3}>
-            <Text type="label" color="secondary" id={`${id}-${cat.id}`}>
-              {cat.label[lang]}
-            </Text>
-            <ul className={styles.skillList} aria-labelledby={`${id}-${cat.id}`} data-category={cat.id}>
-              {SKILLS.filter((s) => s.category === cat.id).map((s) => (
-                <li key={s.id} className={styles.skillItem}>
-                  <span className={`${styles.skillSymbol} yb-display`} aria-hidden="true">
-                    {s.symbol}
-                  </span>
-                  <Text type="supporting" color="primary">
-                    {s.name[lang]}
-                  </Text>
-                </li>
-              ))}
+      <SkillTable
+        baseId={id}
+        tiles={tiles}
+        categories={categories}
+        labels={{
+          filter: h.skillsFilterLabel,
+          all: h.skillsFilterAll,
+          table: h.skillsTableLabel,
+          hint: h.skillsHint,
+          evidence: h.skillsEvidence,
+          source: h.skillsSource,
+          license: h.skillsLicense,
+          kinds: h.evidenceKinds,
+        }}
+      />
+      <div className="yb-sr-only">
+        <h3>{h.skillsListTitle}</h3>
+        {categories.map((c) => (
+          <div key={c.id}>
+            <h4>{c.label}</h4>
+            <ul>
+              {tiles
+                .filter((t) => t.category === c.id)
+                .map((t) => (
+                  <li key={t.id}>
+                    {t.name} ({t.symbol}). {h.skillsEvidence}:{' '}
+                    {t.evidence.map((ev, i) => (
+                      <span key={`${ev.kind}-${ev.label}`}>
+                        {i > 0 ? '; ' : ''}
+                        {h.evidenceKinds[ev.kind]} <span lang={ev.lang}>{ev.label}</span>
+                        {ev.note ? ` (${ev.note})` : ''}
+                      </span>
+                    ))}
+                    .
+                  </li>
+                ))}
             </ul>
-          </VStack>
+          </div>
         ))}
-      </Grid>
+      </div>
     </HomeSection>
   );
 }

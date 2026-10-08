@@ -1,0 +1,400 @@
+/*
+ * 03 Projekte – Akkordeon (project-accordion.tsx, projects-section.tsx). Abweichung von
+ * AGENTS.md (dokumentiert): Streifen mit senkrechtem Titel und eine Reihe, deren Spalten beim
+ * Wechsel die Breite tauschen – dafür hat Astryx keine Props. Nur Tokens; strukturelle Maße
+ * (cqi, Streifenbreite) erlaubt. Übergänge: motion.css §7.
+ *
+ * Container = Akkordeon. < 640px: untereinander (Kopf immer sichtbar, Inhalt klappt auf).
+ * ≥ 640px: nebeneinander. Beide Inhalte haben IMMER die Breite des offenen Eintrags
+ * (--open-w); der geschlossene Eintrag ist ein Streifen (--strip) und beschneidet nur. So hat
+ * die Reihe die Höhe des längeren Projekts und springt beim Wechsel nicht.
+ */
+.accordion {
+  container-type: inline-size;
+}
+
+.list {
+  --gap: var(--spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  min-width: 0;
+  border-radius: var(--radius-container);
+  background-color: var(--color-background-card);
+  box-shadow: var(--yb-shadow-ring);
+  overflow: clip;
+  scroll-margin-top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
+}
+
+/* ---------- untereinander (Standard, schmal) ---------- */
+.inner {
+  display: grid;
+  grid-template-rows: auto 0fr;
+}
+
+.item[data-open='true'] .inner {
+  grid-template-rows: auto 1fr;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-4);
+}
+
+.panel {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panelInner {
+  padding: 0 var(--spacing-5) var(--spacing-6);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-1) var(--spacing-3);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.number {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--color-text-primary);
+}
+
+.kind {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.period {
+  font-variant-numeric: tabular-nums;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: clamp(var(--font-size-lg), 1.05rem + 0.9cqi, var(--font-size-xl));
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  letter-spacing: var(--yb-heading-tracking);
+  text-wrap: balance;
+}
+
+.trigger {
+  appearance: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  text-wrap: balance;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.trigger[aria-disabled='true'] {
+  cursor: default;
+}
+
+.trigger:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--spacing-1);
+  border-radius: var(--radius-inner);
+}
+
+/* Geschlossen: die ganze Karte bzw. der ganze Streifen ist die Trefferfläche */
+.item[data-open='false'] .trigger::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.item[data-open='false'] .trigger:focus-visible {
+  outline: none;
+}
+
+.item[data-open='false']:has(.trigger:focus-visible) {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--spacing-0-5);
+}
+
+/* Plus/Minus (nur untereinander): zeigt den Zustand, aria-expanded sagt ihn an */
+.chevron {
+  position: relative;
+  flex: none;
+  width: var(--size-element-sm);
+  height: var(--size-element-sm);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 var(--border-width) var(--yb-control-border);
+}
+
+.chevron::before,
+.chevron::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 40%;
+  height: var(--yb-stroke-icon);
+  border-radius: var(--radius-full);
+  background-color: currentColor;
+  translate: -50% -50%;
+}
+
+.chevron::after {
+  rotate: 90deg;
+}
+
+.item[data-open='true'] .chevron::after {
+  rotate: 0deg;
+}
+
+@media (hover: hover) {
+  .item[data-open='false']:hover {
+    background-color: var(--color-background-muted);
+  }
+}
+
+.strip {
+  display: none;
+}
+
+/* ---------- Inhalt: Cover, Text, Fähigkeiten, Links ----------
+   Schmal: Cover, Text, Fähigkeiten, Links untereinander (Lesereihenfolge = DOM).
+   Breit: Cover + Links links, Text rechts; Fähigkeiten links (≥ 900) bzw. über die volle
+   Breite (640–899, sonst wäre die Spalte für elf Kacheln zu schmal). */
+.panelGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'cover' 'text' 'chips' 'actions';
+  gap: var(--spacing-6);
+}
+
+.cover {
+  grid-area: cover;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  min-width: 0;
+}
+
+.chips {
+  grid-area: chips;
+  min-width: 0;
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+.blocks {
+  grid-area: text;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  min-width: 0;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5);
+}
+
+.blockTitle {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--color-text-secondary);
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin: 0;
+  padding-inline-start: 1.1em;
+  list-style: disc;
+}
+
+.points li::marker {
+  color: var(--color-text-secondary);
+}
+
+/* ---------- nebeneinander ---------- */
+@container (min-width: 640px) {
+  .list {
+    --strip: 5.5rem;
+    --open-w: calc(100cqi - var(--strip) - var(--gap));
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .item {
+    flex: 0 0 var(--strip);
+  }
+
+  .item[data-open='true'] {
+    flex-basis: var(--open-w);
+  }
+
+  .item[data-open='false'] {
+    background-color: var(--color-background-muted);
+    box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
+  }
+
+  .inner,
+  .item[data-open='true'] .inner {
+    display: flex;
+    flex-direction: column;
+    width: var(--open-w);
+  }
+
+  .panel {
+    overflow: visible;
+  }
+
+  .head {
+    padding: var(--spacing-7) var(--spacing-8) var(--spacing-5);
+  }
+
+  .panelInner {
+    padding: 0 var(--spacing-8) var(--spacing-8);
+  }
+
+  .chevron {
+    display: none;
+  }
+
+  .item[data-open='false'] .head,
+  .item[data-open='false'] .panelInner {
+    opacity: 0;
+  }
+
+  .strip {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding: var(--spacing-6) 0 var(--spacing-5);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .item[data-open='false'] .strip {
+    opacity: 1;
+  }
+
+  .stripNumber {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  /* Senkrecht von unten nach oben; sideways dreht auch Satzzeichen (’) mit */
+  .stripTitle,
+  .stripKind {
+    writing-mode: vertical-rl;
+    text-orientation: sideways;
+    rotate: 180deg;
+    white-space: nowrap;
+  }
+
+  .stripTitle {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--yb-heading-tracking);
+  }
+
+  .stripEnd {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+  }
+
+  .stripKind {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .stripPlus {
+    position: relative;
+    flex: none;
+    width: var(--size-element-md);
+    height: var(--size-element-md);
+    border-radius: var(--radius-full);
+    background-color: var(--color-background-inverted);
+  }
+
+  .stripPlus::before,
+  .stripPlus::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 38%;
+    height: var(--yb-stroke-icon);
+    border-radius: var(--radius-full);
+    background-color: var(--color-background-body);
+    translate: -50% -50%;
+  }
+
+  .stripPlus::after {
+    rotate: 90deg;
+  }
+
+  .panelGrid {
+    grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: 'cover text' 'actions text' '. text' 'chips chips';
+    gap: var(--spacing-5) var(--spacing-6);
+  }
+}
+
+@container (min-width: 900px) {
+  .panelGrid {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas: 'cover text' 'actions text' 'chips text' '. text';
+    gap: var(--spacing-5) var(--spacing-8);
+  }
+
+  .title {
+    font-size: clamp(var(--font-size-xl), 0.9rem + 1.2cqi, var(--font-size-2xl));
+  }
+}

@@ -41,6 +41,33 @@ html {
   font-variant-numeric: tabular-nums;
 }
 
+/* Kategorien des Periodensystems (Startseite 02, Projekt-Kacheln): Fläche und Farbmarke je
+   data-category, Werte aus dem Theme (--yb-cat-*). */
+.yb-cat[data-category='cloud'] {
+  --yb-cat: var(--yb-cat-cloud);
+  --yb-cat-mark: var(--yb-cat-cloud-mark);
+}
+.yb-cat[data-category='identity'] {
+  --yb-cat: var(--yb-cat-identity);
+  --yb-cat-mark: var(--yb-cat-identity-mark);
+}
+.yb-cat[data-category='ai'] {
+  --yb-cat: var(--yb-cat-ai);
+  --yb-cat-mark: var(--yb-cat-ai-mark);
+}
+.yb-cat[data-category='infra'] {
+  --yb-cat: var(--yb-cat-infra);
+  --yb-cat-mark: var(--yb-cat-infra-mark);
+}
+.yb-cat[data-category='consulting'] {
+  --yb-cat: var(--yb-cat-consulting);
+  --yb-cat-mark: var(--yb-cat-consulting-mark);
+}
+.yb-cat[data-category='build'] {
+  --yb-cat: var(--yb-cat-build);
+  --yb-cat-mark: var(--yb-cat-build-mark);
+}
+
 /* Bilder: neutrale 1px-Kontur nach innen (schwarz bzw. weiß 10 %, nie getönt) */
 .yb-image-outline {
   outline: var(--border-width) solid var(--yb-image-outline);

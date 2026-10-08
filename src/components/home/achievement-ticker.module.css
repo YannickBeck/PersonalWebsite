@@ -1,0 +1,96 @@
+/*
+ * 05 Erfolge – Laufband (achievement-ticker.tsx). Bewegung: motion.css §9 (nur no-preference
+ * und ab 768px). Ohne Bewegung (reduce, schmal) ist es eine statische Liste ohne Kopie und
+ * ohne Schalter.
+ */
+.ticker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.viewport {
+  container-type: inline-size;
+  overflow: clip;
+  /* weiche Kanten, damit Einträge nicht hart abgeschnitten wirken */
+  -webkit-mask-image: linear-gradient(to right, transparent, currentColor var(--spacing-8), currentColor calc(100% - var(--spacing-8)), transparent);
+  mask-image: linear-gradient(to right, transparent, currentColor var(--spacing-8), currentColor calc(100% - var(--spacing-8)), transparent);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+}
+
+.items {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-12);
+  min-width: 100cqi;
+  margin: 0;
+  padding: 0 var(--spacing-12) 0 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-3);
+  white-space: nowrap;
+}
+
+.title {
+  font-size: clamp(var(--font-size-2xl), 1.4rem + 2.4vw, var(--font-size-5xl));
+  font-weight: 800;
+  line-height: 1;
+}
+
+.detail {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.controls {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+  .controls {
+    display: flex;
+  }
+}
+
+/* Ohne Bewegung: eine Liste, umbrechend; schmal: untereinander */
+@media (prefers-reduced-motion: reduce), (max-width: 767px) {
+  .viewport {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .track {
+    width: auto;
+  }
+
+  .clone {
+    display: none;
+  }
+
+  .items {
+    flex-wrap: wrap;
+    min-width: 0;
+    gap: var(--spacing-4) var(--spacing-10);
+    padding: 0;
+  }
+
+  .item {
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .items {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

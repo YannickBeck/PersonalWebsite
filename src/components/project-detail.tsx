@@ -18,7 +18,8 @@ import { SHOW_GAPS } from '@/lib/gaps';
 import { ExternalArrow } from '@/components/icons';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { PROJECTS, type Project } from '@/content/profile';
-import { projectCard } from '@/content/profile-view';
+import { anchor, extraTags, projectCard, skillChips } from '@/content/profile-view';
+import { ChipList, PlainChip, SkillChipLink } from '@/components/skill-chip';
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -94,12 +95,21 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
                   )}
                 </MetadataListItem>
               ) : null}
+              {/* Fähigkeiten als kleine Kacheln mit Sprung ins Periodensystem der Startseite;
+                  Tags ohne eigene Kachel (z. B. „Debian 13“) neutral daneben */}
               <MetadataListItem label={dict.factsStack}>
-                <HStack gap={1.5} wrap="wrap">
-                  {project.tags.map((t) => (
-                    <Token key={t} label={t} size="sm" />
+                <ChipList>
+                  {skillChips(project.skills, lang).map((chip) => (
+                    <li key={chip.id}>
+                      <SkillChipLink chip={chip} href={`${withLang('/', lang)}#${anchor.skill(chip.id)}`} />
+                    </li>
                   ))}
-                </HStack>
+                  {extraTags(project).map((t) => (
+                    <li key={t}>
+                      <PlainChip label={t} />
+                    </li>
+                  ))}
+                </ChipList>
               </MetadataListItem>
               {project.links.length > 0 ? (
                 <MetadataListItem label={dict.factsCode}>

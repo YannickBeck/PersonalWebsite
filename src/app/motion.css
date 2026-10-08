@@ -307,6 +307,11 @@ html[data-yb-instant] *::after {
   transition: none !important;
 }
 
+/* Eigene Regel: ein Browser ohne ::details-content verwirft sonst die ganze Liste oben */
+html[data-yb-instant] *::details-content {
+  transition: none !important;
+}
+
 /* ---------- 3. Einstieg: nur beim ersten Laden des Dokuments ----------
    RouteTransition setzt <html data-yb-nav> ab der ersten Client-Navigation: Rückkehr zur
    Startseite spielt die Choreografie nicht erneut (M3), die Seite kommt per View Transition.
@@ -585,6 +590,123 @@ html[data-yb-instant] *::after {
   /* Bewusst KEIN html { scroll-behavior: smooth }: es macht auch die Scroll-Wiederherstellung
      des Browsers bei Zurück/Vorwärts weich und verschiebt damit die Zielposition
      (gemessen 671 statt 700 px, route-transition.tsx). */
+}
+
+/* ---------- 5d. Abschnittsnavigation der Startseite (section-nav.tsx): Pillen wechseln Farbe ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .yb-section-nav-link {
+    transition-property: background-color, color;
+    transition-duration: var(--yb-motion-micro);
+    transition-timing-function: var(--ease-standard);
+  }
+}
+
+/* ---------- 6. Periodensystem (Startseite 02, skill-table.tsx) ----------
+   Auswahl, Hover und Filter wechseln nur Farbe/Deckkraft (≤ 150ms, hochfrequent – keine
+   Wege, Motion Restraint). Druck-Feedback scale(.96) wie Make-Interfaces-Feel-Better. Das
+   Detailfeld wechselt sofort (Pfeiltasten wären sonst träge). */
+@media (prefers-reduced-motion: no-preference) {
+  .yb-skill-tile,
+  .yb-skill-pill,
+  .yb-skill-chip {
+    transition-property: background-color, color, box-shadow, opacity, scale;
+    transition-duration: var(--yb-motion-micro);
+    transition-timing-function: var(--ease-standard);
+  }
+
+  /* Filter: Kacheln blenden etwas ruhiger ab/auf */
+  .yb-skill-tile[inert] {
+    transition-duration: var(--yb-motion-enter);
+  }
+
+  .yb-skill-tile:active,
+  .yb-skill-pill:active,
+  .yb-skill-chip:active {
+    scale: 0.96;
+  }
+}
+
+/* ---------- 7. Projekt-Akkordeon (Startseite 03, project-accordion.tsx) ----------
+   Nebeneinander: der Eintrag wächst per flex-basis (CSS-Transition → unterbrechbar, ein
+   zweiter Klick kehrt mitten im Weg um). Das ist eine Layout-Animation – bewusst erlaubt:
+   die Reihe hat feste Höhe (beide Inhalte sind immer gesetzt), außerhalb verschiebt sich
+   nichts (CLS 0, gemessen), und sie folgt immer einer Eingabe. Inhalt blendet erst ein, wenn
+   der Platz da ist; der Streifen blendet aus/ein. Untereinander: Inhalt klappt über
+   grid-template-rows (0fr → 1fr) auf. */
+@media (prefers-reduced-motion: no-preference) {
+  .yb-acc-item {
+    transition:
+      flex-basis var(--duration-medium) var(--yb-ease-move),
+      background-color var(--yb-motion-micro) var(--ease-standard);
+  }
+
+  .yb-acc-inner {
+    transition: grid-template-rows var(--duration-medium) var(--yb-ease-move);
+  }
+
+  .yb-acc-fade,
+  .yb-acc-strip {
+    transition: opacity var(--yb-motion-exit) var(--yb-ease-exit);
+  }
+
+  .yb-acc-item[data-open='true'] .yb-acc-fade,
+  .yb-acc-item[data-open='false'] .yb-acc-strip {
+    transition: opacity var(--yb-motion-enter) var(--yb-ease-enter) calc(var(--duration-medium) * 0.45);
+  }
+}
+
+/* ---------- 8. Werdegang (Startseite 04, career-section.tsx) ----------
+   Native <details>: Höhe über ::details-content + interpolate-size (Chrome 131+; ohne
+   Support klappt es sofort), Balkenfarbe und Plus/Minus mit kurzer Transition. Sprungziele
+   (data-yb-jumped) klingen langsam aus. */
+@media (prefers-reduced-motion: no-preference) {
+  .yb-career-entry {
+    interpolate-size: allow-keywords;
+    transition:
+      background-color var(--yb-motion-micro) var(--ease-standard),
+      color var(--yb-motion-micro) var(--ease-standard);
+  }
+
+  .yb-career-entry::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    transition:
+      block-size var(--duration-medium) var(--yb-ease-move),
+      content-visibility var(--duration-medium) allow-discrete;
+  }
+
+  .yb-career-entry[open]::details-content {
+    block-size: auto;
+  }
+
+  .yb-career-toggle::after {
+    transition: rotate var(--yb-motion-micro) var(--ease-standard);
+  }
+
+  .yb-jump-target {
+    transition: background-color var(--duration-slow) var(--ease-standard);
+  }
+}
+
+/* ---------- 9. Laufband Erfolge (Startseite 05, achievement-ticker.tsx) ----------
+   Liste + Kopie, verschoben um −50 % → nahtlos. Nur no-preference und ab 768px (schmal und
+   unter reduce ist es eine statische Liste). Hält über dem Band (Hover) und mit dem
+   Schalter (WCAG 2.2.2) – der Schalter selbst liegt außerhalb der Hover-Fläche. */
+@keyframes yb-ticker {
+  to {
+    translate: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+  .yb-ticker-track {
+    animation: yb-ticker var(--yb-ticker-duration, 40s) linear infinite;
+  }
+
+  .yb-ticker[data-paused='true'] .yb-ticker-track,
+  .yb-ticker-viewport:hover .yb-ticker-track {
+    animation-play-state: paused;
+  }
 }
 
 /* ---------- R. Reduced Motion: zentrale Absicherung ----------

@@ -160,6 +160,24 @@ export const ybTheme = defineTheme({
     // Blasser Namenszug im Einstieg (dekorativ, aria-hidden)
     '--yb-name-ghost': ['color-mix(in srgb, #16151B 7%, transparent)', 'color-mix(in srgb, #EEEAE3 7%, transparent)'],
 
+    // ---- Kategorien im Periodensystem (Startseite 02, Projekt-Kacheln): sechs gedämpfte
+    //      Papiertöne gleicher Helligkeit, Buntheit ≤ 0,035 – Farbe ordnet nur zu, sie
+    //      wertet nicht. Violett (Hue ≈ 290) bleibt dem Akzent vorbehalten und fehlt hier.
+    //      `-mark` = kräftigere Variante für kleine Farbmarken (Filter-Pillen, Detailfeld).
+    //      Text auf den Flächen: Tinte/Papier ≥ 12:1, Sekundärtext ≥ 5,4:1 (gemessen).
+    '--yb-cat-cloud': ['oklch(0.935 0.03 250)', 'oklch(0.29 0.035 250)'],
+    '--yb-cat-identity': ['oklch(0.935 0.03 185)', 'oklch(0.29 0.035 185)'],
+    '--yb-cat-ai': ['oklch(0.935 0.03 345)', 'oklch(0.29 0.035 345)'],
+    '--yb-cat-infra': ['oklch(0.94 0.035 85)', 'oklch(0.29 0.035 85)'],
+    '--yb-cat-consulting': ['oklch(0.935 0.035 45)', 'oklch(0.29 0.035 45)'],
+    '--yb-cat-build': ['oklch(0.935 0.03 135)', 'oklch(0.29 0.035 135)'],
+    '--yb-cat-cloud-mark': ['oklch(0.56 0.1 250)', 'oklch(0.74 0.09 250)'],
+    '--yb-cat-identity-mark': ['oklch(0.56 0.08 185)', 'oklch(0.74 0.08 185)'],
+    '--yb-cat-ai-mark': ['oklch(0.56 0.1 345)', 'oklch(0.74 0.09 345)'],
+    '--yb-cat-infra-mark': ['oklch(0.6 0.1 85)', 'oklch(0.76 0.09 85)'],
+    '--yb-cat-consulting-mark': ['oklch(0.56 0.1 45)', 'oklch(0.74 0.09 45)'],
+    '--yb-cat-build-mark': ['oklch(0.56 0.08 135)', 'oklch(0.74 0.08 135)'],
+
     // ---- Motion-Tokens für eigene Animationen (src/app/motion.css)
     '--yb-motion-micro': 'var(--duration-fast)',
     '--yb-motion-exit': 'var(--duration-fast-min)',

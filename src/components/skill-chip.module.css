@@ -1,0 +1,56 @@
+/* Fähigkeits-Kachel klein (Projekt-Akkordeon, Projektseiten). Farbe über .yb-cat (globals.css).
+   Bewegung (Farbwechsel beim Hover): motion.css §6. */
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1-5);
+  min-height: var(--size-element-sm);
+  padding: var(--spacing-0-5) var(--spacing-2) var(--spacing-0-5) var(--spacing-0-5);
+  border-radius: var(--radius-inner);
+  background-color: var(--yb-cat, var(--color-background-muted));
+  box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.symbol {
+  display: inline-grid;
+  place-items: center;
+  min-width: calc(var(--size-element-sm) - var(--spacing-1));
+  align-self: stretch;
+  padding-inline: var(--spacing-1);
+  border-radius: calc(var(--radius-inner) - var(--spacing-0-5));
+  background-color: color-mix(in oklch, var(--color-background-card) 70%, transparent);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+}
+
+a.chip:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--spacing-0-5);
+}
+
+@media (hover: hover) {
+  a.chip:hover {
+    background-color: color-mix(in oklch, var(--yb-cat) 85%, var(--color-text-primary));
+  }
+}
+
+.plain {
+  padding-inline: var(--spacing-3);
+  background-color: var(--color-background-muted);
+  color: var(--color-text-secondary);
+}

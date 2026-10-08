@@ -9,6 +9,7 @@ import { ProjectsSection } from './projects-section';
 import { CareerSection } from './career-section';
 import { AchievementsSection } from './achievements-section';
 import { ContactSection } from './contact-section';
+import { HomeJump } from './home-jump';
 import styles from './home.module.css';
 
 const SECTION: Record<Exclude<HomeSectionKey, 'start'>, typeof AboutSection> = {
@@ -41,6 +42,8 @@ export function HomeContent({ lang }: { lang: Lang }) {
           return <Component key={s.key} id={s.id} number={s.number} lang={lang} />;
         })}
       </div>
+      {/* Nach den Abschnitten: deren Sprung-Listener stehen dann schon (home-jump.tsx) */}
+      <HomeJump />
     </>
   );
 }

@@ -13,11 +13,13 @@ const SOURCES: Record<Lang, { name: string; text: string }[]> = {
     { name: 'LinkedIn-Export (Profile.pdf, 08.10.2026)', text: 'Headline, Ort, Zusammenfassung, Stationen, Ausbildung, Sprachen, Zertifikate, Top-Kenntnisse, Schwerpunkte, Bachelorarbeit.' },
     { name: 'GitHub: YannickBeck/Abgabe_Orbitalis, YannickBeck/OrbitalisTicketSystem', text: 'README und Eigenleistungen/SUMMARY.md – Ausgangslage, Beitrag und Ergebnis von Orbitalis.' },
     { name: 'Fotos (vom Inhaber, ohne Metadaten)', text: 'Porträt, freigestellte Fassung, Ausschnitte für Karte und Avatar.' },
+    { name: 'Logos im Periodensystem (Simple Icons über Better Icons)', text: 'Nur PHP (Colin Viebrock, CC BY-SA 4.0, einfarbig angepasst) und FastAPI (Sebastián Ramírez, MIT). Alle anderen Fähigkeiten zeigen ihr Kürzel; die Begründung steht in docs/skill-logos.md.' },
   ],
   en: [
     { name: 'LinkedIn export (Profile.pdf, 8 Oct 2026)', text: 'Headline, location, summary, positions, education, languages, certifications, top skills, focus list, bachelor’s thesis.' },
     { name: 'GitHub: YannickBeck/Abgabe_Orbitalis, YannickBeck/OrbitalisTicketSystem', text: 'README and Eigenleistungen/SUMMARY.md – starting point, contribution and outcome of Orbitalis.' },
     { name: 'Photos (supplied by the owner, metadata removed)', text: 'Portrait, cut-out version, crops for card and avatar.' },
+    { name: 'Logos in the periodic table (Simple Icons via Better Icons)', text: 'Only PHP (Colin Viebrock, CC BY-SA 4.0, single-colour adaptation) and FastAPI (Sebastián Ramírez, MIT). All other skills show their symbol; the reasoning is in docs/skill-logos.md.' },
   ],
 };
 

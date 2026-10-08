@@ -35,7 +35,14 @@ Zwei Quellen, klar getrennt:
   „OFFEN: …“-Platzhalter; in Produktion fehlen sie ganz. Sobald eine Angabe da ist: Wert in
   profile.ts eintragen (`status: 'belegt'`), Lücke aus GAPS löschen.
 - **Erfolge (Startseite 05):** `ACHIEVEMENTS` in profile.ts – leer = Abschnitt und Navigationspunkt
-  fehlen; mit Einträgen erscheinen beide automatisch.
+  fehlen; mit Einträgen erscheinen beide automatisch als Laufband (Titel kurz, `detail` optional,
+  jeweils mit Quelle).
+- **Fähigkeiten (Periodensystem, Startseite 02):** `SKILLS` in profile.ts – Kürzel (`symbol`,
+  zwei Zeichen, eindeutig), Name, Kategorie (`SKILL_CATEGORIES`), Belege (`evidence`: Station,
+  Ausbildung, Zertifikat, Projekt oder Profilstelle). Kurzname für die Kachel (`tile`) nur, wenn der
+  Name zu lang ist. Logo nur mit geprüfter Lizenz (`docs/skill-logos.md`).
+- **Projekt-Kurzfassung:** `brief` je Projekt (Akkordeon der Startseite) – nur gekürzt aus den
+  belegten Feldern `situation`/`contribution`/`result`; die Detailseite zeigt die Langfassung.
 - **Projekte:** nur `PROJECTS` in profile.ts (derzeit Orbitalis und Bachelorarbeit). Ghost-Beiträge
   mit Tag `project` werden nicht gelistet (URL bleibt erreichbar, noindex).
 - **Demo-Artikel:** `src/content/demo-articles.ts` – nur im Vorschau-Build sichtbar (Token „Demo“).

@@ -140,7 +140,7 @@ export function SectionNav({ items, label }: { items: SectionNavItem[]; label: s
           <li key={item.id}>
             <a
               href={`#${item.id}`}
-              className={styles.sectionNavLink}
+              className={`${styles.sectionNavLink} yb-section-nav-link`}
               aria-current={active === item.id ? 'true' : undefined}
               onClick={(event) => onClick(event, item.id)}
             >

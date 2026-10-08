@@ -698,6 +698,19 @@ export interface ProjectLink {
   kind: 'source';
 }
 
+/**
+ * Kurzfassung für das Projekt-Akkordeon der Startseite: gekürzt aus situation/contribution/
+ * result bzw. den Schwerpunkten – nichts ergänzt. Die Detailseite zeigt die Langfassung.
+ */
+export interface ProjectBrief extends Beleg {
+  situation: L<string[]>;
+  points: L<string[]>;
+  /** Überschrift der Stichpunkte: eigener Beitrag (Orbitalis) oder Schwerpunkte (Bachelorarbeit). */
+  pointsLabel: 'contribution' | 'focus';
+  /** Ergebnis kurz; fehlt, solange das Ergebnis offen ist (Lücke im Projekt). */
+  result?: L;
+}
+
 export interface Project {
   id: ProjectId;
   slug: L;
@@ -713,6 +726,7 @@ export interface Project {
   situation: Fact<L<string[]>>;
   contribution: Fact<L<string[]>>;
   result: Maybe<L<string[]>>;
+  brief: ProjectBrief;
   /** Technik/Themen als Tags (Eigennamen). */
   tags: string[];
   links: ProjectLink[];
@@ -785,6 +799,38 @@ export const PROJECTS: Project[] = [
       },
       'README, Eigenleistungen/SUMMARY.md',
     ),
+    brief: {
+      quelle: 'github:YannickBeck/Abgabe_Orbitalis',
+      status: 'belegt',
+      fundstelle: 'README, Eigenleistungen/SUMMARY.md (gekürzt)',
+      situation: {
+        de: [
+          'Ausgangspunkt waren osTicket und das Plugin „AI Reply Assistant“, ein einfacher LLM-Connector. Ziel waren Antwortvorschläge für Support-Tickets, vollständig lokal und ohne Datenweitergabe an externe Dienste.',
+        ],
+        en: [
+          'The starting point was osTicket and the “AI Reply Assistant” plugin, a simple LLM connector. The goal was reply suggestions for support tickets, fully local and without sending data to external services.',
+        ],
+      },
+      points: {
+        de: [
+          'RAG-Service mit Python/FastAPI, LlamaIndex und Ollama-Embeddings',
+          '10 neue PHP-Klassen im Plugin, u. a. PII-Redactor, Rate-Limiter und Audit-Log',
+          'KB-Seeder, der die Wissensdatenbank mit 370 Artikeln befüllt',
+          'Installationsskript für Debian 13, das am Ende die KI-Kette prüft',
+        ],
+        en: [
+          'RAG service with Python/FastAPI, LlamaIndex and Ollama embeddings',
+          '10 new PHP classes in the plugin, including a PII redactor, rate limiter and audit log',
+          'KB seeder that fills the knowledge base with 370 articles',
+          'Install script for Debian 13 that finally checks the AI chain',
+        ],
+      },
+      pointsLabel: 'contribution',
+      result: {
+        de: 'Zu einem Ticket schreibt das System einen Antwortentwurf als interne Notiz, mit Quellen, Tags und Konfidenz. Es verschickt nichts automatisch.',
+        en: 'For a ticket, the system writes a reply draft as an internal note, with sources, tags and a confidence value. It sends nothing automatically.',
+      },
+    },
     tags: ['osTicket', 'PHP', 'Python', 'FastAPI', 'LlamaIndex', 'Ollama', 'RAG', 'MariaDB', 'Debian 13'],
     links: [
       {
@@ -848,6 +894,23 @@ export const PROJECTS: Project[] = [
       'Berufserfahrung → Duales Studium („Schwerpunkte der Arbeit“)',
     ),
     result: open('thesis-result'),
+    brief: {
+      quelle: 'linkedin',
+      status: 'belegt',
+      fundstelle: 'Berufserfahrung → Duales Studium (gekürzt)',
+      situation: {
+        de: [
+          'Titel: „Untersuchung eines KI-Modells zur Unterstützung der Angebotserstellung im Presales-Prozess“.',
+          'Abschlussarbeit im dualen Studium Wirtschaftsinformatik – Sales & Consulting, in dem ich an IT-Consulting- und Presales-Themen mitgearbeitet habe.',
+        ],
+        en: [
+          'Title: “Investigation of an AI model to support proposal creation in the presales process”.',
+          'Final thesis of the dual degree in Business Informatics – Sales & Consulting, in which I contributed to IT consulting and presales topics.',
+        ],
+      },
+      points: THESIS.focus,
+      pointsLabel: 'focus',
+    },
     tags: ['Generative AI', 'RAG', 'Information Retrieval', 'Presales'],
     links: [],
     skills: ['genai', 'rag', 'ir', 'presales'],
@@ -902,23 +965,61 @@ export type SkillId =
   | 'consulting' | 'presales' | 'process-analysis' | 'solution-design' | 'documentation' | 'sales-consulting'
   | 'python' | 'fastapi' | 'llamaindex' | 'ollama' | 'osticket' | 'php' | 'bash' | 'mariadb';
 
+/**
+ * Logos im Detailfeld des Periodensystems: einfarbige SVGs aus Simple Icons (über die Better-
+ * Icons-CLI geholt) unter public/logos/<logo>.svg – nur Marken, deren Lizenz bzw. Richtlinie
+ * die Verwendung erlaubt (Begründung je Logo: docs/skill-logos.md). Alle anderen Fähigkeiten
+ * zeigen ihr Kürzel als Monogramm (z. B. Microsoft-Produkte: Logos nur mit Lizenz).
+ */
+export type SkillLogo = 'php' | 'fastapi';
+
+/** Urheber und Lizenz je Logo – erscheint als Nachweis im Detailfeld (CC BY-SA verlangt ihn). */
+export const SKILL_LOGOS: Record<SkillLogo, { credit: L; license: string; licenseUrl: string }> = {
+  php: {
+    credit: { de: 'Logo: Colin Viebrock, einfarbig angepasst', en: 'Logo: Colin Viebrock, single-colour adaptation' },
+    license: 'CC BY-SA 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+  },
+  fastapi: {
+    credit: { de: 'Logo: Sebastián Ramírez', en: 'Logo: Sebastián Ramírez' },
+    license: 'MIT',
+    licenseUrl: 'https://github.com/fastapi/fastapi/blob/master/LICENSE',
+  },
+};
+
 export interface Skill extends Beleg {
   id: SkillId;
   /** Kürzel fürs Periodensystem (1–2 Zeichen, sprachneutral). */
   symbol: string;
   name: L;
+  /** Kurzname auf der Kachel, wenn der Name zu lang ist (Abkürzung oder Eigenname aus dem Profil). */
+  tile?: L;
   category: SkillCategory;
   evidence: Evidence[];
+  logo?: SkillLogo;
 }
 
-function skill(id: SkillId, symbol: string, name: L | string, category: SkillCategory, evidence: Evidence[], quelle: Quelle = 'linkedin'): Skill {
+function both(v: L | string): L {
+  return typeof v === 'string' ? { de: v, en: v } : v;
+}
+
+function skill(
+  id: SkillId,
+  symbol: string,
+  name: L | string,
+  category: SkillCategory,
+  evidence: Evidence[],
+  opts: { quelle?: Quelle; tile?: L | string; logo?: SkillLogo } = {},
+): Skill {
   return {
     id,
     symbol,
-    name: typeof name === 'string' ? { de: name, en: name } : name,
+    name: both(name),
+    tile: opts.tile === undefined ? undefined : both(opts.tile),
     category,
     evidence,
-    quelle,
+    logo: opts.logo,
+    quelle: opts.quelle ?? 'linkedin',
     status: 'belegt',
   };
 }
@@ -933,46 +1034,60 @@ const ORB: Quelle = 'github:YannickBeck/Abgabe_Orbitalis';
 export const SKILLS: Skill[] = [
   // Microsoft Cloud & Modern Workplace
   skill('m365', 'Ms', 'Microsoft 365', 'cloud', [P('summary'), P('focus')]),
-  skill('intune', 'In', 'Microsoft Intune', 'cloud', [P('headline'), P('summary'), S('bechtle-junior')]),
-  skill('azure', 'Az', 'Microsoft Azure', 'cloud', [P('headline'), P('summary'), P('focus')]),
+  skill('intune', 'In', 'Microsoft Intune', 'cloud', [P('headline'), P('summary'), S('bechtle-junior')], { tile: 'Intune' }),
+  skill('azure', 'Az', 'Microsoft Azure', 'cloud', [P('headline'), P('summary'), P('focus')], { tile: 'Azure' }),
   skill('modern-workplace', 'Mw', 'Modern Workplace', 'cloud', [P('headline'), P('summary'), S('bechtle-junior')]),
   skill('endpoint', 'Ep', 'Endpoint Management', 'cloud', [P('summary'), S('bechtle-junior')]),
-  skill('mdm', 'Md', { de: 'Mobile-Device-Management', en: 'Mobile device management' }, 'cloud', [P('topSkills'), S('bechtle-junior')]),
+  skill('mdm', 'Md', { de: 'Mobile-Device-Management', en: 'Mobile device management' }, 'cloud', [P('topSkills'), S('bechtle-junior')], { tile: 'MDM' }),
   skill('cloud-computing', 'Cc', { de: 'Cloud-Computing', en: 'Cloud computing' }, 'cloud', [P('topSkills'), S('bechtle-studium')]),
   // Identity & Security
-  skill('entra', 'En', 'Microsoft Entra ID', 'identity', [P('headline'), P('summary'), P('focus')]),
+  skill('entra', 'En', 'Microsoft Entra ID', 'identity', [P('headline'), P('summary'), P('focus')], { tile: 'Entra ID' }),
   skill('conditional-access', 'Ca', 'Conditional Access', 'identity', [P('focus')]),
   skill('identity-security', 'Id', 'Identity & Security', 'identity', [P('summary'), P('focus')]),
-  skill('infosec-admin', 'Is', { de: 'Informationssicherheit-Administration', en: 'Information security administration' }, 'identity', [C('ms-infosec')]),
+  skill('infosec-admin', 'Is', { de: 'Informationssicherheit-Administration', en: 'Information security administration' }, 'identity', [C('ms-infosec')], {
+    tile: { de: 'Informations\u00ADsicherheit', en: 'Information security' },
+  }),
   // KI & Automatisierung
   skill('genai', 'Ga', 'Generative AI', 'ai', [P('summary'), S('bechtle-studium'), PR('bachelorarbeit')]),
-  skill('llm', 'Ll', { de: 'Large Language Models', en: 'Large language models' }, 'ai', [P('summary'), P('focus'), PR('orbitalis')]),
-  skill('rag', 'Rg', 'Retrieval-Augmented Generation', 'ai', [P('summary'), P('focus'), PR('bachelorarbeit'), PR('orbitalis')]),
+  skill('llm', 'Ll', { de: 'Large Language Models', en: 'Large language models' }, 'ai', [P('summary'), P('focus'), PR('orbitalis')], { tile: 'LLMs' }),
+  skill('rag', 'Rg', 'Retrieval-Augmented Generation', 'ai', [P('summary'), P('focus'), PR('bachelorarbeit'), PR('orbitalis')], { tile: 'RAG' }),
   skill('agents', 'Ag', 'AI Agents', 'ai', [P('summary')]),
   skill('ai-automation', 'Au', 'AI Automation', 'ai', [P('summary'), P('focus')]),
   skill('ir', 'Ir', 'Information Retrieval', 'ai', [PR('bachelorarbeit')]),
   // Infrastruktur & Betrieb
-  skill('client-server', 'Cs', { de: 'Client- und Serversysteme', en: 'Client and server systems' }, 'infra', [S('bechtle-ausbildung')]),
-  skill('network', 'Nw', { de: 'Netzwerk und IT-Infrastruktur', en: 'Network and IT infrastructure' }, 'infra', [S('bechtle-ausbildung'), S('bechtle-studium')]),
-  skill('troubleshooting', 'Tr', { de: 'Fehleranalyse und Troubleshooting', en: 'Fault analysis and troubleshooting' }, 'infra', [S('bechtle-ausbildung')]),
+  skill('client-server', 'Cs', { de: 'Client- und Serversysteme', en: 'Client and server systems' }, 'infra', [S('bechtle-ausbildung')], {
+    tile: { de: 'Client & Server', en: 'Client & server' },
+  }),
+  skill('network', 'Nw', { de: 'Netzwerk und IT-Infrastruktur', en: 'Network and IT infrastructure' }, 'infra', [S('bechtle-ausbildung'), S('bechtle-studium')], {
+    tile: { de: 'Netzwerk', en: 'Network' },
+  }),
+  skill('troubleshooting', 'Tr', { de: 'Fehleranalyse und Troubleshooting', en: 'Fault analysis and troubleshooting' }, 'infra', [S('bechtle-ausbildung')], {
+    tile: 'Troubleshooting',
+  }),
   skill('managed-services', 'Ma', 'Managed Services', 'infra', [S('bechtle-ausbildung')]),
-  skill('automation-tech', 'At', { de: 'Automatisierungstechnik', en: 'Automation engineering' }, 'infra', [S('gebhardt'), E('dhbw-et')]),
+  skill('automation-tech', 'At', { de: 'Automatisierungstechnik', en: 'Automation engineering' }, 'infra', [S('gebhardt'), E('dhbw-et')], {
+    tile: { de: 'Automatisierungs\u00ADtechnik', en: 'Automation engineering' },
+  }),
   // Beratung & Presales
   skill('consulting', 'Co', 'IT Consulting', 'consulting', [P('focus'), S('bechtle-junior'), S('bechtle-studium')]),
   skill('presales', 'Ps', 'Presales', 'consulting', [S('bechtle-studium'), PR('bachelorarbeit')]),
   skill('process-analysis', 'Pa', { de: 'Prozessanalyse', en: 'Process analysis' }, 'consulting', [S('bechtle-studium')]),
-  skill('solution-design', 'Ko', { de: 'Lösungskonzeption', en: 'Solution design' }, 'consulting', [P('summary'), S('bechtle-studium'), S('bechtle-junior')]),
-  skill('documentation', 'Do', { de: 'Technische Dokumentation', en: 'Technical documentation' }, 'consulting', [S('bechtle-ausbildung'), S('bechtle-junior'), PR('orbitalis')]),
+  skill('solution-design', 'Ko', { de: 'Lösungskonzeption', en: 'Solution design' }, 'consulting', [P('summary'), S('bechtle-studium'), S('bechtle-junior')], {
+    tile: { de: 'Lösungs\u00ADkonzeption', en: 'Solution design' },
+  }),
+  skill('documentation', 'Do', { de: 'Technische Dokumentation', en: 'Technical documentation' }, 'consulting', [S('bechtle-ausbildung'), S('bechtle-junior'), PR('orbitalis')], {
+    tile: { de: 'Dokumentation', en: 'Documentation' },
+  }),
   skill('sales-consulting', 'Sc', 'Sales & Consulting', 'consulting', [P('headline'), P('focus'), E('dhbw-wi')]),
   // Projekttechnik (Orbitalis, README/Eigenleistungen)
-  skill('python', 'Py', 'Python', 'build', [PR('orbitalis')], ORB),
-  skill('fastapi', 'Fa', 'FastAPI', 'build', [PR('orbitalis')], ORB),
-  skill('llamaindex', 'Li', 'LlamaIndex', 'build', [PR('orbitalis')], ORB),
-  skill('ollama', 'Ol', 'Ollama', 'build', [PR('orbitalis')], ORB),
-  skill('osticket', 'Ot', 'osTicket', 'build', [PR('orbitalis')], ORB),
-  skill('php', 'Ph', 'PHP', 'build', [PR('orbitalis')], ORB),
-  skill('bash', 'Sh', 'Bash', 'build', [PR('orbitalis')], ORB),
-  skill('mariadb', 'Db', 'MariaDB', 'build', [PR('orbitalis')], ORB),
+  skill('python', 'Py', 'Python', 'build', [PR('orbitalis')], { quelle: ORB }),
+  skill('fastapi', 'Fa', 'FastAPI', 'build', [PR('orbitalis')], { quelle: ORB, logo: 'fastapi' }),
+  skill('llamaindex', 'Li', 'LlamaIndex', 'build', [PR('orbitalis')], { quelle: ORB }),
+  skill('ollama', 'Ol', 'Ollama', 'build', [PR('orbitalis')], { quelle: ORB }),
+  skill('osticket', 'Ot', 'osTicket', 'build', [PR('orbitalis')], { quelle: ORB }),
+  skill('php', 'Ph', 'PHP', 'build', [PR('orbitalis')], { quelle: ORB, logo: 'php' }),
+  skill('bash', 'Sh', 'Bash', 'build', [PR('orbitalis')], { quelle: ORB }),
+  skill('mariadb', 'Db', 'MariaDB', 'build', [PR('orbitalis')], { quelle: ORB }),
 ];
 
 export function skillById(id: SkillId): Skill {

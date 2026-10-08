@@ -271,6 +271,18 @@
     --yb-shadow-ring-hover: 0px 0px 0px 1px var(--yb-ring-color-hover), 0px 2px 4px -1px var(--yb-lift-color), 0px 8px 20px 0px var(--yb-ambient-color);
     --yb-image-outline: light-dark(oklch(0 0 0 / 0.1), oklch(1 0 0 / 0.1));
     --yb-name-ghost: light-dark(color-mix(in srgb, #16151B 7%, transparent), color-mix(in srgb, #EEEAE3 7%, transparent));
+    --yb-cat-cloud: light-dark(oklch(0.935 0.03 250), oklch(0.29 0.035 250));
+    --yb-cat-identity: light-dark(oklch(0.935 0.03 185), oklch(0.29 0.035 185));
+    --yb-cat-ai: light-dark(oklch(0.935 0.03 345), oklch(0.29 0.035 345));
+    --yb-cat-infra: light-dark(oklch(0.94 0.035 85), oklch(0.29 0.035 85));
+    --yb-cat-consulting: light-dark(oklch(0.935 0.035 45), oklch(0.29 0.035 45));
+    --yb-cat-build: light-dark(oklch(0.935 0.03 135), oklch(0.29 0.035 135));
+    --yb-cat-cloud-mark: light-dark(oklch(0.56 0.1 250), oklch(0.74 0.09 250));
+    --yb-cat-identity-mark: light-dark(oklch(0.56 0.08 185), oklch(0.74 0.08 185));
+    --yb-cat-ai-mark: light-dark(oklch(0.56 0.1 345), oklch(0.74 0.09 345));
+    --yb-cat-infra-mark: light-dark(oklch(0.6 0.1 85), oklch(0.76 0.09 85));
+    --yb-cat-consulting-mark: light-dark(oklch(0.56 0.1 45), oklch(0.74 0.09 45));
+    --yb-cat-build-mark: light-dark(oklch(0.56 0.08 135), oklch(0.74 0.08 135));
     --yb-motion-micro: var(--duration-fast);
     --yb-motion-exit: var(--duration-fast-min);
     --yb-motion-enter: var(--duration-medium-min);

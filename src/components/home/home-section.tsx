@@ -17,6 +17,7 @@ export function HomeSection({
   title,
   lede,
   aside,
+  split = false,
   children,
 }: {
   id: string;
@@ -25,9 +26,38 @@ export function HomeSection({
   lede?: string;
   /** Zusatz rechts neben dem Kopf (z. B. Links), mobil darunter. */
   aside?: ReactNode;
+  /** Kopf links (große Überschrift, klebt beim Scrollen), Inhalt rechts; schmal untereinander. */
+  split?: boolean;
   children: ReactNode;
 }) {
   const titleId = `${id}-title`;
+  if (split) {
+    return (
+      <section id={id} aria-labelledby={titleId} tabIndex={-1} className={styles.section}>
+        <Section>
+          <div className={styles.splitGrid}>
+            <header className={styles.splitHead}>
+              <Text type="label" color="secondary" className={styles.sectionNumber}>
+                <span className="yb-display" aria-hidden="true">
+                  {number}
+                </span>
+              </Text>
+              <Heading level={2} id={titleId} textWrap="balance" className={styles.splitTitle}>
+                <Emphasis text={title} />
+              </Heading>
+              {lede ? (
+                <Text color="secondary" textWrap="pretty">
+                  {lede}
+                </Text>
+              ) : null}
+              {aside}
+            </header>
+            <div className={styles.splitBody}>{children}</div>
+          </div>
+        </Section>
+      </section>
+    );
+  }
   return (
     <section id={id} aria-labelledby={titleId} tabIndex={-1} className={styles.section}>
       <Section>

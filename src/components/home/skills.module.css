@@ -1,0 +1,433 @@
+/*
+ * 02 Fähigkeiten – Periodensystem (skill-table.tsx). Abweichung von AGENTS.md (dokumentiert):
+ * quadratische Kacheln mit Container-Query-Typografie und ein Raster, dessen Spaltenzahl an der
+ * Breite des Abschnitts hängt – dafür hat Astryx keine Props. Nur Tokens; Farben je Kategorie
+ * über .yb-cat (globals.css → --yb-cat, --yb-cat-mark aus dem Theme). Bewegung: motion.css §6.
+ *
+ * Breiten (Container = Abschnitt):
+ *   < 600px   6 Spalten, Kacheln nur mit Nummer + Kürzel, Detailfeld darunter
+ *   600–879   8 Spalten (5 Zeilen), Detailfeld darunter
+ *   ≥ 880     Raster 6 × 6 links, Detailfeld rechts
+ */
+.skills {
+  container: skills / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+/* ---------- Filter-Pillen ---------- */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: var(--size-element-md);
+  padding-inline: var(--spacing-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background-color: var(--color-background-card);
+  box-shadow: var(--yb-shadow-ring);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.pill[data-category] {
+  padding-inline-start: var(--spacing-3);
+}
+
+@media (hover: hover) {
+  .pill:hover {
+    background-color: var(--color-background-muted);
+  }
+}
+
+.pill[aria-pressed='true'] {
+  background-color: var(--color-background-inverted);
+  color: var(--color-background-body);
+}
+
+.pill:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--spacing-0-5);
+}
+
+.swatch {
+  flex: none;
+  width: calc(var(--spacing-2) + var(--spacing-0-5));
+  height: calc(var(--spacing-2) + var(--spacing-0-5));
+  border-radius: var(--radius-full);
+  background-color: var(--yb-cat-mark);
+  box-shadow: 0 0 0 var(--border-width) color-mix(in oklch, var(--yb-cat-mark) 70%, var(--color-text-primary));
+}
+
+/* ---------- Raster + Detailfeld ---------- */
+.table {
+  --cols: 6;
+  --tile-gap: var(--spacing-1-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-6);
+  align-items: start;
+  scroll-margin-top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
+}
+
+@container (min-width: 600px) {
+  .table {
+    --cols: 8;
+    --tile-gap: var(--spacing-2);
+  }
+}
+
+@container (min-width: 880px) {
+  .table {
+    --cols: 6;
+    grid-template-columns: minmax(0, 1fr) minmax(19rem, 23rem);
+    gap: var(--spacing-8);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--tile-gap);
+}
+
+/* ---------- Kachel ---------- */
+.tile {
+  container-type: inline-size;
+  position: relative;
+  aspect-ratio: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: start;
+  padding: var(--spacing-2);
+  border: 0;
+  border-radius: var(--radius-element);
+  background-color: var(--yb-cat);
+  box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
+  color: var(--color-text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  scroll-margin-top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
+}
+
+.tileNum {
+  font-family: var(--font-family-code);
+  font-size: clamp(0.5625rem, 12cqi, 0.6875rem);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tileSymbol {
+  align-self: center;
+  font-size: 34cqi;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.tileName {
+  max-width: 100%;
+  font-size: clamp(0.625rem, 11.5cqi, 0.75rem);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.15;
+  hyphens: manual;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Kleine Kacheln (Handy, Inhaltsbreite ≤ 56px): Nummer + Kürzel, der Name steht im Detailfeld */
+@container (max-width: 56px) {
+  .tileSymbol {
+    justify-self: center;
+    align-self: center;
+    font-size: 40cqi;
+  }
+
+  .tileName {
+    display: none;
+  }
+}
+
+@media (hover: hover) {
+  .tile:hover {
+    background-color: color-mix(in oklch, var(--yb-cat) 93%, var(--color-text-primary));
+  }
+}
+
+.tile[aria-selected='true'] {
+  background-color: var(--color-background-inverted);
+  color: var(--color-background-body);
+  box-shadow: 0 0 0 var(--border-width) var(--color-background-inverted);
+}
+
+.tile[aria-selected='true'] .tileNum {
+  color: color-mix(in oklch, var(--color-background-body) 72%, var(--color-background-inverted));
+}
+
+.tile:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--spacing-0-5);
+  z-index: 1;
+}
+
+/* Gefiltert: bleibt an seinem Platz, blass, nicht bedienbar (inert) */
+.tile[inert] {
+  opacity: 0.28;
+  cursor: default;
+}
+
+/* ---------- Detailfeld: die gewählte Kachel vergrößert, darunter die Belege ---------- */
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-container);
+  background-color: var(--color-background-card);
+  box-shadow: var(--yb-shadow-ring);
+  min-width: 0;
+}
+
+@container (min-width: 880px) {
+  .detail {
+    position: sticky;
+    top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
+  }
+}
+
+/* Konzentrisch: Feld 20px = Kachel 12px + 8px Innenabstand */
+.element {
+  container: element / inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4) var(--spacing-5) var(--spacing-5);
+  border-radius: var(--radius-element);
+  background-color: var(--yb-cat);
+  box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
+  color: var(--color-text-primary);
+}
+
+.elementTop {
+  align-self: stretch;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.elementNum {
+  color: var(--color-text-secondary);
+}
+
+.elementSymbolSmall {
+  font-family: var(--font-family-body);
+  font-weight: 700;
+}
+
+.elementSymbol {
+  margin-block: var(--spacing-1) var(--spacing-1);
+  font-size: min(32cqi, 6.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+
+/* Logo als Maske: eine Datei, Farbe = Textfarbe (hell/dunkel), keine Markenfarbe */
+.elementLogo {
+  margin-block: var(--spacing-2) var(--spacing-2);
+  width: min(26cqi, 5.5rem);
+  aspect-ratio: 1;
+  background-color: currentColor;
+  -webkit-mask: var(--yb-logo) center / contain no-repeat;
+  mask: var(--yb-logo) center / contain no-repeat;
+}
+
+.detailName {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.15;
+  letter-spacing: var(--yb-heading-tracking);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.detailCategory {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-wrap: balance;
+}
+
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-3) var(--spacing-2);
+}
+
+.detailLabel {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.evidence {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.evidenceItem {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--spacing-1) var(--spacing-3);
+  padding-block: calc(var(--spacing-2) + var(--spacing-0-5));
+  border-top: var(--border-width) solid var(--color-border);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.evidenceItem:last-child {
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.evidenceKind {
+  color: var(--color-text-secondary);
+}
+
+.evidenceText {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-0-5) var(--spacing-2);
+  min-width: 0;
+}
+
+.evidenceLink {
+  /* Inline-Polster: Trefferfläche ≥ 24px hoch (WCAG 2.5.8), ohne die Zeile zu verschieben */
+  padding-block: var(--spacing-1);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--border-width);
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in oklch, currentColor 35%, transparent);
+  overflow-wrap: break-word;
+}
+
+@media (hover: hover) {
+  .evidenceLink:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+.evidenceLink:focus-visible,
+.detailSourceLink:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--spacing-0-5);
+  border-radius: var(--radius-inner);
+}
+
+.evidenceNote {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.detailSource {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.detailSourceLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Detailfeld unter dem Raster (schmal): Kürzel links neben Name und Kategorie, damit die
+   Belege nach dem Tippen auf eine Kachel schnell in Sicht sind */
+@container skills (max-width: 599px) {
+  .element {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--spacing-4);
+    row-gap: var(--spacing-1);
+    align-items: center;
+  }
+
+  .elementTop {
+    grid-column: 1 / -1;
+  }
+
+  .elementSymbol,
+  .elementLogo {
+    grid-row: 2 / span 2;
+    margin: 0;
+  }
+
+  .elementSymbol {
+    font-size: var(--font-size-5xl);
+  }
+
+  .elementLogo {
+    width: var(--font-size-5xl);
+  }
+
+  .detailName {
+    grid-column: 2;
+    align-self: end;
+  }
+
+  .detailCategory {
+    grid-column: 2;
+    align-self: start;
+  }
+}
+
+@container skills (max-width: 420px) {
+  .evidenceItem {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

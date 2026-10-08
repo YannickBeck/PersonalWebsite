@@ -33,6 +33,22 @@ function ExternalArrowSvg(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+function PauseSvg(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M9 6v12M15 6v12" />
+    </svg>
+  );
+}
+
+function PlaySvg(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M8 5.5v13l10-6.5z" />
+    </svg>
+  );
+}
+
 type IconColor = 'primary' | 'secondary' | 'accent' | 'inherit';
 
 export function ArrowRight({ color = 'inherit' }: { color?: IconColor }) {
@@ -46,4 +62,14 @@ export function ArrowLeft({ color = 'inherit' }: { color?: IconColor }) {
 /** Pfeil nach rechts oben: Link verlässt die Website (externes Ziel, z. B. LinkedIn, GitHub). */
 export function ExternalArrow({ color = 'inherit' }: { color?: IconColor }) {
   return <Icon icon={ExternalArrowSvg} size="sm" color={color} />;
+}
+
+/** Laufband anhalten (Erfolge, WCAG 2.2.2). */
+export function PauseIcon({ color = 'inherit' }: { color?: IconColor }) {
+  return <Icon icon={PauseSvg} size="sm" color={color} />;
+}
+
+/** Laufband fortsetzen. */
+export function PlayIcon({ color = 'inherit' }: { color?: IconColor }) {
+  return <Icon icon={PlaySvg} size="sm" color={color} />;
 }
