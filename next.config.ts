@@ -1,5 +1,49 @@
 import type { NextConfig } from "next";
 
+/**
+ * Alte Demo-Adressen des Live-Stands 2d636c6 (Inhalte eines anderen Agenten, im Redesign
+ * entfernt). Sie standen in Navigation, Listen und teils in Suchmaschinen – statt einer 404
+ * führen sie dauerhaft (308) auf die passende Übersicht. Exakte Slugs statt Muster, damit
+ * künftige Ghost-Beiträge nie versehentlich umgeleitet werden. Übersicht: docs/urls.md.
+ * Demo-Artikel gibt es im Vorschau-Build (NEXT_PUBLIC_SHOW_GAPS=1) weiterhin – dort keine
+ * Umleitung für sie.
+ */
+const DEMO_PROJECTS = {
+  de: ["demo-projekt-webseite", "demo-projekt-cms-migration", "demo-projekt-deploy-pipeline"],
+  en: ["demo-project-website", "demo-project-cms-migration", "demo-project-deploy-pipeline"],
+};
+const DEMO_ARTICLES = {
+  de: [
+    "demo-warum-eigene-website",
+    "demo-ghost-headless",
+    "demo-automatisierung-alltag",
+    "demo-nextjs-rendering",
+    "demo-content-modellierung",
+    "demo-ci-cd-sideprojects",
+  ],
+  en: [
+    "demo-why-own-website",
+    "demo-ghost-headless-en",
+    "demo-automation-everyday",
+    "demo-nextjs-rendering-en",
+    "demo-content-modeling",
+    "demo-ci-cd-sideprojects-en",
+  ],
+};
+const SHOW_GAPS = process.env.NEXT_PUBLIC_SHOW_GAPS === "1";
+
+function legacy(prefix: string, slugs: string[], destination: string) {
+  return { source: `${prefix}/:slug(${slugs.join("|")})`, destination, permanent: true };
+}
+
+const LEGACY_REDIRECTS = [
+  legacy("/projekte", DEMO_PROJECTS.de, "/projekte"),
+  legacy("/en/projekte", DEMO_PROJECTS.en, "/en/projekte"),
+  ...(SHOW_GAPS
+    ? []
+    : [legacy("/blog", DEMO_ARTICLES.de, "/blog"), legacy("/en/blog", DEMO_ARTICLES.en, "/en/blog")]),
+];
+
 const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
@@ -31,8 +75,8 @@ const nextConfig: NextConfig = {
       // alte Ghost-URLs (Root vor Cutover) auf neue Routen. Quellen OHNE abschließenden
       // Slash (FUN5): Next normalisiert „/about/“ zuerst auf „/about“ (308) – Quellen mit
       // Slash griffen danach nie. So decken sie beide Schreibweisen ab.
-      // OFFEN: ob der Ghost-Beitrag „coming-soon“ live existiert; mit den Mock-Inhalten ist
-      // /en/blog/coming-soon 404, daher Ziel /en/blog.
+      // /coming-soon: Ghost-Standardbeitrag, live unter /en/blog/coming-soon (geprüft
+      // 2026-10-09). Ziel bleibt die Liste /en/blog – der Beitrag kann jederzeit verschwinden.
       { source: "/about", destination: "/ueber-mich", permanent: true },
       { source: "/coming-soon", destination: "/en/blog", permanent: true },
       { source: "/tag/news", destination: "/blog", permanent: true },
@@ -41,6 +85,7 @@ const nextConfig: NextConfig = {
       { source: "/contact", destination: "/kontakt", permanent: true },
       { source: "/privacy", destination: "/datenschutz", permanent: true },
       { source: "/imprint", destination: "/impressum", permanent: true },
+      ...LEGACY_REDIRECTS,
     ];
   },
   images: {

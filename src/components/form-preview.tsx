@@ -35,7 +35,8 @@ export function FormPreview({
     <Collapsible
       defaultIsOpen={false}
       trigger={
-        <Text type="label" color="secondary">
+        // Trefferfläche ≥ 24px (WCAG 2.5.8): der Auslöser ist sonst nur so hoch wie die Zeile
+        <Text type="label" color="secondary" className="yb-target-min">
           {dict.formPreviewLabel}
         </Text>
       }

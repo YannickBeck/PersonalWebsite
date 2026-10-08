@@ -85,6 +85,9 @@
 /* Kein Überlauf (z. B. 3 Karten am Desktop): keine Pfeile – die Weiterführung steht dann
    bündig rechts. Sie erscheinen erst, wenn es etwas zu blättern gibt (nach dem Messen; sie
    verschieben dabei nichts, weil sie am Ende der Zeile angehängt werden). */
+/* Ohne Überlauf unsichtbar, aber mit Platz (B4): Mit display:none erschienen die Pfeile erst
+   nach der Messung im Browser, der Kopf wurde höher und die Überschrift rutschte (CLS, gemessen
+   auf kurzen Artikeln bei 390px). visibility nimmt sie zugleich aus der Tab-Reihenfolge. */
 .controlsIdle {
-  display: none;
+  visibility: hidden;
 }

@@ -1,4 +1,4 @@
-# Funktionsmatrix — yannick-beck.de (Stand: Redesign B3, 2026-10)
+# Funktionsmatrix — yannick-beck.de (Stand: Redesign B4, 2026-10)
 
 ## Funktioniert echt
 - Navigation: sticky Header mit Blur, aktive Seite markiert; mobil Astryx-MobileNav-Drawer
@@ -13,7 +13,9 @@
 - Werdegang mit aufklappbaren Stationen (native `<details>`, exklusiv, ohne JS bedienbar), Ausbildung und Zertifikate als Liste; Bachelorarbeit springt ins Projekt
 - Laufband „Erfolge“ fertig (Pause-Schalter, Kopie verborgen, statisch bei Reduced Motion und mobil) – erscheint erst mit belegten Einträgen
 - Kontaktformular mit echtem Versand: `POST /api/kontakt` → Resend (fetch), Honeypot, Mindest-Ausfüllzeit, Rate-Limit je IP + global, Einwilligung, ehrliche Zustände (Erfolg, Fehler, „Versand gerade nicht verfügbar“ ohne Konfiguration); Doku `docs/kontaktformular.md`
-- Projekte: Orbitalis + Bachelorarbeit mit Detailseiten; Artikel-Liste aus Ghost (Filter, Suche, Leer-Zustand, Reset; Demo-Artikel nur Vorschau)
+- Projekte: Orbitalis + Bachelorarbeit mit Detailseiten; Artikel-Liste aus Ghost (Filter und Suche ab vier Beiträgen, Leer-Zustand, Reset; Demo-Artikel nur Vorschau)
+- Unterseiten im Look der Startseite (B4): Seitenkopf mit Kennung in der Display-Schrift und Akzent-Wort, nummerierte Abschnitte; Lebenslauf aus dem Content-Modell, druckbar (DE/EN je 3 Seiten A4); Über mich mit Porträt und Werdegang kurz; Schwerpunkte mit Fähigkeiten und Projekten; Projekte als Zeilen, Detailseiten mit „Weiteres Projekt“; Profil-Marken springen ins Periodensystem
+- Alle Adressen des Live-Stands erreichbar oder dauerhaft weitergeleitet (`docs/urls.md`, `scripts/url-check.mjs`, `scripts/link-check.mjs`)
 - Agenten-Lesbarkeit: `<html lang>` je Sprache serverseitig, JSON-LD Person, og:image (`/og/de|en`), llms.txt, Markdown bei `Accept: text/markdown` inkl. Markdown-404
 - Detailseiten (Projekte aus dem Content-Modell; Ghost-HTML mit TOC, Code-Kopie, Tabellen, Galerie)
 - Related-Content, Zurück-Links, Redirects alter Ghost-URLs
@@ -23,9 +25,12 @@
 - Formulare als echtes `<form>` mit `autocomplete`, Enter sendet; deutsche
   Astryx-Beschriftungen über `InternationalizationProvider`
 
-## Simuliert (keine Datenübertragung)
-- Newsletter: alle Zustände lokal (Invite-Hinweis, existiert, Fehler, Bestätigung)
-- Demo-Artikel (nur Vorschau-Build); Impressum/Datenschutz-Angaben als [Platzhalter]
+## Simuliert (keine Datenübertragung) – nur im Vorschau-Build
+- Newsletter-Formular: alle Zustände lokal (Invite-Hinweis, existiert, Fehler, Bestätigung). Produktion: ehrlicher Stand (nur auf Einladung) + RSS-Feed + LinkedIn
+- Demo-Artikel
+
+## Entwurf (auch in Produktion sichtbar)
+- Impressum/Datenschutz aus `src/content/legal.ts`: belegte Angaben (Name, tatsächliches Verhalten der Website) plus „OFFEN“-Markierungen für fehlende Pflichtangaben
 
 ## Noch anzubinden (Angaben fehlen)
 - Kontaktversand in Produktion: Resend-Konto mit bestätigter Absender-Domain, dann `CONTACT_RESEND_API_KEY`, `CONTACT_FROM`, `CONTACT_TO` in Coolify (bis dahin zeigt das Formular ehrlich „Versand gerade nicht verfügbar“)

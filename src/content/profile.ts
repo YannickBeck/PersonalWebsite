@@ -205,8 +205,8 @@ export const GAPS: GapEntry[] = [
     label: { de: 'Eigene Blogbeiträge in Ghost', en: 'Own blog posts in Ghost' },
     where: { de: '/blog', en: '/en/blog' },
     need: {
-      de: 'Ghost enthält bisher den Beispielbeitrag „Hallo Welt“; Projekt-Beispielbeitrag wird nicht gelistet',
-      en: 'Ghost currently holds the sample post “Hello World”; the sample project post is not listed',
+      de: 'Ghost enthält bisher den Beispielbeitrag „Hallo Welt“ (DE/EN) und den Ghost-Standardbeitrag „Coming soon“ (EN); der Projekt-Beispielbeitrag wird nicht gelistet',
+      en: 'Ghost currently holds the sample post “Hello World” (DE/EN) and Ghost’s default post “Coming soon” (EN); the sample project post is not listed',
     },
   },
   {
@@ -231,15 +231,18 @@ export const GAPS: GapEntry[] = [
     id: 'legal-imprint',
     label: { de: 'Impressumsangaben', en: 'Imprint details' },
     where: { de: '/impressum', en: '/en/impressum' },
-    need: { de: 'Name, ladungsfähige Anschrift, Kontaktweg – alle [eckigen Klammern] ersetzen', en: 'Name, postal address, contact – replace all [brackets]' },
+    need: {
+      de: 'Ladungsfähige Anschrift und E-Mail-Adresse (§ 5 DDG verlangt eine – mit „keine öffentliche E-Mail“ abstimmen); ob die Angaben nach § 18 Abs. 2 MStV nötig sind; Impressumspflicht rechtlich prüfen. Die Seite zeigt diese Punkte auch in Produktion als „OFFEN“.',
+      en: 'Postal address and email address (§ 5 DDG requires one – reconcile with “no public email”); whether § 18 (2) MStV details are needed; check the imprint obligation legally. The page shows these items as “OPEN” in production too.',
+    },
   },
   {
     id: 'legal-privacy',
     label: { de: 'Datenschutzerklärung vervollständigen', en: 'Complete the privacy policy' },
     where: { de: '/datenschutz', en: '/en/datenschutz' },
     need: {
-      de: 'Verantwortlicher, Hosting, Kontaktformular (Resend) – rechtlich prüfen lassen',
-      en: 'Controller, hosting, contact form (Resend) – have it legally reviewed',
+      de: 'Verantwortliche Stelle (Anschrift, E-Mail), Hoster und Log-Dauer bestätigen, Cloudflare und Resend (Anbieter, Rechtsgrundlage, Drittland), Speicherdauer, Betroffenenrechte – rechtlich prüfen lassen. Offene Punkte stehen auch in Produktion als „OFFEN“ auf der Seite.',
+      en: 'Controller (address, email), confirm host and log retention, Cloudflare and Resend (provider, legal basis, third country), retention periods, data subject rights – have it legally reviewed. Open items are shown as “OPEN” on the page in production too.',
     },
   },
   {

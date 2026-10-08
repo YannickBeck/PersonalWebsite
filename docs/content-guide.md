@@ -45,7 +45,15 @@ Zwei Quellen, klar getrennt:
   belegten Feldern `situation`/`contribution`/`result`; die Detailseite zeigt die Langfassung.
 - **Projekte:** nur `PROJECTS` in profile.ts (derzeit Orbitalis und Bachelorarbeit). Ghost-Beiträge
   mit Tag `project` werden nicht gelistet (URL bleibt erreichbar, noindex).
-- **Demo-Artikel:** `src/content/demo-articles.ts` – nur im Vorschau-Build sichtbar (Token „Demo“).
+- **Rechtstexte:** `src/content/legal.ts` (Impressum, Datenschutz; DE+EN, auch für die Markdown-
+  Fassung). Fehlende Pflichtangaben stehen als `open` und erscheinen – als einzige Lücken – auch in
+  Produktion als „OFFEN: …“. Angabe da → Text eintragen, `open` löschen; vor der Veröffentlichung
+  rechtlich prüfen lassen (Entwurf, keine Rechtsberatung).
+- **Schwerpunkte (/leistungen):** `FOCUS_AREAS` in profile.ts; „Projekte dazu“ ergibt sich aus
+  `PROJECTS[].skills`.
+- **Alte Adressen:** Weiterleitungen und Prüfskripte in `docs/urls.md`.
+- **Demo-Artikel:** `src/content/demo-articles.ts` – nur im Vorschau-Build sichtbar (Token „Demo“);
+  das Newsletter-Demo-Formular ebenso.
 - **UI-Texte:** `src/i18n/dictionaries.ts` (DE+EN nebeneinander), nur Bedienung und Überschriften.
 - **Übersetzungszuordnung:** `src/i18n/translations.ts` (Slug-Paare beider Richtungen).
 - **Platzhalter-Bilder:** `public/placeholders/*.svg` werden im Frontend wie „kein Bild“

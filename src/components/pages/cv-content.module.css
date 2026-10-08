@@ -1,9 +1,14 @@
 /*
- * Lebenslauf-Einträge (cv-content.tsx): Zeitraum-Spalte + Inhalt, Trennlinien zwischen den
- * Einträgen; mobil gestapelt. Abweichung von AGENTS.md (dokumentiert): native Listen (ol/ul)
- * mit zweispaltigem Raster – List/ListItem kürzt bzw. kennt kein Zeitraum-Feld.
- * Anker-Ziele (#bechtle-studium …) halten Abstand zum Sticky-Header. Nur Tokens.
+ * Lebenslauf-Einträge (cv-content.tsx, Redesign B4): linke Spalte (Jahre in der Display-Schrift
+ * + genauer Zeitraum bzw. Aussteller/Sprache) + Inhalt, Trennlinien zwischen den Einträgen;
+ * mobil gestapelt. Abweichung von AGENTS.md (dokumentiert): native Listen (ol/ul) mit
+ * zweispaltigem Raster – List/ListItem kürzt bzw. kennt kein Zeitraum-Feld. Anker-Ziele
+ * (#bechtle-studium …) halten Abstand zum Sticky-Header. Nur Tokens.
  */
+.contactLine {
+  font-weight: var(--font-weight-medium);
+}
+
 .list {
   list-style: none;
   margin: 0;
@@ -12,9 +17,9 @@
 
 .entry {
   display: grid;
-  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
   gap: var(--spacing-2) var(--spacing-6);
-  padding-block: var(--spacing-5);
+  padding-block: var(--spacing-6);
   border-top: var(--border-width) solid var(--color-border);
   scroll-margin-top: calc(var(--size-element-md) + var(--spacing-12));
   break-inside: avoid;
@@ -25,12 +30,56 @@
   padding-top: 0;
 }
 
+.compact {
+  padding-block: var(--spacing-4);
+  align-items: baseline;
+}
+
 .when {
-  padding-top: var(--spacing-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding-top: var(--spacing-0-5);
+}
+
+/* Jahre / Aussteller / Sprache: Display-Schrift wie die Abschnittsnummern der Startseite */
+.years {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--color-text-primary);
+}
+
+.role {
+  font-size: var(--font-size-lg);
+  line-height: 1.25;
+}
+
+.level {
+  color: var(--color-text-secondary);
+}
+
+.points {
+  list-style: disc;
+  margin: 0;
+  padding-inline-start: var(--spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5);
+  line-height: 1.5;
+}
+
+.points li::marker {
+  color: var(--color-text-secondary);
 }
 
 .thesis {
-  padding: var(--spacing-3) var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-1);
+  padding: var(--spacing-4);
   border-radius: var(--radius-element);
   background-color: var(--color-background-muted);
 }
@@ -44,5 +93,32 @@
 @media (max-width: 599px) {
   .entry {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--spacing-3);
+  }
+
+  .when {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--spacing-3);
+  }
+}
+
+/* Druck: kompakter, Kasten der Bachelorarbeit als Linie statt Fläche */
+@media print {
+  .entry {
+    padding-block: var(--spacing-3);
+    grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+  }
+
+  .years {
+    font-size: var(--font-size-lg);
+  }
+
+  .thesis {
+    background: none;
+    padding: 0 0 0 var(--spacing-3);
+    border-left: var(--border-width) solid var(--color-border);
+    border-radius: 0;
   }
 }

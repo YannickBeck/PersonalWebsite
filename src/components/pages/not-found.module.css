@@ -1,0 +1,21 @@
+/*
+ * 404 (not-found-content.tsx, global-not-found.module.css übernimmt dieselben Werte):
+ * „404“ in der Display-Schrift, blass wie der Namenszug der Startseite (--yb-name-ghost),
+ * dekorativ (aria-hidden). Die H1 sagt, was los ist. Nur Tokens; Größe fließend.
+ */
+.code {
+  display: block;
+  margin-block-end: calc(-1 * var(--spacing-4));
+  font-weight: 800;
+  font-size: clamp(7rem, 4rem + 18vw, 15rem);
+  line-height: 0.8;
+  letter-spacing: -0.01em;
+  color: var(--yb-name-ghost);
+  user-select: none;
+}
+
+.title {
+  font-size: clamp(var(--font-size-2xl), 1.2rem + 3vw, var(--font-size-5xl));
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}

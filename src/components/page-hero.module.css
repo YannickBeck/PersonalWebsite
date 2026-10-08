@@ -4,6 +4,10 @@
  * Abweichung von AGENTS.md (dokumentiert): Section-Props enden bei 40px (paddingBlockStart
  * 10); Section legt className auf den äußeren Wrapper, die Padding-Variable gilt am inneren
  * .astryx-section (wie home.module.css). Nur Spacing-Tokens.
+ *
+ * Typografie des Seitenkopfs (B4): Kennung und H1 wie die Abschnitte der Startseite
+ * (home.module.css .sectionNumber/.splitTitle) – Unterseiten sehen aus wie ein Abschnitt der
+ * langen Seite, nur mit H1. Fließende Größen mit clamp(), mobil eine Stufe kleiner.
  */
 .top > :global(.astryx-section) {
   --astryx-section-padding-block-start: var(--spacing-8);
@@ -18,5 +22,56 @@
 @media (min-width: 1024px) {
   .top > :global(.astryx-section) {
     --astryx-section-padding-block-start: calc(var(--spacing-8) * 2);
+  }
+}
+
+.kicker {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--color-text-secondary);
+}
+
+.title {
+  margin: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Startseiten-Format (wie .splitTitle): 31 → 61px */
+.xl {
+  font-size: clamp(var(--font-size-2xl), 1.2rem + 3vw, var(--font-size-5xl));
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+/* Lange Titel: 31 → 49px */
+.lg {
+  font-size: clamp(var(--font-size-2xl), 1.1rem + 2vw, var(--font-size-4xl));
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+
+/* Name in der Display-Schrift (Lebenslauf): kräftig wie „IT CONSULTANT“ im Einstieg */
+.display {
+  font-weight: 800;
+  font-size: clamp(3.25rem, 2rem + 6vw, 7rem);
+  line-height: 0.86;
+  letter-spacing: -0.005em;
+  hyphens: manual;
+}
+
+.lede {
+  max-width: 62ch;
+}
+
+@media print {
+  .top > :global(.astryx-section) {
+    --astryx-section-padding-block-start: 0;
+  }
+
+  .display {
+    font-size: 3.5rem;
   }
 }

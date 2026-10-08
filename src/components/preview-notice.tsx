@@ -24,7 +24,7 @@ export function PreviewNotice() {
         {dict.previewNoticeLine}
       </Text>
       {pathname !== statusHref && (
-        <Link href={statusHref} hasUnderline size="sm" color="primary">
+        <Link href={statusHref} hasUnderline size="sm" color="primary" className="yb-target-min">
           {dict.statusTitle}
         </Link>
       )}

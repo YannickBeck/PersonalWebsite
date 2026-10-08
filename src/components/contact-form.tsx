@@ -308,7 +308,7 @@ export function ContactForm({ lang }: { lang: Lang }) {
               />
             </FormLayout>
             <Text type="supporting" color="secondary" className={styles.privacy}>
-              <Link href={withLang('/datenschutz', lang)} hasUnderline color="inherit">
+              <Link href={`${withLang('/datenschutz', lang)}#kontaktformular`} hasUnderline color="inherit">
                 {dict.formConsentLink}
               </Link>
             </Text>

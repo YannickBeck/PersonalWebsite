@@ -54,7 +54,12 @@ export function pageMeta({
   return {
     title,
     description,
-    alternates: { canonical, languages },
+    // RSS-Feed der Sprache auffindbar (B4: Blog und Newsletter verweisen darauf)
+    alternates: {
+      canonical,
+      languages,
+      types: { 'application/rss+xml': [{ url: url(lang, '/rss.xml'), title: lang === 'de' ? 'Yannick Beck – Blog' : 'Yannick Beck – Blog (English)' }] },
+    },
     openGraph: {
       title,
       description,

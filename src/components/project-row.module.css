@@ -1,0 +1,88 @@
+/*
+ * Projekt-Zeile (project-row.tsx: /projekte und „Weiteres Projekt“ auf den Detailseiten, B4): je Projekt eine Zeile – Text links, Cover
+ * rechts ab 900px, darunter gestapelt (Cover zuerst wie eine Karte). Zeilen durch eine Linie
+ * getrennt. Abweichung von AGENTS.md (dokumentiert): asymmetrische Spalten und Rasterbereiche –
+ * Astryx-Grid kennt nur gleich breite Spuren. Bewegung des Covers: .yb-card (motion.css §5a).
+ */
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'cover'
+    'text';
+  gap: var(--spacing-6);
+  padding-block: var(--spacing-10);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.row:first-child {
+  border-top: 0;
+  padding-top: var(--spacing-4);
+}
+
+@media (min-width: 900px) {
+  .row {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas: 'text cover';
+    gap: var(--spacing-12);
+    align-items: start;
+  }
+}
+
+.text {
+  grid-area: text;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  min-width: 0;
+}
+
+.n {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--color-text-secondary);
+}
+
+.meta {
+  font-weight: var(--font-weight-medium);
+}
+
+.title {
+  font-size: clamp(var(--font-size-xl), 1.05rem + 1.4vw, var(--font-size-3xl));
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.teaser {
+  font-size: var(--yb-prose-size);
+  line-height: 1.6;
+  max-width: 56ch;
+}
+
+.chipsLabel {
+  margin-top: var(--spacing-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+}
+
+.cover {
+  grid-area: cover;
+  position: relative;
+  display: block;
+  border-radius: var(--radius-container);
+  color: inherit;
+  text-decoration: none;
+}

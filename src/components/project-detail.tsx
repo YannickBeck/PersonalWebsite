@@ -1,30 +1,42 @@
 import { VStack } from '@astryxdesign/core/VStack';
-import { HStack } from '@astryxdesign/core/HStack';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Card } from '@astryxdesign/core/Card';
-import { Token } from '@astryxdesign/core/Token';
 import { Link } from '@astryxdesign/core/Link';
 import { List, ListItem } from '@astryxdesign/core/List';
 import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { PageHero } from '@/components/page-hero';
 import { ItemCover } from '@/components/item-cover';
 import { coverMeta, coverSeed } from '@/components/content-card';
-import { RelatedCarousel } from '@/components/carousel-row';
+import { Section } from '@astryxdesign/core/Section';
+import { Divider } from '@astryxdesign/core/Divider';
+import { ProjectRow } from '@/components/project-row';
 import { MorphTarget } from '@/components/morph';
 import { BackLink, ReadingLayout } from '@/components/reading-layout';
 import { Gap } from '@/components/gap';
 import { SHOW_GAPS } from '@/lib/gaps';
-import { ExternalArrow } from '@/components/icons';
+import { InlineExternalArrow } from '@/components/icons';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { PROJECTS, type Project } from '@/content/profile';
 import { anchor, extraTags, projectCard, skillChips } from '@/content/profile-view';
 import { ChipList, PlainChip, SkillChipLink } from '@/components/skill-chip';
+import styles from './project-detail.module.css';
+import rowStyles from './project-row.module.css';
 
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
+/** Abschnitt der Lesespalte: Nummer in der Display-Schrift (dekorativ) + H2, wie die Abschnitte. */
+function Block({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
     <VStack gap={3}>
-      <Heading level={2}>{title}</Heading>
+      <VStack gap={2}>
+        <Text type="label" color="secondary" className={styles.n}>
+          <span className="yb-display" aria-hidden="true">
+            {String(n).padStart(2, '0')}
+          </span>
+        </Text>
+        <Heading level={2} className={styles.blockTitle}>
+          {title}
+        </Heading>
+      </VStack>
       {children}
     </VStack>
   );
@@ -46,7 +58,7 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
   const dict = getDictionary(lang);
   const card = projectCard(project, lang);
   const cover = coverMeta(card, lang);
-  const related = PROJECTS.filter((p) => p.id !== project.id).map((p) => projectCard(p, lang));
+  const others = PROJECTS.filter((p) => p.id !== project.id);
   const period = project.period.status === 'belegt' ? project.period.value[lang] : null;
   const context = project.context.status === 'belegt' ? project.context.value[lang] : null;
 
@@ -54,14 +66,10 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
     <>
       <PageHero
         eyebrow={<BackLink href={withLang('/projekte', lang)} label={dict.backToProjects} />}
+        kicker={[project.kind[lang], period].filter(Boolean).join(' · ')}
         title={project.title[lang]}
         lede={project.teaser[lang]}
-        meta={
-          <HStack gap={1.5} wrap="wrap">
-            <Token label={project.kind[lang]} size="sm" />
-            {period ? <Token label={period} size="sm" /> : null}
-          </HStack>
-        }
+        size="lg"
       />
       <ReadingLayout
         tocTitle={dict.tocTitle}
@@ -116,10 +124,10 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
                   <VStack gap={1}>
                     {project.links.map((l) => (
                       <Link key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" color="primary" hasUnderline>
-                        <HStack gap={1} vAlign="center" as="span">
-                          {l.label[lang]}
-                          <ExternalArrow />
-                        </HStack>
+                        {/* Pfeil inline nach dem letzten Wort (in einer HStack rutschte er bei
+                            Zeilenumbruch an den rechten Rand) */}
+                        {l.label[lang]}
+                        <InlineExternalArrow />
                       </Link>
                     ))}
                   </VStack>
@@ -129,22 +137,23 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
           </Card>
         }
       >
-        <Block title={dict.sectionSituation}>
+        <Block n={1} title={dict.sectionSituation}>
           {project.situation.value[lang].map((p) => (
             <Text key={p.slice(0, 32)} as="p" textWrap="pretty">
               {p}
             </Text>
           ))}
         </Block>
-        <Block title={dict.sectionContribution}>
+        <Block n={2} title={project.brief.pointsLabel === 'focus' ? dict.cvThesisFocus : dict.sectionContribution}>
+          {/* Bachelorarbeit: Schwerpunkte als Liste (THESIS.focus); Orbitalis: eigener Beitrag */}
           <List listStyle="disc" density="compact">
-            {project.contribution.value[lang].map((c) => (
+            {(project.brief.pointsLabel === 'focus' ? project.brief.points[lang] : project.contribution.value[lang]).map((c) => (
               <ListItem key={c.slice(0, 32)} label={<Text textWrap="pretty">{c}</Text>} />
             ))}
           </List>
         </Block>
         {project.result.status === 'belegt' ? (
-          <Block title={dict.sectionOutcome}>
+          <Block n={3} title={dict.sectionOutcome}>
             {project.result.value[lang].map((p) => (
               <Text key={p.slice(0, 32)} as="p" textWrap="pretty">
                 {p}
@@ -165,7 +174,20 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
           {dict.factsSource}: {project.quellen.map((q) => SOURCE_LABEL[q] ?? q).join(' · ')}
         </Text>
       </ReadingLayout>
-      <RelatedCarousel title={dict.relatedTitle} items={related} lang={lang} />
+      {/* Statt Karussell (nur ein weiteres Projekt): das andere Projekt als Zeile wie auf /projekte */}
+      <Section>
+        <VStack gap={6}>
+          <Divider />
+          <Heading level={2} className={styles.blockTitle}>
+            {dict.otherProjectTitle}
+          </Heading>
+          <div className={rowStyles.list}>
+            {others.map((p) => (
+              <ProjectRow key={p.id} project={p} n={PROJECTS.indexOf(p) + 1} lang={lang} headingLevel={3} />
+            ))}
+          </div>
+        </VStack>
+      </Section>
     </>
   );
 }

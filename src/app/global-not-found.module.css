@@ -50,6 +50,40 @@
   color: var(--color-text-accent);
 }
 
+/* Pillen wie die Buttons der Seite (Astryx-Button size lg: Tinte bzw. Kontur), ohne Client-JS */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-element-lg);
+  padding-inline: var(--spacing-5);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 var(--border-width) var(--yb-control-border);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.primary {
+  background-color: var(--color-background-inverted);
+  box-shadow: none;
+  color: var(--color-background-body);
+}
+
+@media (hover: hover) {
+  .pill:hover {
+    background-color: var(--color-overlay-hover);
+  }
+
+  .primary:hover {
+    background-color: color-mix(in srgb, var(--color-background-inverted) 88%, var(--color-background-body));
+  }
+}
+
+.pill:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
 .link:focus-visible,
 .brand:focus-visible {
   outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
@@ -59,4 +93,27 @@
 
 :global(html[data-yb-404='en']) .otherLang {
   display: none;
+}
+
+/*
+ * CLS (B4, gemessen): Diese Seite bekommt von Next keine Schrift-Preloads (anders als die
+ * Seiten in den Root-Layouts). Bis Fustat geladen ist, bricht der Satz mit der Ersatzschrift
+ * eine Zeile später um (DE 390px: 4 statt 3 Zeilen, EN 320px: 4 statt 3) – die Links
+ * rutschten danach 30px hoch. Mindesthöhe = Zeilenzahl der Ersatzschrift je Breite.
+ */
+.lede {
+  display: block;
+  min-height: 4lh;
+}
+
+@media (min-width: 400px) {
+  .lede {
+    min-height: 3lh;
+  }
+}
+
+@media (min-width: 600px) {
+  .lede {
+    min-height: 2lh;
+  }
 }

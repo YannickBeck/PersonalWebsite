@@ -1,20 +1,57 @@
 /*
  * Abweichung von AGENTS.md (dokumentiert): asymmetrische Spalten 1:2 – Astryx-Grid
  * kennt nur gleich breite Spuren (GridSpan erzeugt mobil eine 0px-Spur).
+ * Kopf-Typografie wie die Abschnitte der Startseite (home.module.css .sectionNumber /
+ * .splitTitle), eine Stufe kleiner: Unterabschnitte stehen unter der H1 der Seite.
+ * Anker-Ziele (#cloud …) halten Abstand zum Sticky-Header.
  */
+.section {
+  scroll-margin-top: calc(var(--size-element-md) + var(--spacing-8));
+}
+
 .head,
 .body {
   min-width: 0;
+}
+
+.index {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--color-text-secondary);
+}
+
+.title {
+  font-size: clamp(var(--font-size-xl), 1.05rem + 1.4vw, var(--font-size-3xl));
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 
 @media (min-width: 1024px) {
   .split {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     align-items: start;
+    column-gap: var(--spacing-10);
   }
 
   .head {
     position: sticky;
     top: calc(var(--size-element-md) + var(--spacing-12));
+  }
+}
+
+/* Druck: Abschnittskopf nie allein am Seitenende (Lebenslauf) */
+@media print {
+  /* Block statt Raster: Umbruch-Vermeidung zwischen Kopf und Inhalt greift in Chrome nur im
+     Blockfluss (gemessen im PDF) */
+  .split {
+    display: block !important;
+  }
+
+  .head {
+    margin-block-end: var(--spacing-4);
+    break-inside: avoid;
+    break-after: avoid;
   }
 }

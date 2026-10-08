@@ -16,6 +16,9 @@ import type { CardItem } from '@/lib/items';
 import { FILTER, FILTER_SHARE } from '@/lib/transitions';
 import { suppressTransitions } from '@/lib/instant';
 
+/** Ab so vielen Beiträgen erscheinen Suche und Themenfilter. */
+const TOOLS_MIN = 4;
+
 export function PostList({
   lang,
   posts,
@@ -65,9 +68,12 @@ export function PostList({
     return hay.includes(q);
   });
   const isFiltered = q.length > 0 || topic !== 'all';
+  // Suche und Themenfilter erst ab vier Beiträgen (B4): bei ein, zwei Beiträgen bringen sie nichts
+  const hasTools = posts.length >= TOOLS_MIN;
 
   return (
     <VStack gap={6}>
+      {hasTools ? (
       <VStack gap={4}>
       <VStack maxWidth={480}>
         <TextInput
@@ -91,6 +97,7 @@ export function PostList({
         </div>
       )}
       </VStack>
+      ) : null}
       <ViewTransition key={topic} name="yb-filter-blog" share={FILTER_SHARE} default="none">
       <VStack gap={4}>
       {filtered.length === 0 ? (

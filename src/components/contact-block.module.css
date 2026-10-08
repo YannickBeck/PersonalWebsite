@@ -1,0 +1,36 @@
+/*
+ * Kontakt-Komposition (contact-block.tsx, Startseite 06 + /kontakt). Abweichung von AGENTS.md
+ * (dokumentiert): asymmetrische Spalten und klebende Randspalte – Astryx-Grid kennt nur gleich
+ * breite Spuren. Klebt unter Header (+ Abschnittsnavigation der Startseite, falls vorhanden:
+ * --yb-header aus home.module.css, sonst die gemessene Header-Höhe). Nur Tokens.
+ */
+.grid {
+  display: grid;
+  gap: var(--spacing-8);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.form {
+  max-width: 640px;
+}
+
+.avatar {
+  width: var(--size-element-lg);
+  height: var(--size-element-lg);
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--spacing-10);
+  }
+
+  /* LinkedIn bleibt beim Ausfüllen in Sicht */
+  .aside {
+    position: sticky;
+    top: calc(var(--yb-header, var(--size-element-md)) + var(--size-element-md) + var(--spacing-8));
+  }
+}

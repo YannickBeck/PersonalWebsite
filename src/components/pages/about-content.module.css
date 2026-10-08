@@ -1,7 +1,8 @@
 /*
- * Über mich: Text (Lesebreite) + Randspalte mit Porträt und Fakten ab 900px, darunter gestapelt.
- * Abweichung von AGENTS.md (dokumentiert): asymmetrische Spalten (Astryx-Grid nur gleich
- * breit), Bildmaße, native Liste für den Kurz-Werdegang. Nur Tokens.
+ * Über mich: Text (Lesebreite) + Randspalte mit Porträt und Angaben ab 900px, darunter
+ * gestapelt (Foto zuerst schmal begrenzt). Abweichung von AGENTS.md (dokumentiert):
+ * asymmetrische Spalten (Astryx-Grid nur gleich breit), Bildmaße, native Liste für den
+ * Kurz-Werdegang (Jahre in der Display-Schrift wie im Lebenslauf). Nur Tokens.
  */
 .grid {
   display: grid;
@@ -12,12 +13,13 @@
 
 @media (min-width: 900px) {
   .grid {
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: var(--spacing-12);
   }
 }
 
 .text {
-  max-width: 68ch;
+  max-width: 64ch;
 }
 
 .paragraph {
@@ -25,15 +27,34 @@
   line-height: 1.65;
 }
 
+/* Mobil/Tablet: Foto und Angaben nebeneinander, solange Platz ist; sonst untereinander */
 .side {
-  max-width: 22rem;
+  max-width: 26rem;
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .side {
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--spacing-8);
+  }
+}
+
+@media (min-width: 900px) {
+  .side {
+    max-width: 22rem;
+    justify-self: end;
+    width: 100%;
+  }
 }
 
 .photo {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
   border-radius: var(--radius-container);
 }
@@ -44,12 +65,46 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-3);
 }
 
 .pathItem {
   display: grid;
-  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
   gap: var(--spacing-4);
   align-items: baseline;
+  padding-block: var(--spacing-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.pathItem:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.pathYears {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.pathWhat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-0-5);
+  min-width: 0;
+}
+
+.pathLink {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Touch: Link-Zeile mindestens 24px hoch (WCAG 2.5.8) ohne Zeilenversatz */
+@media (pointer: coarse) {
+  .pathLink {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--spacing-6);
+  }
 }

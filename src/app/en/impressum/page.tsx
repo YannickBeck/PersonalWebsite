@@ -1,13 +1,7 @@
-import { PageHero } from '@/components/page-hero';
-import { Section } from '@astryxdesign/core/Section';
-import { VStack } from '@astryxdesign/core/VStack';
-import { Heading } from '@astryxdesign/core/Heading';
-import { Text } from '@astryxdesign/core/Text';
-import { Banner } from '@astryxdesign/core/Banner';
-import { getDictionary } from '@/i18n/dictionaries';
 import type { Metadata } from 'next';
 import { pageMeta } from '@/lib/seo';
-import { Gap } from '@/components/gap';
+import { getDictionary } from '@/i18n/dictionaries';
+import { LegalContent } from '@/components/pages/legal-content';
 
 const meta = getDictionary('en').pages.impressum;
 export const metadata: Metadata = pageMeta({
@@ -17,36 +11,7 @@ export const metadata: Metadata = pageMeta({
   description: meta.lede,
 });
 
+/** Inhalt aus src/content/legal.ts (DE + EN, auch für die Markdown-Fassung). */
 export default function Page() {
-  const page = getDictionary('en').pages.impressum;
-  const dict = getDictionary('en');
-  return (
-    <>
-      <PageHero title={page.title} lede={page.lede} meta={<Gap id="legal-imprint" lang="en" block />} />
-      <Section>
-        <VStack gap={8} maxWidth={640}>
-          <Banner
-            status="note"
-            title={dict.templateNoticeTitle}
-            description="Editorial template — not legal advice. Replace all bracketed items with real data before publishing."
-          />
-          <VStack gap={2}>
-            <Heading level={2}>Information according to § 5 TMG</Heading>
-            <Text type="code" color="secondary">[Add full name]</Text>
-            <Text type="code" color="secondary">[Add street and number]</Text>
-            <Text type="code" color="secondary">[Add postal code and city]</Text>
-          </VStack>
-          <VStack gap={2}>
-            <Heading level={2}>Contact</Heading>
-            <Text type="code" color="secondary">[Add email address]</Text>
-            <Text type="code" color="secondary">[Add phone number — optional but recommended]</Text>
-          </VStack>
-          <VStack gap={2}>
-            <Heading level={2}>Responsible for content (§ 55 II RStV)</Heading>
-            <Text type="code" color="secondary">[Add name and address]</Text>
-          </VStack>
-        </VStack>
-      </Section>
-    </>
-  );
+  return <LegalContent kind="impressum" lang="en" />;
 }

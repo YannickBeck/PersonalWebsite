@@ -14,6 +14,15 @@
   min-height: var(--size-element-sm);
 }
 
+/* WCAG 2.5.8 (B4): jeder Link mindestens 24 × 24px – kurze Beschriftungen wie „CV“ waren
+   22px breit */
+.item :global(a) {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--spacing-6);
+  min-inline-size: var(--spacing-6);
+}
+
 /* Touch (A122): Zeile 44px (--size-element-sm, Touch-Adaptation im Theme), der Link füllt sie */
 @media (pointer: coarse) {
   .item :global(a) {

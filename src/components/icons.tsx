@@ -73,3 +73,16 @@ export function PauseIcon({ color = 'inherit' }: { color?: IconColor }) {
 export function PlayIcon({ color = 'inherit' }: { color?: IconColor }) {
   return <Icon icon={PlaySvg} size="sm" color={color} />;
 }
+
+/**
+ * Pfeil hinter einem Linktext im Fließtext (Randspalte, Rechtstexte): bleibt inline beim
+ * letzten Wort. Astryx-Link legt den Inhalt in ein Text-Span, das Icon wäre dort ein Block
+ * und rutschte beim Umbruch in eine eigene Zeile bzw. an den rechten Rand.
+ */
+export function InlineExternalArrow() {
+  return (
+    <span className="yb-inline-icon" aria-hidden="true">
+      <Icon icon={ExternalArrowSvg} size="sm" color="inherit" />
+    </span>
+  );
+}

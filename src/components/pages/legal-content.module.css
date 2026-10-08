@@ -1,0 +1,20 @@
+/*
+ * Rechtstexte (legal-content.tsx): Abschnitte mit Anker (Abstand zum Sticky-Header) und
+ * Lesegröße wie die Prosa der Detailseiten. Nur Tokens.
+ */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  scroll-margin-top: calc(var(--size-element-md) + var(--spacing-8));
+}
+
+.heading {
+  font-size: var(--font-size-xl);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.text {
+  line-height: 1.65;
+}

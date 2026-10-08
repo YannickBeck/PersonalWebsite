@@ -24,8 +24,10 @@ export async function ArticleDetail({ lang, item }: { lang: Lang; item: DemoArti
     <>
       <PageHero
         eyebrow={<BackLink href={withLang('/blog', lang)} label={dict.backToBlog} />}
+        kicker={dict.kindPost}
         title={item.title}
         lede={item.excerpt}
+        size="lg"
         meta={
           <HStack gap={3} wrap="wrap" vAlign="center">
             <Text type="supporting">

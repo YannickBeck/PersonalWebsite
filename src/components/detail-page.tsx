@@ -55,8 +55,10 @@ export async function DetailBody({ lang, item }: { lang: Lang; item: GhostItem }
             label={project ? dict.backToProjects : dict.backToBlog}
           />
         }
+        kicker={project ? dict.kindProject : dict.kindPost}
         title={item.title ?? item.slug}
         lede={item.custom_excerpt || undefined}
+        size="lg"
         meta={
           meta.length > 0 || topics.length > 0 ? (
             <HStack gap={3} wrap="wrap" vAlign="center">

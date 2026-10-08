@@ -24,9 +24,14 @@ type TransitionLinkProps = ComponentProps<typeof NextLink> & { to?: string };
  *   die Scroll-Position der alten Seite (für Browser-Zurück, route-transition.tsx).
  * - Links in die andere Sprache (z. B. Sprachwechsel EN/DE) tragen hrefLang und lang der
  *   Zielsprache (A124) – Astryx-Button reicht diese Attribute nicht typisiert durch.
+ * - Feeds und Dateien (.xml, .txt, .json, .pdf) bleiben normale Dokument-Links (kein RSC-Abruf
+ *   eines Route-Handlers, keine Vorabladung).
  * - entfernt Astryx' zusätzliches `to`-Attribut (für React Router gedacht), sonst
  *   landet ein ungültiges <a to="…"> im HTML (T9).
  */
+/** Ziele ohne Seite (Feeds, llms.txt …): Route-Handler liefern kein RSC – normaler Dokument-Link. */
+const FILE_TARGET = /\.(xml|txt|json|pdf)$/;
+
 export function TransitionLink({ to: _to, href, transitionTypes, onClick, ...rest }: TransitionLinkProps) {
   void _to;
   const pathname = usePathname();
@@ -46,5 +51,10 @@ export function TransitionLink({ to: _to, href, transitionTypes, onClick, ...res
     }
   };
 
+  if (typeof href === 'string' && FILE_TARGET.test(href.split(/[?#]/)[0])) {
+    const { prefetch: _prefetch, replace: _replace, scroll: _scroll, shallow: _shallow, locale: _locale, legacyBehavior: _legacy, passHref: _passHref, onNavigate: _onNavigate, ...anchor } = rest;
+    void [_prefetch, _replace, _scroll, _shallow, _locale, _legacy, _passHref, _onNavigate];
+    return <a {...anchor} href={href} onClick={onClick} />;
+  }
   return <NextLink {...langProps} {...rest} href={href} transitionTypes={types} onClick={handleClick} />;
 }

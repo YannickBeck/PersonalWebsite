@@ -392,34 +392,4 @@
   }
 }
 
-/* ---------- 06 Kontakt ---------- */
-.contactGrid {
-  display: grid;
-  gap: var(--spacing-8);
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-}
-
-.contactForm {
-  max-width: 640px;
-}
-
-.contactAvatar {
-  width: var(--size-element-lg);
-  height: var(--size-element-lg);
-  border-radius: var(--radius-full);
-  object-fit: cover;
-}
-
-@media (min-width: 900px) {
-  .contactGrid {
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-    gap: var(--spacing-10);
-  }
-
-  /* LinkedIn bleibt beim Ausfüllen in Sicht */
-  .contactAside {
-    position: sticky;
-    top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
-  }
-}
+/* 06 Kontakt: Komposition in src/components/contact-block.module.css (auch /kontakt) */

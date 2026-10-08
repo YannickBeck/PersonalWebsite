@@ -2,24 +2,29 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Text } from '@astryxdesign/core/Text';
 import { Heading } from '@astryxdesign/core/Heading';
-import { Token } from '@astryxdesign/core/Token';
 import { Link } from '@astryxdesign/core/Link';
-import { List, ListItem } from '@astryxdesign/core/List';
+import { Button } from '@astryxdesign/core/Button';
 import { PageHero } from '@/components/page-hero';
 import { SplitSection } from '@/components/split-section';
 import { PrintButton } from '@/components/print-button';
+import { LabelChipList } from '@/components/skill-chip';
+import { ExternalArrow } from '@/components/icons';
 import { Gap } from '@/components/gap';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { CERTIFICATIONS, EDUCATION, FOCUS_LIST, LANGUAGES, LINKEDIN_URL, PERSON, STATIONS, projectById } from '@/content/profile';
-import { projectHref } from '@/content/profile-view';
-import { formatPeriod } from '@/lib/period';
+import { labelChips, projectHref } from '@/content/profile-view';
+import { formatPeriod, formatYears } from '@/lib/period';
 import styles from './cv-content.module.css';
 
 /**
- * Lebenslauf aus dem Content-Modell (LinkedIn-Export): Stationen mit Stichpunkten,
- * Ausbildung, Zertifikate, Sprachen, Schwerpunkte. Druckbar (globals.css @media print:
- * Header/Footer/Buttons aus, helles Schema). Anker je Eintrag (#bechtle-studium …) für die
- * „belegt durch“-Links der Fähigkeiten.
+ * Lebenslauf aus dem Content-Modell (LinkedIn-Export), Redesign B4: Kopf mit dem Namen in der
+ * Display-Schrift (wie der Namenszug der Startseite, aber in Tinte), darunter nummerierte
+ * Abschnitte wie auf der Startseite. Linke Spalte je Eintrag: Jahre in der Display-Schrift plus
+ * genauer Zeitraum (Stationen, Ausbildung) bzw. Aussteller (Zertifikate) bzw. Sprache.
+ *
+ * Druckbar (globals.css + cv-content.module.css @media print): Header, Footer und Bedienelemente
+ * fallen weg, helles Schema, Einträge brechen nicht über Seiten. Anker je Eintrag
+ * (#bechtle-studium …).
  */
 export function CvContent({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
@@ -28,32 +33,49 @@ export function CvContent({ lang }: { lang: Lang }) {
   return (
     <>
       <PageHero
-        title={page.title}
-        lede={page.lede}
+        size="display"
+        kicker={page.title}
+        title={PERSON.name}
+        lede={`${PERSON.role.value[lang]} · ${PERSON.focusLine.value[lang]}`}
         meta={
-          <VStack gap={3}>
-            <Text color="secondary">
-              {PERSON.name} · {PERSON.role.value[lang]} · {PERSON.location.value[lang]} ·{' '}
+          <VStack gap={4}>
+            <Text color="secondary" className={styles.contactLine}>
+              {PERSON.location.value[lang]} ·{' '}
               <Link href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" color="primary" hasUnderline>
                 linkedin.com/in/yannickbeck
               </Link>
             </Text>
-            <HStack className="print-hide">
+            <HStack gap={2} wrap="wrap" className="print-hide">
               <PrintButton lang={lang} />
+              <Button
+                label={dict.home.aboutLinkedIn}
+                aria-label={dict.linkedinExternal}
+                variant="ghost"
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                endContent={<ExternalArrow />}
+              />
             </HStack>
           </VStack>
         }
       />
-      <SplitSection title={dict.cvStationsTitle}>
+
+      <SplitSection index="01" title={dict.cvStationsTitle}>
         <ol className={styles.list}>
           {STATIONS.map((s) => (
             <li key={s.id} id={s.id} className={styles.entry}>
-              <Text type="supporting" color="secondary" className={styles.when}>
-                {formatPeriod(s.start, s.end, lang)}
-              </Text>
-              <VStack gap={2}>
+              <div className={styles.when}>
+                <span className={`${styles.years} yb-display`}>{formatYears(s.start, s.end, lang)}</span>
+                <Text type="supporting" color="secondary">
+                  {formatPeriod(s.start, s.end, lang)}
+                </Text>
+              </div>
+              <VStack gap={3}>
                 <VStack gap={0.5}>
-                  <Heading level={3}>{s.role[lang]}</Heading>
+                  <Heading level={3} className={styles.role}>
+                    {s.role[lang]}
+                  </Heading>
                   <Text color="secondary">
                     {s.org}
                     {s.place ? ` · ${s.place[lang]}` : ''}
@@ -65,11 +87,11 @@ export function CvContent({ lang }: { lang: Lang }) {
                   </Text>
                 ) : null}
                 {s.points[lang].length > 0 ? (
-                  <List listStyle="disc" density="compact">
+                  <ul className={styles.points}>
                     {s.points[lang].map((pt) => (
-                      <ListItem key={pt} label={<Text textWrap="pretty">{pt}</Text>} />
+                      <li key={pt}>{pt}</li>
                     ))}
-                  </List>
+                  </ul>
                 ) : null}
                 {s.closing ? (
                   <Text as="p" color="secondary" textWrap="pretty">
@@ -77,7 +99,7 @@ export function CvContent({ lang }: { lang: Lang }) {
                   </Text>
                 ) : null}
                 {s.thesis ? (
-                  <VStack gap={1} className={styles.thesis}>
+                  <div className={styles.thesis}>
                     <Text type="label" color="secondary">
                       {dict.cvThesisLabel}
                     </Text>
@@ -87,64 +109,70 @@ export function CvContent({ lang }: { lang: Lang }) {
                     <Text type="supporting" color="secondary">
                       {dict.cvThesisFocus}: {s.thesis.focus[lang].join(', ')}
                     </Text>
-                  </VStack>
+                  </div>
                 ) : null}
               </VStack>
             </li>
           ))}
         </ol>
       </SplitSection>
-      <SplitSection title={dict.cvEducationTitle} hasDivider>
+
+      <SplitSection index="02" title={dict.cvEducationTitle} hasDivider>
         <ol className={styles.list}>
           {EDUCATION.map((e) => (
             <li key={e.id} id={e.id} className={styles.entry}>
-              <Text type="supporting" color="secondary" className={styles.when}>
-                {formatPeriod(e.start, e.end, lang)}
-              </Text>
+              <div className={styles.when}>
+                <span className={`${styles.years} yb-display`}>{formatYears(e.start, e.end, lang)}</span>
+                <Text type="supporting" color="secondary">
+                  {formatPeriod(e.start, e.end, lang)}
+                </Text>
+              </div>
               <VStack gap={0.5}>
-                <Heading level={3}>{e.degree[lang]}</Heading>
+                <Heading level={3} className={styles.role}>
+                  {e.degree[lang]}
+                </Heading>
                 <Text color="secondary">{e.school}</Text>
               </VStack>
             </li>
           ))}
         </ol>
       </SplitSection>
-      <SplitSection title={dict.cvCertsTitle} hasDivider>
+
+      <SplitSection index="03" title={dict.cvCertsTitle} hasDivider>
         <ul className={styles.list}>
           {CERTIFICATIONS.map((c) => (
             <li key={c.id} id={c.id} className={styles.entry}>
-              <span className={styles.when}>
-                <Gap id="cert-dates" lang={lang} />
-              </span>
-              <VStack gap={0.5}>
-                <Heading level={3}>
-                  <span lang={c.nameLang[lang]}>{c.name[lang]}</span>
+              <div className={styles.when}>
+                <span className={`${styles.years} yb-display`}>{c.issuer}</span>
+              </div>
+              <VStack gap={1}>
+                <Heading level={3} className={styles.role}>
+                  <span lang={c.nameLang[lang] !== lang ? c.nameLang[lang] : undefined}>{c.name[lang]}</span>
                 </Heading>
-                <Text color="secondary">{c.issuer}</Text>
+                {/* Datum offen: in Produktion keine Zeile, in der Vorschau die Lücke */}
+                <Gap id="cert-dates" lang={lang} />
                 {lang === 'en' && c.enTitle ? <Gap id={c.enTitle.gap} lang={lang} /> : null}
               </VStack>
             </li>
           ))}
         </ul>
       </SplitSection>
-      <SplitSection title={dict.cvLanguagesTitle} hasDivider>
+
+      <SplitSection index="04" title={dict.cvLanguagesTitle} hasDivider>
         <ul className={styles.list}>
           {LANGUAGES.value.map((l) => (
-            <li key={l.code} className={styles.entry}>
-              <Text weight="semibold" className={styles.when}>
-                {l.name[lang]}
-              </Text>
-              <Text color="secondary">{l.level[lang]}</Text>
+            <li key={l.code} className={`${styles.entry} ${styles.compact}`}>
+              <div className={styles.when}>
+                <span className={`${styles.years} yb-display`}>{l.name[lang]}</span>
+              </div>
+              <Text className={styles.level}>{l.level[lang]}</Text>
             </li>
           ))}
         </ul>
       </SplitSection>
-      <SplitSection title={dict.cvSkillsTitle} hasDivider>
-        <HStack gap={2} wrap="wrap">
-          {FOCUS_LIST.value.map((s) => (
-            <Token key={s} label={s} size="lg" />
-          ))}
-        </HStack>
+
+      <SplitSection index="05" title={dict.cvSkillsTitle} hasDivider>
+        <LabelChipList chips={labelChips(FOCUS_LIST.value)} lang={lang} />
       </SplitSection>
     </>
   );

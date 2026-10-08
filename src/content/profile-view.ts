@@ -220,3 +220,34 @@ export function extraTags(project: Project): string[] {
   );
   return project.tags.filter((t) => !names.has(t.toLowerCase()));
 }
+
+/** Fähigkeit zu einer Profil-Bezeichnung (z. B. „Microsoft Intune“, „LLMs“) – Name oder Kurzname. */
+export function skillIdFor(label: string): SkillId | undefined {
+  const l = label.toLowerCase();
+  return SKILLS.find((s) =>
+    [s.name.de, s.name.en, s.tile?.de, s.tile?.en].some((v) => v?.replace(/­/g, '').toLowerCase() === l),
+  )?.id;
+}
+
+/**
+ * Bezeichnungen aus dem Profil (Schwerpunkte-Liste, Interessen) als Marken: mit Kachel im
+ * Periodensystem → Fähigkeits-Kachel (Kürzel, Kategoriefarbe, Sprung auf /#skill-<id>),
+ * sonst neutrale Marke. Die Beschriftung bleibt der Wortlaut des Profils.
+ */
+export type LabelChip = { kind: 'skill'; chip: SkillChip } | { kind: 'plain'; label: string };
+
+export function labelChips(labels: string[]): LabelChip[] {
+  return labels.map((label) => {
+    const id = skillIdFor(label);
+    if (!id) {
+      return { kind: 'plain', label };
+    }
+    const s = SKILLS.find((x) => x.id === id)!;
+    return { kind: 'skill', chip: { id, symbol: s.symbol, label, category: s.category } };
+  });
+}
+
+/** Projekte, die mindestens eine der Fähigkeiten belegen (z. B. Schwerpunkt → Projekte). */
+export function projectsForSkills(ids: SkillId[]): Project[] {
+  return PROJECTS.filter((p) => p.skills.some((id) => ids.includes(id)));
+}

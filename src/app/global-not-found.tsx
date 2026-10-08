@@ -11,6 +11,7 @@ import { THEME_BOOT } from '@/theme/theme-boot';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { FONT_VARIABLES } from './_shell/fonts';
 import styles from './global-not-found.module.css';
+import nf from '@/components/pages/not-found.module.css';
 
 /**
  * Globale 404 für URLs ohne passende Route (next.config experimental.globalNotFound) – nötig,
@@ -88,27 +89,28 @@ export default function GlobalNotFound() {
             <main id="main">
               <VStack gap={6}>
                 <VStack gap={4}>
-                  <Text type="code" color="accent" weight="semibold">
+                  {/* Blasse Display-Ziffern wie der Namenszug (dekorativ, wie not-found-content.tsx) */}
+                  <span className={`${nf.code} yb-display`} aria-hidden="true">
                     404
-                  </Text>
-                  <Heading level={1} textWrap="balance">
+                  </span>
+                  <Heading level={1} textWrap="balance" className={nf.title}>
                     <Both de={de.notFoundTitle} en={en.notFoundTitle} />
                   </Heading>
-                  <Text type="large" color="secondary" textWrap="pretty">
+                  <Text type="large" color="secondary" textWrap="pretty" className={styles.lede}>
                     <Both de={de.notFoundText} en={en.notFoundText} />
                   </Text>
                 </VStack>
-                <HStack as="ul" gap={4} wrap="wrap" className={styles.links}>
-                  {LINKS.map((href) => (
+                <HStack as="ul" gap={2} wrap="wrap" className={styles.links}>
+                  {LINKS.map((href, i) => (
                     <li key={href}>
                       <Both
                         de={
-                          <a href={withLang(href, 'de')} className={styles.link}>
+                          <a href={withLang(href, 'de')} className={`${styles.pill} ${i === 0 ? styles.primary : ''}`}>
                             {label(href, 'de')}
                           </a>
                         }
                         en={
-                          <a href={withLang(href, 'en')} className={styles.link}>
+                          <a href={withLang(href, 'en')} className={`${styles.pill} ${i === 0 ? styles.primary : ''}`}>
                             {label(href, 'en')}
                           </a>
                         }

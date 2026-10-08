@@ -1,0 +1,17 @@
+/*
+ * Projekt-Detailseite (project-detail.tsx, Redesign B4): Abschnittsnummer in der
+ * Display-Schrift und H2 wie die Unterabschnitte (split-section.module.css). Nur Tokens.
+ */
+.n {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--color-text-secondary);
+}
+
+.blockTitle {
+  font-size: clamp(var(--font-size-xl), 1.05rem + 1.1vw, var(--font-size-2xl));
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}

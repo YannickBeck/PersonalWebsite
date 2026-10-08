@@ -6,10 +6,12 @@ import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
 import { Link } from '@astryxdesign/core/Link';
 import { PAGE_TOP } from '@/components/page-hero';
+import styles from './not-found.module.css';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 
 /**
- * 404-Inhalt für notFound() innerhalb einer Sprache ((de)/not-found.tsx, en/not-found.tsx) –
+ * 404-Inhalt (Redesign B4: blasse „404“ in der Display-Schrift wie der Namenszug, H1, Pillen)
+ * für notFound() innerhalb einer Sprache ((de)/not-found.tsx, en/not-found.tsx) –
  * im normalen Seitenrahmen der jeweiligen Sprache. Die andere Sprache als EINE ruhige Zeile mit
  * Link (VIS19), ausgezeichnet mit lang (A120). Unbekannte URLs ohne Route: global-not-found.tsx.
  */
@@ -21,17 +23,18 @@ export function NotFoundContent({ lang }: { lang: Lang }) {
     <Section className={PAGE_TOP}>
       <VStack gap={8} maxWidth={640}>
         <VStack gap={4}>
-          <Text type="code" color="accent" weight="semibold">
+          {/* Blasse Display-Ziffern wie der Namenszug der Startseite (dekorativ) */}
+          <span className={`${styles.code} yb-display`} aria-hidden="true">
             404
-          </Text>
-          <Heading level={1} textWrap="balance">
+          </span>
+          <Heading level={1} textWrap="balance" className={styles.title}>
             {dict.notFoundTitle}
           </Heading>
           <Text type="large" color="secondary" textWrap="pretty">
             {dict.notFoundText}
           </Text>
         </VStack>
-        <HStack gap={3} wrap="wrap">
+        <HStack gap={2} wrap="wrap">
           <Button label={dict.notFoundHome} variant="primary" size="lg" href={withLang('/', lang)} />
           <Button label={dict.pages.projekte.title} variant="secondary" size="lg" href={withLang('/projekte', lang)} />
           <Button label={dict.pages.kontakt.title} variant="secondary" size="lg" href={withLang('/kontakt', lang)} />

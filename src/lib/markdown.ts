@@ -23,6 +23,7 @@ import {
   skillById,
   type Project,
 } from '@/content/profile';
+import { IMPRINT, LEGAL_OPEN, PRIVACY, type LegalDoc } from '@/content/legal';
 import { formatPeriod } from '@/lib/period';
 import { KNOWN_ROUTES } from '@/lib/routes';
 import { getBySlug, getPosts } from '@/lib/ghost';
@@ -167,6 +168,62 @@ function servicesMarkdown(lang: Lang): string {
   return out.join('\n');
 }
 
+/** Rechtstexte aus src/content/legal.ts – offene Pflichtangaben wie auf der HTML-Seite als „OFFEN: …“. */
+function legalMarkdown(doc: LegalDoc, title: string, lang: Lang): string {
+  const out = [`# ${title}`, '', `> ${doc.notice[lang]}`, ''];
+  for (const block of doc.blocks) {
+    out.push(`## ${block.heading[lang]}`, '');
+    for (const e of block.entries) {
+      if (e.heading) {
+        out.push(`### ${e.heading[lang]}`, '');
+      }
+      for (const t of e.text?.[lang] ?? []) {
+        out.push(t, '');
+      }
+      for (const l of e.links ?? []) {
+        out.push(`- ${l.label[lang]}: ${l.external ? l.href : abs(withLang(l.href, lang))}`);
+      }
+      if (e.links?.length) {
+        out.push('');
+      }
+      if (e.open) {
+        out.push(`${LEGAL_OPEN[lang]}: ${e.open[lang]}`, '');
+      }
+    }
+  }
+  return out.join('\n');
+}
+
+function usesMarkdown(lang: Lang): string {
+  const dict = getDictionary(lang);
+  const orbitalis = PROJECTS.find((p) => p.id === 'orbitalis')!;
+  return [
+    `# ${dict.pages.uses.title}`,
+    '',
+    dict.pages.uses.lede,
+    '',
+    dict.usesEmpty,
+    '',
+    `${dict.usesFromProjects} ([${orbitalis.shortTitle[lang]}](${abs(withLang(`/projekte/${orbitalis.slug[lang]}`, lang))})): ${orbitalis.tags.join(', ')}`,
+    '',
+  ].join('\n');
+}
+
+function newsletterMarkdown(lang: Lang): string {
+  const dict = getDictionary(lang);
+  return [
+    `# ${dict.pages.newsletter.title}`,
+    '',
+    dict.pages.newsletter.lede,
+    '',
+    dict.newsletterAlternatives,
+    '',
+    `- ${dict.blogRss}: ${abs(withLang('/rss.xml', lang))}`,
+    `- LinkedIn: ${LINKEDIN_URL}`,
+    '',
+  ].join('\n');
+}
+
 /** Seiten ohne eigenes Markdown-Modell: Titel, Lede und Verweis auf die HTML-Fassung. */
 function pointerMarkdown(path: string, lang: Lang): string | null {
   const dict = getDictionary(lang);
@@ -223,6 +280,17 @@ export async function markdownFor(pathname: string): Promise<{ lang: Lang; body:
   if (segs[0] === 'blog' && segs.length === 2) {
     const post = await getBySlug(segs[1], lang);
     return post ? { lang, body: `# ${post.title ?? segs[1]}\n\n${post.custom_excerpt || post.excerpt || ''}\n\n${abs(withLang(bare, lang))}\n` } : null;
+  }
+  if (bare === '/impressum' || bare === '/datenschutz') {
+    const dict = getDictionary(lang);
+    const doc = bare === '/impressum' ? IMPRINT : PRIVACY;
+    return { lang, body: legalMarkdown(doc, dict.pages[bare === '/impressum' ? 'impressum' : 'datenschutz'].title, lang) };
+  }
+  if (bare === '/uses') {
+    return { lang, body: usesMarkdown(lang) };
+  }
+  if (bare === '/newsletter') {
+    return { lang, body: newsletterMarkdown(lang) };
   }
   if (bare === '/content-status') {
     const dict = getDictionary(lang);
