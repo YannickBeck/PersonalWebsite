@@ -16,6 +16,8 @@ import {
   issueToken,
   logEvent,
   markTokenUsed,
+  releaseToken,
+  reserveToken,
   sendContactMail,
 } from '@/lib/contact-server';
 
@@ -136,8 +138,14 @@ export async function POST(req: NextRequest): Promise<Response> {
     });
   }
 
+  // Reservieren vor dem await (FUN3): gleichzeitige Anfragen mit demselben Token → nur eine Mail
+  if (!reserveToken(payload.token)) {
+    logEvent('token_used');
+    return reply({ ok: false, error: 'rejected' }, 400);
+  }
   const result = await sendContactMail(cfg, payload);
   if (!result.ok) {
+    releaseToken(payload.token);
     logEvent('send_failed', result.status);
     return reply({ ok: false, error: 'send_failed' }, 502);
   }

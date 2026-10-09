@@ -52,7 +52,8 @@ export function coverMeta(item: ContentCardData, lang: Lang): { label: string; m
   const dict = getDictionary(lang);
   const firstTopic = item.topics?.[0];
   const key = item.category ?? firstTopic?.slug ?? '';
-  const motif = TOPIC_MOTIF[key] ?? (item.kind === 'post' ? 'article' : 'code');
+  // Ohne passendes Thema: Artikel-Motiv – kein Code-Symbol für Inhalte ohne Code (DES1)
+  const motif = TOPIC_MOTIF[key] ?? 'article';
   const label =
     item.categoryLabel ?? firstTopic?.label ?? (item.kind === 'post' ? dict.kindPost : dict.kindProject);
   return { label, motif };

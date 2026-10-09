@@ -11,8 +11,12 @@ import { Fustat, JetBrains_Mono, Newsreader, Sofia_Sans_Extra_Condensed } from '
  *   riesigen, blassen Namenszug über die volle Breite und die Abschnittsnummern, ohne zu
  *   schreien. Variable Strichstärke (dünn im Hintergrund, kräftig für „IT Consultant“).
  * - Text: Fustat (bisherige Hausschrift, gut lesbar, offene Formen).
- * - Akzent-Serif: Newsreader Italic mit optischer Größe – fein, redaktionell, warm; nur für
- *   einzelne Wörter in Überschriften (statt der derzeit allgegenwärtigen Instrument Serif).
+ * - Akzent-Serif: Newsreader Italic – fein, redaktionell, warm; nur für einzelne Wörter in
+ *   Überschriften und das Titelblatt der Bachelorarbeit (statt der allgegenwärtigen Instrument
+ *   Serif). Nur Gewicht 400, ohne opsz-Achse (Fix-Runde 1, PER2): Die variable Datei mit opsz
+ *   und 200–800 wog 147 KB – größte Einzelressource der Startseite für eine Handvoll Wörter.
+ *   Gemessen (Verifier): 24 KB, mobil gedrosselt LCP ≤ 2,5 s in 8/8 Läufen. Ohne opsz entfällt
+ *   die optische Größenanpassung großer Überschriften (bewusste Abwägung).
  * - Technik: JetBrains Mono für Tags, Versionen, Kürzel (Konvention des Projekts).
  * preload nur für Text und Display (Einstieg/LCP); Serif und Mono laden bei Bedarf.
  */
@@ -30,7 +34,7 @@ export const serif = Newsreader({
   variable: '--font-serif',
   subsets: ['latin'],
   style: 'italic',
-  axes: ['opsz'],
+  weight: '400',
   preload: false,
 });
 

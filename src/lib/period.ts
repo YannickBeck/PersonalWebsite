@@ -28,3 +28,13 @@ export function formatYears(start: string, end: string | null, lang: Lang): stri
 export function isoMonth(ym: string): string {
   return ym;
 }
+
+/**
+ * Listenpunkte als Satzteil: „Generative AI, RAG …“. Englisch kleingeschrieben mitten im Satz
+ * („Focus of the thesis: generative AI, retrieval-augmented generation …“, TEX15) – die Daten
+ * bleiben Listenform mit großem Anfangsbuchstaben; Deutsch unverändert (Substantive).
+ */
+export function sentenceList(items: string[], lang: Lang): string {
+  const parts = lang === 'en' ? items.map((t) => (/^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t)) : items;
+  return parts.join(', ');
+}

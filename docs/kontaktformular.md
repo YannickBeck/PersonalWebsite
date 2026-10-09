@@ -1,9 +1,23 @@
 # Kontaktformular
 
-Stand: Redesign B2 (2026-10). Das Formular steht auf `/kontakt`, `/en/kontakt` und im Abschnitt
-„Kontakt“ der Startseite. Es versendet echte E-Mails über die REST-API von
-[Resend](https://resend.com/docs/api-reference/emails/send-email), per `fetch` und ohne
-zusätzliche Abhängigkeit.
+Stand: Redesign B2, ergänzt in Fix-Runde 1 (2026-10). Das Formular steht auf `/kontakt`,
+`/en/kontakt` und im Abschnitt „Kontakt“ der Startseite. Es versendet echte E-Mails über die
+REST-API von [Resend](https://resend.com/docs/api-reference/emails/send-email), per `fetch` und
+ohne zusätzliche Abhängigkeit.
+
+## Sichtbar erst mit Build-Variable (Fix-Runde 1, DES6)
+
+Das Formular erscheint nur in einem Build mit `NEXT_PUBLIC_CONTACT_FORM=1`
+(`src/lib/contact-flag.ts`, Dockerfile-`ARG`). Ohne die Variable zeigen Startseite und
+`/kontakt` statt eines ausgegrauten Formulars einen kompakten, ehrlichen Zustand: die
+LinkedIn-Karte als Hauptweg („Auf LinkedIn schreiben“) und den Satz „Das Kontaktformular
+folgt“; die Ledes passen sich an. Entschieden wird beim Build, weil die Seiten statisch sind –
+so springt nach dem Laden nichts um. (Der Formular-Code wird über den statischen Import trotzdem
+mitgeladen; gemessen ein Chunk mit 39 KB unkomprimiert auf `/`.)
+
+Die Variable ist kein Geheimnis (sie landet im Browser-Bundle). Den Versand selbst steuern
+weiterhin die Laufzeit-Variablen `CONTACT_*`; fehlen sie trotz Flag, greift der Hinweis
+„Versand gerade nicht verfügbar“ (unten).
 
 ## Bausteine
 
@@ -17,13 +31,16 @@ zusätzliche Abhängigkeit.
 ## Ablauf
 
 1. Beim Laden ruft das Formular `GET /api/kontakt` auf.
-   - Versand konfiguriert: `{ "available": true, "token": "<ms>.<hmac>" }`. Das Token ist der
-     signierte Ausgabezeitpunkt. Der Schlüssel wird aus dem API-Key abgeleitet, eine eigene
-     Variable ist dafür nicht nötig.
-   - Nicht konfiguriert: `{ "available": false }`. Über dem Formular erscheint der Hinweis
-     „Versand gerade nicht verfügbar“ mit dem LinkedIn-Weg. Das Formular ist dann `inert`
-     (gedämpft, nicht bedienbar). Der Hinweis liegt absolut darüber, damit nichts verrutscht
-     (CLS 0, gemessen).
+   - Versand konfiguriert: `{ "available": true, "token": "<ms>.<nonce>.<hmac>" }`. Das Token
+     ist der signierte Ausgabezeitpunkt plus eine Zufalls-Nonce (Fix-Runde 1, FUN3: vorher
+     waren in derselben Millisekunde ausgegebene Tokens identisch). Der Schlüssel wird aus dem
+     API-Key abgeleitet, eine eigene Variable ist dafür nicht nötig.
+   - Nicht konfiguriert (nur noch, wenn `NEXT_PUBLIC_CONTACT_FORM=1` gebaut wurde, die
+     Laufzeit-Variablen aber fehlen): `{ "available": false }`. Über dem Formular erscheint der
+     Hinweis „Versand gerade nicht verfügbar“ mit dem LinkedIn-Weg. Das Formular ist dann
+     `inert` (gedämpft, nicht bedienbar). Der Hinweis liegt absolut darüber, damit nichts
+     verrutscht (CLS 0, gemessen). Er ist keine Live-Region (A117): Screenreader lesen ihn,
+     wenn man hinkommt, statt ihn beim Laden ungefragt anzusagen.
 2. Absenden: Der Browser prüft die Felder (gleiche Regeln wie der Server) und schickt JSON an
    `POST /api/kontakt`.
 3. Der Server prüft der Reihe nach:
@@ -33,7 +50,9 @@ zusätzliche Abhängigkeit.
    4. Größe höchstens 32 KB (`413`), gültiges JSON (`400 bad_request`)
    5. Honeypot leer, sonst `400 rejected` (ehrliche Ablehnung, kein Schein-Erfolg)
    6. Token: gültige Signatur, mindestens 3 s alt (`too_fast`), höchstens 24 h alt (`expired`),
-      nach einem erfolgreichen Versand nicht noch einmal nutzbar (`rejected`)
+      nach einem erfolgreichen Versand nicht noch einmal nutzbar (`rejected`). Vor dem Versand
+      wird das Token synchron reserviert: Gleichzeitige Anfragen mit demselben Token ergeben
+      genau eine Mail, die übrigen `rejected` (FUN3). Ein Anbieterfehler gibt es wieder frei.
    7. Felder: Name 1–100, E-Mail gültig und höchstens 200, Anliegen höchstens 150,
       Nachricht 1–5000 Zeichen, Einwilligung `true`. Sonst `400 invalid` mit `fields`
    8. Globale Obergrenze: höchstens 20 versendete Nachrichten pro Stunde, sonst `429`
@@ -43,8 +62,12 @@ zusätzliche Abhängigkeit.
 4. Erfolg `200 { ok: true }`: Die Felder werden geleert und das Formular holt ein neues Token.
 
 Die Meldungen stehen in den Dictionaries (`contactErr*`, `contactOk*`, `contactUnavailable*`).
-Der Fokus geht nach dem Absenden zurück auf den Button, die Meldung erscheint in einer
-dauerhaft eingehängten Live-Region und wird in Sicht gescrollt.
+Während des Sendens bleibt der Button fokussierbar (Astryx `isInterruptible`: Spinner und
+`aria-busy`, aber nicht `disabled` – sonst fiel der Fokus auf `<body>`, A122). Danach geht der
+Fokus zurück auf den Button; die Meldung ist ein Astryx-Banner, der erst dann eingehängt wird
+und selbst die Live-Rolle trägt (Erfolg `role="status"`, Fehler `role="alert"`, keine zweite
+Region drumherum – A123) und in Sicht gescrollt wird. OFFEN: mit echtem Screenreader
+(NVDA/VoiceOver) nicht geprüft.
 
 ## Datenschutz im Code
 
@@ -66,17 +89,19 @@ dauerhaft eingehängten Live-Region und wird in Sicht gescrollt.
   vertrauenswürdig, der sie setzt (Cloudflare → Coolify/Traefik). Das Rate-Limit ist deshalb
   eine Bremse und kein Schutzwall. Die globale Obergrenze fängt den Rest ab.
 - Ohne JavaScript sendet das Formular nichts (`<form method="dialog">`). Ein `<noscript>`-Hinweis
-  sagt das.
+  über dem Formular sagt das (seit Fix-Runde 1 vor den Feldern, FUN4).
 
 ## Einrichten (Produktion)
 
 1. Resend-Konto anlegen und die Absender-Domain bestätigen (DNS-Einträge bei Resend).
    OFFEN: Konto und Domain existieren noch nicht bzw. sind nicht bestätigt.
-2. In Coolify als Laufzeit-Variablen setzen (keine Build-Variablen nötig, siehe
-   `docs/environment.md`): `CONTACT_RESEND_API_KEY`, `CONTACT_FROM`, `CONTACT_TO`.
-3. Neu starten und `curl -s https://yannick-beck.de/api/kontakt` prüfen: Die Antwort muss
-   `"available":true` enthalten.
-4. Eine Testnachricht über `/kontakt` schicken und den Eingang prüfen.
+2. In Coolify als Laufzeit-Variablen setzen (siehe `docs/environment.md`):
+   `CONTACT_RESEND_API_KEY`, `CONTACT_FROM`, `CONTACT_TO`.
+3. Zusätzlich die Build-Variable `NEXT_PUBLIC_CONTACT_FORM=1` setzen (in Coolify als
+   „Build Variable“; das Dockerfile reicht sie per `ARG` an `pnpm build` weiter) und neu bauen.
+4. `curl -s https://yannick-beck.de/api/kontakt` prüfen: Die Antwort muss `"available":true`
+   enthalten.
+5. Eine Testnachricht über `/kontakt` schicken und den Eingang prüfen.
 
 ## Lokal testen (ohne echte Keys)
 
@@ -89,6 +114,7 @@ node scripts/resend-mock.mjs 3362     # Modi: POST /__mode {"mode":"ok"|"fail"|"
 CONTACT_RESEND_API_KEY=re_test_fake CONTACT_TO=inbox@example.test \
 CONTACT_FROM='Website <kontakt@example.test>' CONTACT_RESEND_BASE_URL=http://127.0.0.1:3362 \
 PORT=3302 HOSTNAME=127.0.0.1 node .next/standalone/server.js
+# für die UI: vorher mit NEXT_PUBLIC_CONTACT_FORM=1 bauen
 node scripts/contact-api-test.mjs http://127.0.0.1:3302 http://127.0.0.1:3362
 ```
 
@@ -98,4 +124,6 @@ ungültige Felder, CR/LF im Namen, Resend 500/422, Wiederholung nach Fehler, Cro
 falsches Format, kaputtes JSON, zu groß, Rate-Limit mit `Retry-After`, Vorrang von
 `CF-Connecting-IP`), Timeout des Anbieters (10 s → 502), ohne Konfiguration (503 bzw.
 `available:false`). Dazu UI-Tests mit Playwright (Arbeitsordner, nicht im Repo): Erfolg, Fehler, Fokus, Hinweis ohne
-Konfiguration, CLS. Im Server-Log stand dabei keiner der Testinhalte.
+Konfiguration, CLS. Im Server-Log stand dabei keiner der Testinhalte. Fix-Runde 1: zusätzlich
+„6 parallele GET → 6 verschiedene Tokens“ und „3 parallele POST mit demselben Token → genau
+1× 200, 1 Mail“.

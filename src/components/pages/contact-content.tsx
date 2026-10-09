@@ -7,9 +7,11 @@ import { PageHero } from '@/components/page-hero';
 import { ContactBlock } from '@/components/contact-block';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { FOCUS_AREAS, PERSON } from '@/content/profile';
+import { contactPageLede } from '@/lib/contact-flag';
+import { FactList } from '@/components/fact-list';
 
 /**
- * Kontakt (Redesign B4): Kopf wie Abschnitt 06 der Startseite („Schreib *mir*.“), darunter
+ * Kontakt (Redesign B4): Kopf wie Abschnitt 06 der Startseite („Schreib mir.“), darunter
  * dieselbe Komposition (contact-block.tsx: Formular mit echtem Versand über /api/kontakt +
  * LinkedIn-Karte), ergänzt um „Wer dir antwortet“. Keine öffentliche E-Mail-Adresse
  * (Nutzerentscheidung); ohne Versand-Konfiguration zeigt das Formular den ehrlichen Zustand.
@@ -19,7 +21,7 @@ export function ContactContent({ lang }: { lang: Lang }) {
   const page = dict.pages.kontakt;
   return (
     <>
-      <PageHero kicker={page.title} title={dict.home.contactTitle} lede={page.lede} />
+      <PageHero kicker={page.title} title={dict.home.contactTitle} lede={contactPageLede(lang)} />
       <Section>
         <ContactBlock
           lang={lang}
@@ -36,8 +38,9 @@ export function ContactContent({ lang }: { lang: Lang }) {
                 <MetadataListItem label={dict.home.factPlace}>
                   <Text>{PERSON.location.value[lang]}</Text>
                 </MetadataListItem>
+                {/* als kurze Liste statt ·-Kette (DES12: „KI &“ hing am Zeilenende) */}
                 <MetadataListItem label={dict.contactTopics}>
-                  <Text>{FOCUS_AREAS.map((a) => a.title[lang]).join(' · ')}</Text>
+                  <FactList items={FOCUS_AREAS.map((a) => ({ main: a.title[lang] }))} />
                 </MetadataListItem>
               </MetadataList>
             </VStack>

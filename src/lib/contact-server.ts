@@ -34,7 +34,10 @@ export function contactConfig(): ContactConfig | null {
   return { apiKey, from, to, baseUrl };
 }
 
-/* ---------- Token: signierter Ausgabezeitpunkt (Mindest-Ausfüllzeit, Ablauf) ---------- */
+/* ---------- Token: signierter Ausgabezeitpunkt (Mindest-Ausfüllzeit, Ablauf) ----------
+ * Aufbau `<ausgabe>.<nonce>.<signatur>` (Fix-Runde 1, FUN3): Die Zufalls-Nonce macht jedes
+ * Token eindeutig – vorher waren in derselben Millisekunde ausgegebene Tokens identisch, und
+ * nach dem Versand der einen Person lehnte der Server die andere als „verbraucht“ ab. */
 
 function tokenKey(cfg: ContactConfig): Buffer {
   // Vom API-Key abgeleitet: stabil über Neustarts und mehrere Instanzen, ohne eigene Variable.
@@ -47,20 +50,23 @@ function sign(cfg: ContactConfig, issued: string): string {
 
 export function issueToken(cfg: ContactConfig, now = Date.now()): string {
   const issued = String(now);
-  return `${issued}.${sign(cfg, issued)}`;
+  const nonce = randomBytes(9).toString('base64url');
+  return `${issued}.${nonce}.${sign(cfg, `${issued}.${nonce}`)}`;
 }
 
 export type TokenCheck = 'ok' | 'invalid' | 'too_fast' | 'expired' | 'used';
 
 /** Bereits erfolgreich genutzte Tokens (Wiederholung desselben Formular-Tokens abweisen). */
 const usedTokens = new Map<string, number>();
+/** Tokens, deren Versand gerade läuft (synchron vor dem await reserviert, FUN3). */
+const inFlight = new Set<string>();
 
 export function checkToken(cfg: ContactConfig, token: string, now = Date.now()): TokenCheck {
-  const [issued, sig] = token.split('.');
-  if (!issued || !sig || !/^\d{10,16}$/.test(issued)) {
+  const [issued, nonce, sig] = token.split('.');
+  if (!issued || !nonce || !sig || !/^\d{10,16}$/.test(issued) || !/^[\w-]{8,32}$/.test(nonce)) {
     return 'invalid';
   }
-  const expected = Buffer.from(sign(cfg, issued));
+  const expected = Buffer.from(sign(cfg, `${issued}.${nonce}`));
   const given = Buffer.from(sig);
   if (expected.length !== given.length || !timingSafeEqual(expected, given)) {
     return 'invalid';
@@ -72,17 +78,40 @@ export function checkToken(cfg: ContactConfig, token: string, now = Date.now()):
   if (age > CONTACT_TOKEN_MAX_AGE_MS) {
     return 'expired';
   }
-  if (usedTokens.has(sig)) {
+  if (usedTokens.has(sig) || inFlight.has(sig)) {
     return 'used';
   }
   return 'ok';
 }
 
+/**
+ * Token für einen Versand reservieren – synchron zwischen Prüfung und `await`, damit drei
+ * gleichzeitige POSTs mit demselben Token nicht drei Mails auslösen (FUN3). false = schon
+ * reserviert oder verbraucht.
+ */
+export function reserveToken(token: string): boolean {
+  const sig = token.split('.')[2];
+  if (!sig || inFlight.has(sig) || usedTokens.has(sig)) {
+    return false;
+  }
+  inFlight.add(sig);
+  return true;
+}
+
+/** Reservierung aufheben (Anbieterfehler: dieselbe Nachricht darf noch einmal gesendet werden). */
+export function releaseToken(token: string): void {
+  const sig = token.split('.')[2];
+  if (sig) {
+    inFlight.delete(sig);
+  }
+}
+
 export function markTokenUsed(token: string, now = Date.now()): void {
-  const sig = token.split('.')[1];
+  const sig = token.split('.')[2];
   if (!sig) {
     return;
   }
+  inFlight.delete(sig);
   usedTokens.set(sig, now);
   // aufräumen: abgelaufene Tokens wären ohnehin ungültig
   for (const [k, t] of usedTokens) {

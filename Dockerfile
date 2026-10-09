@@ -11,7 +11,10 @@ FROM base AS builder
 WORKDIR /app
 ARG GHOST_URL
 ARG GHOST_CONTENT_KEY
-ENV GHOST_URL=$GHOST_URL GHOST_CONTENT_KEY=$GHOST_CONTENT_KEY
+# Kontaktformular sichtbar bauen (1), sobald Resend zur Laufzeit konfiguriert ist – kein
+# Geheimnis, landet im Browser-Bundle (src/lib/contact-flag.ts, docs/kontaktformular.md)
+ARG NEXT_PUBLIC_CONTACT_FORM
+ENV GHOST_URL=$GHOST_URL GHOST_CONTENT_KEY=$GHOST_CONTENT_KEY NEXT_PUBLIC_CONTACT_FORM=$NEXT_PUBLIC_CONTACT_FORM
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN corepack enable && corepack prepare pnpm@11 --activate && pnpm approve-builds @astryxdesign/core @astryxdesign/cli && pnpm build

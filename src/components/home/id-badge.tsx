@@ -12,7 +12,8 @@ export interface IdBadgeData {
   name: string;
   role: string;
   org: string;
-  stations: { id: string; years: string; title: string; org: string }[];
+  /** Drei Stationen bei einem Arbeitgeber (DES7: Arbeitgeber einmal im Label, nicht je Zeile). */
+  stations: { id: string; years: string; title: string }[];
   languages: { name: string; level: string }[];
   linkedin: string;
   labels: {
@@ -353,10 +354,7 @@ export function IdBadge({ data }: { data: IdBadgeData }) {
                 {data.stations.map((s) => (
                   <li key={s.id} className={styles.station}>
                     <span className={styles.years}>{s.years}</span>
-                    <span className={styles.stationText}>
-                      <span className={styles.stationTitle}>{s.title}</span>
-                      <span className={styles.stationOrg}>{s.org}</span>
-                    </span>
+                    <span className={styles.stationTitle}>{s.title}</span>
                   </li>
                 ))}
               </ol>
@@ -364,7 +362,7 @@ export function IdBadge({ data }: { data: IdBadgeData }) {
               <ul className={styles.languages}>
                 {data.languages.map((l) => (
                   <li key={l.name}>
-                    <span className={styles.languageName}>{l.name}</span> · {l.level}
+                    <span className={styles.languageName}>{l.name}</span> <span className={styles.languageLevel}>{l.level}</span>
                   </li>
                 ))}
               </ul>

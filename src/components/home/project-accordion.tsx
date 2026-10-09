@@ -13,6 +13,8 @@ export interface AccordionItem {
   period: string | null;
   title: string;
   shortTitle: string;
+  /** Detailseite – ohne JavaScript führt der geschlossene Eintrag dorthin (FUN4). */
+  href: string;
   /** Vorschau-Platzhalter neben der Meta-Zeile (nur mit NEXT_PUBLIC_SHOW_GAPS, sonst null). */
   metaExtra?: ReactNode;
   /** Inhalt (serverseitig gerendert: Cover, Ausgangslage, Beitrag, Ergebnis, Kacheln, Links). */
@@ -28,7 +30,9 @@ export interface AccordionItem {
  * zuklappen (aria-disabled), damit immer ein Projekt sichtbar ist. Geschlossen ist derselbe
  * Button der schmale Streifen mit senkrechtem Titel (Trefferfläche = ganzer Streifen); der
  * Fokus bleibt beim Öffnen auf ihm. ←/→ (und ↑/↓) wechseln zwischen den Köpfen, Pos1/Ende.
- * Der Inhalt des geschlossenen Eintrags ist `inert`.
+ * Der Inhalt des geschlossenen Eintrags ist `inert`. Ohne JavaScript lässt sich nichts
+ * aufklappen: Ein <noscript>-Link über dem geschlossenen Eintrag führt dann zur Detailseite
+ * (FUN4) – sonst wäre das zweite Projekt auf der Startseite unerreichbar.
  *
  * Layout (projects.module.css): Ab 640px Breite nebeneinander; beide Inhalte sind immer in
  * voller Breite gesetzt, der geschlossene Eintrag beschneidet nur – die Höhe der Reihe ist
@@ -119,6 +123,13 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
                   <div className={`${styles.panelInner} yb-acc-fade`}>{it.panel}</div>
                 </div>
               </div>
+              {isOpen ? null : (
+                <noscript>
+                  <a href={it.href} className={styles.noscriptLink}>
+                    <span className="yb-sr-only">{it.title}</span>
+                  </a>
+                </noscript>
+              )}
               <span className={`${styles.strip} yb-acc-strip`} aria-hidden="true">
                 <span className={`${styles.stripNumber} yb-display`}>{it.number}</span>
                 <span className={styles.stripTitle}>{it.shortTitle}</span>

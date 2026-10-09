@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     path: '/',
     title: 'Yannick Beck – IT Consultant',
     description:
-      'Yannick Beck, IT consultant from Sandhausen, Germany: Microsoft Cloud & AI, Modern Workplace, identity & security. Career, projects and contact.',
+      'Yannick Beck, IT consultant based in Sandhausen, Germany: Microsoft Cloud & AI, Modern Workplace, identity & security. Career, projects and contact.',
     type: 'profile',
   }),
   title: { absolute: 'Yannick Beck – IT Consultant' },

@@ -11,6 +11,8 @@ import { SplitSection } from '@/components/split-section';
 import { CtaCard } from '@/components/cta-card';
 import { LabelChipList } from '@/components/skill-chip';
 import { Gap } from '@/components/gap';
+import { FactList } from '@/components/fact-list';
+import { contactLede } from '@/lib/contact-flag';
 import { ExternalArrow } from '@/components/icons';
 import { plain } from '@/components/emphasis';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
@@ -78,12 +80,17 @@ export function AboutContent({ lang }: { lang: Lang }) {
                   <Text>{h.factIndustryValue(PERSON.inIndustrySince.value)}</Text>
                 </MetadataListItem>
                 <MetadataListItem label={h.factStudy}>
+                  {/* Hochschule als eigene Zeile: EN-Name trägt selbst Klammern („(DHBW)“) */}
                   <Text>
-                    {study.degree[lang]} ({study.school})
+                    {study.degree[lang]}
+                    <br />
+                    <Text as="span" color="secondary">
+                      {study.school[lang]}
+                    </Text>
                   </Text>
                 </MetadataListItem>
                 <MetadataListItem label={h.factLanguages}>
-                  <Text>{LANGUAGES.value.map((l) => `${l.name[lang]} (${l.level[lang]})`).join(' · ')}</Text>
+                  <FactList items={LANGUAGES.value.map((l) => ({ main: l.name[lang], note: l.level[lang] }))} />
                 </MetadataListItem>
               </MetadataList>
             </VStack>
@@ -135,7 +142,7 @@ export function AboutContent({ lang }: { lang: Lang }) {
 
       <CtaCard
         title={plain(h.contactTitle)}
-        text={h.contactLede}
+        text={contactLede(lang)}
         label={dict.contact}
         href={withLang('/kontakt', lang)}
       />

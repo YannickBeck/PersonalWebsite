@@ -6,8 +6,7 @@ import { Link } from '@astryxdesign/core/Link';
 import { List, ListItem } from '@astryxdesign/core/List';
 import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { PageHero } from '@/components/page-hero';
-import { ItemCover } from '@/components/item-cover';
-import { coverMeta, coverSeed } from '@/components/content-card';
+import { ProjectVisual } from '@/components/project-visual';
 import { Section } from '@astryxdesign/core/Section';
 import { Divider } from '@astryxdesign/core/Divider';
 import { ProjectRow } from '@/components/project-row';
@@ -18,7 +17,7 @@ import { SHOW_GAPS } from '@/lib/gaps';
 import { InlineExternalArrow } from '@/components/icons';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { PROJECTS, type Project } from '@/content/profile';
-import { anchor, extraTags, projectCard, skillChips } from '@/content/profile-view';
+import { anchor, extraTags, projectHref, skillChips } from '@/content/profile-view';
 import { ChipList, PlainChip, SkillChipLink } from '@/components/skill-chip';
 import styles from './project-detail.module.css';
 import rowStyles from './project-row.module.css';
@@ -51,13 +50,16 @@ const SOURCE_LABEL: Record<string, string> = {
 /**
  * Projekt-Detailseite aus dem Content-Modell (Orbitalis, Bachelorarbeit): Lesespalte mit
  * Ausgangslage, Beitrag, Ergebnis; Fakten und Quellcode-Links in der Randspalte (mobil vor
- * dem Text). Offene Angaben erscheinen nur in der Vorschau. Cover generativ (kein echtes Bild),
- * Ziel des Morphs von der Karte.
+ * dem Text). Offene Angaben erscheinen nur in der Vorschau.
+ *
+ * Fix-Runde 1: Orbitalis zeigt den Ablauf laut README als Linienzeichnung (Morph-Ziel aus
+ * Akkordeon und Projektzeile), die Bachelorarbeit kein Bild – ihr voller Titel steht in der
+ * Lede, ein Titelblatt wiederholte ihn nur (DES1, DES8). Die Art steht nur noch als Kennung
+ * über der H1, nicht zusätzlich in der Randspalte.
  */
 export function ProjectDetail({ lang, project }: { lang: Lang; project: Project }) {
   const dict = getDictionary(lang);
-  const card = projectCard(project, lang);
-  const cover = coverMeta(card, lang);
+  const href = projectHref(project, lang);
   const others = PROJECTS.filter((p) => p.id !== project.id);
   const period = project.period.status === 'belegt' ? project.period.value[lang] : null;
   const context = project.context.status === 'belegt' ? project.context.value[lang] : null;
@@ -66,7 +68,8 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
     <>
       <PageHero
         eyebrow={<BackLink href={withLang('/projekte', lang)} label={dict.backToProjects} />}
-        kicker={[project.kind[lang], period].filter(Boolean).join(' · ')}
+        // nur die Art – das Jahr steht als „Abgabe“ bzw. „Zeitraum“ in der Randspalte (DES8)
+        kicker={project.kind[lang]}
         title={project.title[lang]}
         lede={project.teaser[lang]}
         size="lg"
@@ -74,19 +77,19 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
       <ReadingLayout
         tocTitle={dict.tocTitle}
         cover={
-          <MorphTarget morphKey={card.href}>
-            <ItemCover src={null} seed={coverSeed(card.slug, lang)} label={cover.label} motif={cover.motif} variant="hero" eager />
-          </MorphTarget>
+          project.id === 'orbitalis' ? (
+            <MorphTarget morphKey={href}>
+              <ProjectVisual project={project} lang={lang} />
+            </MorphTarget>
+          ) : undefined
         }
         aside={
           <Card>
             <MetadataList label={{ position: 'top' }}>
-              <MetadataListItem label={dict.factsKind}>
-                <Text>{project.kind[lang]}</Text>
-              </MetadataListItem>
-              {/* Offene Fakten: in Produktion ohne Zeile (kein leeres Label), in der Vorschau als Lücke */}
+              {/* Offene Fakten: in Produktion ohne Zeile (kein leeres Label), in der Vorschau als Lücke.
+                  „Abgabe“ statt „Zeitraum“, wo nur das Abgabejahr belegt ist (TEX8) */}
               {period || SHOW_GAPS ? (
-                <MetadataListItem label={dict.factsPeriod}>
+                <MetadataListItem label={project.periodKind === 'submitted' ? dict.factsSubmitted : dict.factsPeriod}>
                   {project.period.status === 'belegt' ? (
                     <Text>{project.period.value[lang]}</Text>
                   ) : (
@@ -127,6 +130,7 @@ export function ProjectDetail({ lang, project }: { lang: Lang; project: Project 
                         {/* Pfeil inline nach dem letzten Wort (in einer HStack rutschte er bei
                             Zeilenumbruch an den rechten Rand) */}
                         {l.label[lang]}
+                        <span className="yb-sr-only"> ({dict.newTab})</span>
                         <InlineExternalArrow />
                       </Link>
                     ))}

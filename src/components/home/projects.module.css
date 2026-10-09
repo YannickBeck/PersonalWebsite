@@ -30,7 +30,8 @@
   background-color: var(--color-background-card);
   box-shadow: var(--yb-shadow-ring);
   overflow: clip;
-  scroll-margin-top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
+  /* Header + Leiste deckt scroll-padding-top der Startseite ab (A112) */
+  scroll-margin-top: var(--spacing-4);
 }
 
 /* ---------- untereinander (Standard, schmal) ---------- */
@@ -132,6 +133,19 @@
   position: absolute;
   inset: 0;
   z-index: 2;
+}
+
+/* Ohne JavaScript (project-accordion.tsx, FUN4): der geschlossene Eintrag führt zur Detailseite */
+.noscriptLink {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+}
+
+.noscriptLink:focus-visible {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--spacing-0-5);
 }
 
 .item[data-open='false'] .trigger:focus-visible {
@@ -396,5 +410,12 @@
 
   .title {
     font-size: clamp(var(--font-size-xl), 0.9rem + 1.2cqi, var(--font-size-2xl));
+  }
+}
+
+/* Windows-Kontrastmodus (A121): Karten und Streifen mit sichtbarem Rand */
+@media (forced-colors: active) {
+  .item {
+    border: var(--border-width) solid CanvasText;
   }
 }

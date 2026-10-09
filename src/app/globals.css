@@ -22,6 +22,35 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Startseite (A112, WCAG 2.4.11): Header UND klebende Abschnittsnavigation verdecken sonst
+   fokussierte Elemente und Sprungziele. Höhen setzt section-nav.tsx (ResizeObserver); die
+   Fallbacks entsprechen den gemessenen Höhen (53px Header, 72px Leiste). Die Ziele selbst
+   haben nur noch wenig scroll-margin – scroll-padding und scroll-margin addieren sich. */
+html:has(.yb-section-nav) {
+  scroll-padding-top: calc(
+    var(--yb-header-h, calc(var(--size-element-md) + var(--spacing-4) + var(--border-width))) +
+      var(--yb-section-nav-h, calc(var(--size-element-md) + var(--spacing-8))) + var(--spacing-2)
+  );
+}
+
+/* Geringe Höhe (200 % Zoom, Handy quer): Die Leiste klebt nicht (home.module.css, A120) –
+   dann verdeckt nur der Header etwas. */
+@media (max-height: 500px) {
+  html:has(.yb-section-nav) {
+    scroll-padding-top: calc(var(--yb-header-h, calc(var(--size-element-md) + var(--spacing-4) + var(--border-width))) + var(--spacing-4));
+  }
+}
+
+/* Textfelder (A124): bei Tastatur-Fokus derselbe 2px-Fokusring mit Abstand wie bei allen
+   übrigen Bedienelementen – der violette 1px-Rahmen allein unterschied sich nur 1,7:1 vom
+   unfokussierten Zustand. :focus-visible gilt bei Texteingaben laut Browser auch nach einem
+   Mausklick (dort erwartet man den Ring), bei Buttons nur per Tastatur. */
+.astryx-text-input:has(:focus-visible),
+.astryx-text-area:has(:focus-visible) {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+}
+
 /* Akzent-Wort in Überschriften (src/components/emphasis.tsx): feine Kursiv-Serif, optisch
    etwas größer, damit sie neben der Grotesk nicht kleiner wirkt; Gewicht folgt nicht der
    Überschrift (Serif bleibt fein). */

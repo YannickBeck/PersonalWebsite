@@ -6,6 +6,10 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { PERSON, PHOTOS } from '@/content/profile';
 import { HeroStage } from './hero-stage';
+// Statisch importiert (PER6): liegt dann gehasht unter /_next/static/media mit
+// „immutable“ – aus public/ kam es mit max-age=0 und wurde bei jedem Wiederbesuch vor dem LCP
+// revalidiert. Die Datei in public/me/ bleibt für andere Verweise bestehen.
+import portraitCutout from '../../../public/me/portrait-cutout.webp';
 import styles from './home.module.css';
 
 /**
@@ -42,15 +46,13 @@ export function Hero({ id, lang }: { id: string; lang: Lang }) {
         <div className={`${styles.heroPersonLayer} yb-hero-person-layer`}>
           <Image
             className={`${styles.heroPortrait} yb-hero-person`}
-            src={photo.src}
-            width={photo.width}
-            height={photo.height}
-            alt={PHOTOS.full.alt[lang]}
+            src={portraitCutout}
+            alt={photo.alt[lang]}
             loading="eager"
             fetchPriority="high"
             unoptimized
             draggable={false}
-            sizes="(max-width: 767px) 62vw, 410px"
+            sizes="(max-width: 599px) 62vw, 364px"
           />
         </div>
         <div className={`${styles.heroText} yb-enter yb-hero-text`}>
@@ -59,8 +61,13 @@ export function Hero({ id, lang }: { id: string; lang: Lang }) {
             {PERSON.role.value[lang]}
           </Heading>
           <Text type="large" className={styles.heroFocus}>
-            {/* Trenner bleibt am Zeilenende, nie am Anfang der zweiten Zeile */}
-            {PERSON.focusLine.value[lang].replace(' · ', '\u00a0· ')}
+            {/* Zwei Zeilen ohne Mittelpunkt (DES12: der Trenner hing sonst am Zeilenende) */}
+            {PERSON.focusLine.value[lang].map((part, i) => (
+              <span key={part} className={styles.heroFocusLine}>
+                {i > 0 ? <span className="yb-sr-only">, </span> : null}
+                {part}
+              </span>
+            ))}
           </Text>
         </div>
         <HStack gap={2} wrap="wrap" className={`${styles.heroActions} yb-enter yb-hero-actions`}>

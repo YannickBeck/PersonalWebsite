@@ -3,9 +3,8 @@ import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { PROJECTS, type Project } from '@/content/profile';
-import { anchor, extraTags, projectCard, projectHref, skillChips } from '@/content/profile-view';
-import { ItemCover } from '@/components/item-cover';
-import { coverMeta, coverSeed } from '@/components/content-card';
+import { anchor, extraTags, projectHref, skillChips } from '@/content/profile-view';
+import { ProjectVisual } from '@/components/project-visual';
 import { MorphSource } from '@/components/morph';
 import { ExternalArrow } from '@/components/icons';
 import { Gap } from '@/components/gap';
@@ -15,16 +14,15 @@ import { ProjectAccordion, type AccordionItem } from './project-accordion';
 import styles from './projects.module.css';
 
 /**
- * Inhalt eines Projekts im Akkordeon (Server): generatives Cover (Morph-Quelle zur
- * Detailseite), Links, Ausgangslage, Beitrag bzw. Schwerpunkte, Ergebnis (nur wenn belegt),
+ * Inhalt eines Projekts im Akkordeon (Server): Projekt-Grafik (Ablauf bzw. Titelblatt,
+ * project-visual.tsx – Morph-Quelle zur Detailseite), Links, Ausgangslage, neu gebaute Teile
+ * bzw. Schwerpunkte, Ergebnis (nur wenn belegt),
  * Fähigkeiten als kleine Kacheln mit Sprung ins Periodensystem. Kurzfassung aus
  * project.brief (gekürzt, nichts ergänzt); die Langfassung steht auf der Detailseite.
  */
 function ProjectPanel({ project, lang }: { project: Project; lang: Lang }) {
   const dict = getDictionary(lang);
   const h = dict.home;
-  const card = projectCard(project, lang);
-  const cover = coverMeta(card, lang);
   const href = projectHref(project, lang);
   const source = project.links.find((l) => l.kind === 'source');
   const brief = project.brief;
@@ -33,7 +31,7 @@ function ProjectPanel({ project, lang }: { project: Project; lang: Lang }) {
     <div className={styles.panelGrid}>
       <div className={styles.cover}>
         <MorphSource morphKey={href}>
-          <ItemCover src={null} seed={coverSeed(card.slug, lang)} label={cover.label} motif={cover.motif} />
+          <ProjectVisual project={project} lang={lang} />
         </MorphSource>
         {project.id === 'orbitalis' ? <Gap id="orbitalis-media" lang={lang} block /> : null}
       </div>
@@ -95,6 +93,7 @@ function ProjectPanel({ project, lang }: { project: Project; lang: Lang }) {
         {source ? (
           <Button
             label={dict.factsCode}
+            aria-label={`${dict.factsCode}: ${source.label[lang]} (GitHub, ${dict.newTab})`}
             variant="secondary"
             href={source.href}
             target="_blank"
@@ -122,6 +121,7 @@ export function ProjectsSection({ id, number, lang }: { id: string; number: stri
     period: p.period.status === 'belegt' ? p.period.value[lang] : null,
     title: p.title[lang],
     shortTitle: p.shortTitle[lang],
+    href: projectHref(p, lang),
     metaExtra: p.period.status === 'offen' ? <Gap id={p.period.gap} lang={lang} /> : null,
     panel: <ProjectPanel project={p} lang={lang} />,
   }));

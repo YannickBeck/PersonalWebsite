@@ -1,0 +1,139 @@
+/*
+ * Bildfläche der Projekte (project-visual.tsx, Fix-Runde 1 DES1): Tinte auf Papier, ohne
+ * Raster, Muster oder Lichtpunkt. Abweichung von AGENTS.md (dokumentiert): Verbindungslinie
+ * des Ablaufs (Pseudo-Element) und Titelblatt-Typografie – dafür hat Astryx keine Props.
+ * Allseitig gerundet wie das Detail-Cover (DES11). Nur Tokens.
+ */
+.visual {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-container);
+  background-color: var(--color-background-card);
+  box-shadow: var(--yb-shadow-ring);
+  color: var(--color-text-primary);
+}
+
+/* ---------- Orbitalis: Ablauf ---------- */
+.visual[data-kind='flow'] {
+  gap: var(--spacing-4);
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-6);
+}
+
+.caption {
+  font-family: var(--yb-font-display);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--spacing-8) minmax(0, 1fr);
+  gap: var(--spacing-3);
+  align-items: start;
+}
+
+/* Verbindungslinie zur nächsten Station (Tinte, 1px) */
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: var(--spacing-8);
+  bottom: calc(-1 * var(--spacing-3));
+  left: calc(var(--spacing-4) - var(--border-width) / 2);
+  width: var(--border-width);
+  background-color: var(--color-border-emphasized);
+}
+
+.stepNumber {
+  display: grid;
+  place-items: center;
+  width: var(--spacing-8);
+  height: var(--spacing-8);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 var(--border-width) var(--color-text-primary);
+  background-color: var(--color-background-card);
+  font-family: var(--font-family-code);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Letzte Station (Mensch prüft und sendet): gefüllt – das Ende der Kette */
+.step:last-child .stepNumber {
+  background-color: var(--color-background-inverted);
+  color: var(--color-background-body);
+  box-shadow: none;
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-0-5);
+  min-height: var(--spacing-8);
+  justify-content: center;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+.stepTech {
+  font-family: var(--font-family-code);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+/* ---------- Bachelorarbeit: Titelblatt ---------- */
+.visual[data-kind='title'] {
+  gap: var(--spacing-8);
+  /* höher als der Inhalt (auch mit Ersatzschrift): Die Hochschule unten springt nicht, wenn
+     die Serif nachlädt und der Titel anders umbricht */
+  min-height: 18rem;
+  padding: var(--spacing-6) var(--spacing-6) var(--spacing-5);
+}
+
+.kicker,
+.school {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-wrap: balance;
+}
+
+.kicker {
+  padding-block-end: var(--spacing-3);
+  border-block-end: var(--border-width) solid var(--color-border);
+}
+
+.thesisTitle {
+  margin: 0;
+  font-family: var(--yb-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(var(--font-size-lg), 1.1rem + 0.9vw, var(--font-size-2xl));
+  line-height: 1.22;
+  text-wrap: pretty;
+  hyphens: auto;
+}
+
+.school {
+  /* unten am Titelblatt; der Titel steht fest unter dem Abschluss (nicht zentriert – sonst
+     wanderte sein Anfang mit, wenn er beim Schriftwechsel anders umbricht) */
+  margin-block-start: auto;
+  padding-block-start: var(--spacing-3);
+  border-block-start: var(--border-width) solid var(--color-border);
+}

@@ -31,7 +31,7 @@ export function personJsonLd(lang: Lang) {
           addressRegion: PERSON.address.value.region,
           addressCountry: PERSON.address.value.country,
         },
-        alumniOf: { '@type': 'CollegeOrUniversity', name: dhbw.school },
+        alumniOf: { '@type': 'CollegeOrUniversity', name: dhbw.school[lang] },
         knowsAbout: FOCUS_LIST.value,
         knowsLanguage: LANGUAGES.value.map((l) => l.code),
         sameAs: [LINKEDIN_URL],

@@ -18,10 +18,14 @@ import {
   PERSON,
   PHOTOS,
   STATIONS,
+  type Station,
 } from '@/content/profile';
+import { FactList } from '@/components/fact-list';
 import { formatYears } from '@/lib/period';
 import { IdBadge, type IdBadgeData } from './id-badge';
 import styles from './home.module.css';
+
+const BADGE_STATIONS: Station['id'][] = ['bechtle-consultant', 'bechtle-studium', 'bechtle-ausbildung'];
 
 /** Daten der Ausweiskarte (nur Serialisierbares an die Client-Komponente, kein Content-Modell im Bundle). */
 function badgeData(lang: Lang): IdBadgeData {
@@ -31,11 +35,12 @@ function badgeData(lang: Lang): IdBadgeData {
     name: PERSON.name,
     role: PERSON.role.value[lang],
     org: PERSON.employer.value,
-    stations: STATIONS.map((s) => ({
+    // Rückseite (DES7, A115): drei Stationen bei Bechtle, Arbeitgeber einmal im Label; der
+    // volle Werdegang steht direkt darunter in Abschnitt 04
+    stations: STATIONS.filter((s) => BADGE_STATIONS.includes(s.id)).map((s) => ({
       id: s.id,
       years: formatYears(s.start, s.end, lang),
       title: s.short[lang],
-      org: s.org,
     })),
     languages: LANGUAGES.value.map((l) => ({ name: l.name[lang], level: l.level[lang] })),
     linkedin: LINKEDIN_URL,
@@ -43,7 +48,7 @@ function badgeData(lang: Lang): IdBadgeData {
       group: `${dict.home.badgeLabel}: ${PERSON.name}`,
       flip: dict.home.badgeFlip,
       hint: dict.home.badgeHint,
-      stations: dict.home.badgeStations,
+      stations: `${dict.home.badgeStations} · ${PERSON.employer.value}`,
       languages: dict.home.badgeLanguages,
       linkedin: dict.linkedinLabel,
       linkedinExternal: dict.linkedinExternal,
@@ -82,6 +87,7 @@ export function AboutSection({ id, number, lang }: { id: string; number: string;
             <HStack gap={2} wrap="wrap">
               <Button
                 label={h.aboutLinkedIn}
+                aria-label={dict.linkedinExternal}
                 variant="secondary"
                 href={LINKEDIN_URL}
                 target="_blank"
@@ -107,17 +113,21 @@ export function AboutSection({ id, number, lang }: { id: string; number: string;
                 <Text>{h.factIndustryValue(PERSON.inIndustrySince.value)}</Text>
               </MetadataListItem>
               <MetadataListItem label={h.factStudy}>
+                {/* Hochschule als eigene Zeile: EN-Name trägt selbst Klammern („(DHBW)“) */}
                 <Text>
-                  {study.degree[lang]} ({study.school})
+                  {study.degree[lang]}
+                  <br />
+                  <Text as="span" color="secondary">
+                    {study.school[lang]}
+                  </Text>
                 </Text>
               </MetadataListItem>
+              {/* Sprachen und Interessen als kurze Listen statt ·-Kette über mehrere Zeilen (DES12) */}
               <MetadataListItem label={h.factLanguages}>
-                <Text>
-                  {LANGUAGES.value.map((l) => `${l.name[lang]} (${l.level[lang]})`).join(' · ')}
-                </Text>
+                <FactList items={LANGUAGES.value.map((l) => ({ main: l.name[lang], note: l.level[lang] }))} />
               </MetadataListItem>
               <MetadataListItem label={h.factInterests}>
-                <Text>{INTERESTS.value[lang].join(' · ')}</Text>
+                <FactList items={INTERESTS.value[lang].map((i) => ({ main: i }))} />
               </MetadataListItem>
             </MetadataList>
           </VStack>

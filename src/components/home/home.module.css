@@ -24,10 +24,19 @@
  * Die Rolle links unten bekommt genau den Platz links neben der Person; ihre Schriftgröße
  * folgt daraus („CONSULTANT“ ≈ 4,05 em breit in der Display-Schrift, gemessen), zweizeilig,
  * höchstens 7,5 rem.
+ *
+ * Drei Zustände (DES4): ≥ 1024 Person knapp rechts der Mitte, Aktionen rechts; 600–1023 Person
+ * rechts, Rolle und Aktionen links untereinander (Personenbreite so begrenzt, dass „CONSULTANT“
+ * in 3 rem daneben passt); < 600 gestapelt, Höhe aus der Bildschirmhöhe berechnet, damit Rolle
+ * und Aktionen auch auf kurzen Handys im ersten Bildschirm stehen.
+ * Personenhöhe höchstens 46 rem (DES2, übergangsweise): Der Freisteller ist nur 482px breit;
+ * größer dargestellt wird er auf 2x-Displays sichtbar weich (OFFEN: höher aufgelöstes Foto).
  */
+/* Kein eigenes padding-inline (DES9): <main> setzt die Inhaltslinie schon – Rolle, Aktionen
+   und Namenszug liegen damit auf derselben Kante wie Marke, Überschriften und Footer
+   (1440px: 176px; vorher 15px eingerückt). */
 .hero {
   container-type: inline-size;
-  padding-inline: var(--spacing-4);
   scroll-margin-top: var(--yb-header);
 }
 
@@ -38,7 +47,7 @@
 
 .heroStage {
   --stage-h: clamp(34rem, calc(100svh - var(--yb-header) - var(--spacing-4)), 56rem);
-  --person-h: calc(var(--stage-h) * 0.92);
+  --person-h: min(calc(var(--stage-h) * 0.92), 46rem);
   --person-w: calc(var(--person-h) * 482 / 974);
   --person-x: 54cqi;
   --hero-gap: var(--spacing-6);
@@ -67,6 +76,25 @@
   white-space: nowrap;
   user-select: none;
   pointer-events: none;
+}
+
+/* Feste Breiten der beiden Wörter (gemessen in der Display-Schrift: „YANNICK“ 2,727em, „BECK“
+   1,623em; Ersatzschrift 2,597em): Lädt die Schrift auf langsamen Verbindungen erst nach dem
+   ersten Bild, verschob der Tausch die zentrierten Wörter (CLS 0,0011 in 3 von 8 gedrosselten
+   Läufen, PER7). Linksbündig in der festen Box: Der Text beginnt vor und nach dem Tausch an
+   derselben Stelle (zentriert wanderte sein Anfang mit – auch das zählt als Shift). In der echten
+   Schrift füllt der Text die Box genau, das Bild ist unverändert. */
+.heroName > span {
+  flex: none;
+  text-align: start;
+}
+
+.heroName > span:first-child {
+  width: 2.73em;
+}
+
+.heroName > span:last-child {
+  width: 1.63em;
 }
 
 .heroPersonLayer {
@@ -112,7 +140,11 @@
 
 .heroFocus {
   font-weight: var(--font-weight-medium);
-  text-wrap: balance;
+}
+
+/* Je Teil der Headline eine Zeile (DES12) */
+.heroFocusLine {
+  display: block;
 }
 
 .heroActions {
@@ -122,10 +154,19 @@
   bottom: var(--spacing-10);
 }
 
-/* Tablet: Person rechts der Mitte, Aktionen unter der Rolle (links) */
+/* Tablet (600–1023): Person rechts der Mitte, Aktionen unter der Rolle (links). Breite der
+   Person höchstens 2 × (66cqi − 14rem): links bleiben dann ≥ 14rem − Abstand für die Rolle in
+   3rem (DES4: zwischen 600 und 767 war vorher das Handy-Layout aktiv, Rolle unter dem Falz). */
 @media (max-width: 1023px) {
   .heroStage {
-    --person-h: calc(var(--stage-h) * 0.82);
+    /* Obergrenze der Personenhöhe aus der Breite; die Bühne ist höchstens so hoch wie Person +
+       Namenszug-Band – sonst klaffte zwischen Namenszug und Kopf eine Lücke (600–700px) */
+    --person-cap: calc((132cqi - 28rem) * 974 / 482);
+    --stage-h: min(
+      clamp(34rem, calc(100svh - var(--yb-header) - var(--spacing-4)), 56rem),
+      calc(var(--person-cap) + 22cqi)
+    );
+    --person-h: min(calc(var(--stage-h) * 0.82), var(--person-cap), 46rem);
     --person-x: 66cqi;
   }
 
@@ -139,11 +180,15 @@
   }
 }
 
-/* Mobil: Namenszug zweizeilig und groß, die Person steht davor (überlappt ihn), Rolle und
-   Aktionen darunter – nichts liegt über dem Foto (Lesbarkeit auf Jacke/Hose). */
-@media (max-width: 767px) {
+/* Mobil (< 600): Namenszug zweizeilig und groß, die Person steht davor (überlappt ihn), Rolle
+   und Aktionen darunter – nichts liegt über dem Foto (Lesbarkeit auf Jacke/Hose).
+   Höhe (DES4): Namenszug höchstens 14svh je Zeile; die Person bekommt, was nach Header,
+   sichtbarem Namenszug und Rollenblock (≈ 15rem: Rolle, Zeile darunter, Aktionen, Abstände)
+   von der Bildschirmhöhe bleibt – zwischen 40cqi und 62cqi breit. */
+@media (max-width: 599px) {
   .heroStage {
-    --person-w: min(62cqi, calc(70svh * 482 / 974));
+    --name-size: min(38cqi, 14svh);
+    --person-w: clamp(40cqi, calc((100svh - var(--yb-header) - var(--name-size) * 1.02 - 15rem) * 482 / 974), 62cqi);
     height: auto;
     display: flex;
     flex-direction: column;
@@ -160,7 +205,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0;
-    font-size: 38cqi;
+    font-size: var(--name-size);
     line-height: 0.8;
   }
 
@@ -172,7 +217,7 @@
     height: auto;
     aspect-ratio: 482 / 974;
     /* Der Kopf ragt in die zweite Zeile („BECK“), die Schultern beginnen darunter */
-    margin-block-start: -22cqi;
+    margin-block-start: calc(var(--name-size) * -0.58);
   }
 
   .heroText,
@@ -199,8 +244,10 @@
   position: relative;
 }
 
+/* Abstand unter Header + Abschnittsnavigation regelt scroll-padding-top der Startseite
+   (globals.css, A112); hier nur kein zusätzlicher Versatz. */
 .section {
-  scroll-margin-top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-4));
+  scroll-margin-top: 0;
 }
 
 .sectionNav {
@@ -219,22 +266,41 @@
   );
 }
 
-.sectionNavList {
+.sectionNavBar {
   pointer-events: auto;
   display: flex;
-  gap: var(--spacing-1);
-  margin: 0;
-  padding: var(--spacing-1);
-  list-style: none;
+  align-items: center;
   max-width: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
+  padding: var(--spacing-1);
   border-radius: var(--radius-full);
   background-color: color-mix(in srgb, var(--color-background-card) 88%, transparent);
   -webkit-backdrop-filter: blur(var(--spacing-3)) saturate(1.3);
   backdrop-filter: blur(var(--spacing-3)) saturate(1.3);
   box-shadow: var(--yb-shadow-ring);
+}
+
+/* „Auf dieser Seite“ (DES14): unterscheidet die Anker-Pillen von den Header-Links; erst ab
+   1024px – darunter braucht die Leiste den Platz für die Pillen */
+.sectionNavHint {
+  display: none;
+  flex: none;
+  padding-inline: var(--spacing-3) var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.sectionNavList {
+  display: flex;
+  gap: var(--spacing-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  border-radius: var(--radius-full);
 }
 
 .sectionNavList::-webkit-scrollbar {
@@ -284,14 +350,30 @@
   color: color-mix(in srgb, var(--color-accent) 55%, var(--color-background-body));
 }
 
+/* Geringe Höhe (200 % Zoom, Handy quer): nicht kleben – Header + Leiste belegten sonst ein
+   Drittel der Höhe (A120). */
+@media (max-height: 500px) {
+  .sectionNav {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sectionNavHint {
+    display: block;
+  }
+}
+
 @media (max-width: 767px) {
   .sectionNav {
     justify-content: flex-start;
     padding-inline: var(--spacing-2);
   }
 
-  /* Mobil: Pillen ohne Nummer, Leiste füllt die Breite und scrollt horizontal */
-  .sectionNavList {
+  /* Mobil: Pillen ohne Nummer und ohne Vorsatz (die Header-Links liegen im Menü), Leiste
+     füllt die Breite und scrollt horizontal */
+  .sectionNavBar {
     width: 100%;
   }
 
@@ -393,3 +475,26 @@
 }
 
 /* 06 Kontakt: Komposition in src/components/contact-block.module.css (auch /kontakt) */
+
+/* ---------- Windows-Kontrastmodus (A121) ----------
+   Der Verlauf hinter der Abschnittsnavigation entfällt dort – sonst schiene Seitentext unter
+   den Pillen durch; der aktive Abschnitt bekommt einen Rahmen in Systemfarbe. */
+@media (forced-colors: active) {
+  .sectionNav {
+    background: Canvas;
+  }
+
+  .sectionNavBar {
+    border: var(--border-width) solid CanvasText;
+  }
+
+  .sectionNavLink {
+    border: var(--border-width) solid transparent;
+  }
+
+  .sectionNavLink[aria-current='true'] {
+    border-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}

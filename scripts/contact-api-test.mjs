@@ -3,7 +3,7 @@
 //   (Server mit CONTACT_RESEND_API_KEY=re_test_fake_0000000000 CONTACT_TO=inbox@example.test
 //    CONTACT_FROM='Website <kontakt@example.test>' CONTACT_RESEND_BASE_URL=http://127.0.0.1:3362)
 //   node scripts/contact-api-test.mjs http://127.0.0.1:3302 http://127.0.0.1:3362
-// Keine echten Keys. Dauer ≈ 25 s (Mindest-Ausfüllzeit 3 s je Fall).
+// Keine echten Keys. Dauer ≈ 30 s (Mindest-Ausfüllzeit 3 s je Fall).
 const [base = 'http://127.0.0.1:3302', mock = 'http://127.0.0.1:3362'] = process.argv.slice(2);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let ipN = 10;
@@ -32,7 +32,7 @@ await fetch(`${mock}/__reset`, { method: 'POST' });
 
 // 1. Status
 const st = await (await fetch(`${base}/api/kontakt`)).json();
-check('GET: available + Token', st.available === true && /^\d+\.[\w-]+$/.test(st.token));
+check('GET: available + Token (Ausgabe.Nonce.Signatur)', st.available === true && /^\d+\.[\w-]+\.[\w-]+$/.test(st.token));
 
 // 2. Zu schnell
 let r = await post(payload(await token()));
@@ -85,6 +85,16 @@ check('Resend 422 → 502 send_failed (Token bleibt nutzbar)', r.status === 502 
 await fetch(`${mock}/__mode`, { method: 'POST', body: JSON.stringify({ mode: 'ok' }) });
 r = await post(payload(t4));
 check('Nach Fehler mit gleichem Token erneut → 200', r.status === 200 && r.data?.ok === true, JSON.stringify(r.data));
+
+// 7b. Eindeutige Tokens und atomare Einmal-Nutzung (FUN3)
+const many = await Promise.all(Array.from({ length: 6 }, () => token()));
+check('6 parallele GET → 6 verschiedene Tokens', new Set(many).size === 6, `${new Set(many).size} verschieden`);
+const t5 = await token();
+await sleep(3200);
+const before = (await mockLog()).length;
+const par = await Promise.all([post(payload(t5)), post(payload(t5)), post(payload(t5))]);
+const after = (await mockLog()).length;
+check('3 parallele POST mit demselben Token → genau 1× 200, 1 Mail', par.filter((x) => x.status === 200).length === 1 && after - before === 1, par.map((x) => x.status).join(' ') + ` mails=${after - before}`);
 
 // 8. Herkunft/Format
 r = await post(payload(await token()), { 'Sec-Fetch-Site': 'cross-site' });

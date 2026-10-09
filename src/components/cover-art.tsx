@@ -7,7 +7,8 @@ import styles from './cover-art.module.css';
 
 export type CoverMotif = 'web' | 'cms' | 'automation' | 'code' | 'article';
 
-const PATTERNS = ['grid', 'dots', 'lines', 'rings'] as const;
+/* Fix-Runde 1 (DES1): ohne Raster und Ringe – Anti-Slop „Background Grid“ */
+const PATTERNS = ['dots', 'lines'] as const;
 
 /** Bildaufbau des Motivs (VIS8): Variation über Komposition und Ausschnitt statt Farbe (E3). */
 const COMPOSITIONS = ['corner', 'side', 'crop'] as const;
@@ -70,9 +71,11 @@ function MotifSvg({ motif, className }: { motif: CoverMotif; className: string }
 
 /**
  * Generatives Cover (V6, LV2): EIN Bildsystem für Projekte und Artikel ohne echtes Bild.
- * Verlauf + Muster aus dem Akzent-Token (hell/dunkel automatisch über light-dark()),
- * großes Linienmotiv und eine lesbare Kategorie-Marke – kein Mikrotext, kein Pseudo-Code.
- * Variation je Seed: Muster, Komposition, Lichtpunkt, Verlaufswinkel. Der Seed ist
+ * Papierfläche mit leisem Muster (Punkte oder Linien), großes Linienmotiv und eine lesbare
+ * Kategorie-Marke – kein Mikrotext, kein Pseudo-Code, kein Lichtpunkt (Fix-Runde 1, DES1:
+ * „blurred radial orbs“). Seit Fix-Runde 1 nur noch für Ghost-Beiträge ohne Bild; die zwei
+ * Projekte haben eigene Grafiken (project-visual.tsx). Variation je Seed: Muster, Komposition,
+ * Musterausschnitt, Verlaufswinkel. Der Seed ist
  * sprachunabhängig (coverSeed in content-card.tsx), DE und EN sehen gleich aus. Füllt seinen Rahmen
  * (AspectRatio in ItemCover). Rein dekorativ: Titel steht immer als Text daneben.
  */

@@ -35,8 +35,14 @@
   list-style: none;
 }
 
+.item,
+.entry {
+  /* Header + Leiste deckt scroll-padding-top der Startseite ab (A112); das Sprungziel ist bei
+     aufklappbaren Stationen das <details> (.entry), sonst die Zeile (.item) */
+  scroll-margin-top: var(--spacing-4);
+}
+
 .item {
-  scroll-margin-top: calc(var(--yb-header) + var(--size-element-md) + var(--spacing-8));
   border-radius: var(--radius-element);
 }
 

@@ -8,6 +8,7 @@ import { CtaCard } from '@/components/cta-card';
 import { ChipList, SkillChipLink } from '@/components/skill-chip';
 import { Gap } from '@/components/gap';
 import { plain } from '@/components/emphasis';
+import { contactLede } from '@/lib/contact-flag';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { FOCUS_AREAS } from '@/content/profile';
 import { anchor, projectHref, projectsForSkills, skillChips } from '@/content/profile-view';
@@ -77,7 +78,7 @@ export function ServicesContent({ lang }: { lang: Lang }) {
       })}
       <CtaCard
         title={plain(dict.home.contactTitle)}
-        text={dict.home.contactLede}
+        text={contactLede(lang)}
         label={dict.contact}
         href={withLang('/kontakt', lang)}
       />

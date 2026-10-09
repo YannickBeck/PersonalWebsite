@@ -8,7 +8,7 @@
 - Startseite als Scrollseite mit Abschnitten 00–06 und klebender Abschnittsnavigation (aktiver Abschnitt, Tastatur, mobil horizontal)
 - Einstieg: freigestelltes Porträt vor blassem Namenszug, Einblenden beim ersten Laden, Zeiger-Parallaxe (Maus) und Scroll-Drift; unter Reduced Motion statisch
 - Ausweiskarte am Band (Über mich): Ziehen (Maus/Touch), Tippen, Button „Karte umdrehen“, ←/→ schwenken; Pendeln nur ohne Reduced Motion, klingt in < 4 s aus
-- Fähigkeiten als Periodensystem (36 Kacheln aus LinkedIn und Orbitalis, farbig nach Kategorie): Filter-Pillen, Auswahl per Klick/Tippen/Pfeiltasten, Detailfeld mit Kürzel bzw. Logo (nur PHP und FastAPI, Lizenz geprüft: `docs/skill-logos.md`), Kategorie und Belegen mit Sprung zu Werdegang und Projekten; vollständige Textliste für Screenreader
+- Fähigkeiten als Periodensystem (35 Kacheln aus LinkedIn und Orbitalis, farbig nach Kategorie; seit Fix-Runde 1 ohne „AI Agents“ – laut Profil ein Interesse): Filter-Pillen, Auswahl per Klick/Tippen/Pfeiltasten, Detailfeld mit Kürzel bzw. Logo (nur PHP und FastAPI, Lizenz geprüft: `docs/skill-logos.md`), Kategorie und Belegen mit Sprung zu Werdegang und Projekten; vollständige Textliste für Screenreader
 - Projekte als Akkordeon (nebeneinander mit Streifen, mobil untereinander): Kurzfassung, Fähigkeiten mit Sprung ins Periodensystem, Detailseite und Quellcode-Link (Orbitalis); Projektseiten verlinken ihre Fähigkeiten zurück auf die Startseite
 - Werdegang mit aufklappbaren Stationen (native `<details>`, exklusiv, ohne JS bedienbar), Ausbildung und Zertifikate als Liste; Bachelorarbeit springt ins Projekt
 - Laufband „Erfolge“ fertig (Pause-Schalter, Kopie verborgen, statisch bei Reduced Motion und mobil) – erscheint erst mit belegten Einträgen

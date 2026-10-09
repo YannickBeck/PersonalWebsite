@@ -13,14 +13,21 @@ export async function GET(_request: NextRequest, ctx: RouteContext<'/api/md/[[..
   const pathname = `/${(path ?? []).map((s) => decodeURIComponent(s)).join('/')}`;
   const found = await markdownFor(pathname);
   const lang = pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'de';
-  const headers = {
+  // private (PER4): Die HTML-Antwort derselben URL trägt kein Vary: Accept (Next 16.3.6
+  // überschreibt es) – ein geteilter Cache, der nur nach URL schlüsselt, darf die Markdown-
+  // Fassung deshalb nicht speichern, sonst bekämen Browser Markdown. 404 gar nicht speichern.
+  const headers: Record<string, string> = {
     'Content-Type': 'text/markdown; charset=utf-8',
     'Content-Language': found?.lang ?? lang,
     Vary: 'Accept',
-    'Cache-Control': 'public, max-age=300',
+    'Cache-Control': found ? 'private, max-age=300' : 'no-store',
   };
   if (!found) {
     return new Response(notFoundMarkdown(pathname, lang), { status: 404, headers });
+  }
+  if (found.noindex) {
+    // wie <meta name="robots" content="noindex"> der HTML-Fassung (PER5)
+    headers['X-Robots-Tag'] = 'noindex';
   }
   return new Response(found.body, { status: 200, headers });
 }

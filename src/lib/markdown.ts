@@ -26,7 +26,10 @@ import {
 import { IMPRINT, LEGAL_OPEN, PRIVACY, type LegalDoc } from '@/content/legal';
 import { formatPeriod } from '@/lib/period';
 import { KNOWN_ROUTES } from '@/lib/routes';
-import { getBySlug, getPosts } from '@/lib/ghost';
+import { getBySlug, getPosts, getProjectSlugs } from '@/lib/ghost';
+import { projectFullTitle } from '@/content/profile-view';
+import { sentenceList } from '@/lib/period';
+import { CONTACT_FORM_ENABLED, contactPageLede } from '@/lib/contact-flag';
 
 export const SITE = 'https://yannick-beck.de';
 
@@ -41,7 +44,7 @@ function projectsMd(lang: Lang, level = '##'): string {
   return [
     `${level} ${dict.pages.projekte.title}`,
     '',
-    ...PROJECTS.map((p) => `- [${p.title[lang]}](${abs(withLang(`/projekte/${p.slug[lang]}`, lang))}) – ${p.teaser[lang]}`),
+    ...PROJECTS.map((p) => `- [${projectFullTitle(p, lang)}](${abs(withLang(`/projekte/${p.slug[lang]}`, lang))}): ${p.teaser[lang]}`),
   ].join('\n');
 }
 
@@ -58,13 +61,14 @@ function careerMd(lang: Lang, detailed: boolean): string {
         out.push(`  - ${pt}`);
       }
       if (s.thesis) {
-        out.push(`  - ${dict.cvThesisLabel}: „${s.thesis.title[lang]}“ (${s.thesis.focus[lang].join(', ')})`);
+        const q = lang === 'de' ? ['„', '“'] : ['“', '”'];
+        out.push(`  - ${dict.cvThesisLabel}: ${q[0]}${s.thesis.title[lang]}${q[1]} (${sentenceList(s.thesis.focus[lang], lang)})`);
       }
     }
   }
   out.push('', `## ${dict.cvEducationTitle}`, '');
   for (const e of EDUCATION) {
-    out.push(`- ${e.degree[lang]}, ${e.school} (${formatPeriod(e.start, e.end, lang)})`);
+    out.push(`- ${e.degree[lang]}, ${e.school[lang]} (${formatPeriod(e.start, e.end, lang)})`);
   }
   out.push('', `## ${dict.cvCertsTitle}`, '');
   for (const c of CERTIFICATIONS) {
@@ -82,7 +86,10 @@ function contactMd(lang: Lang): string {
   return [
     `## ${dict.contact}`,
     '',
-    `- ${lang === 'de' ? 'Kontaktformular' : 'Contact form'}: ${abs(withLang('/kontakt', lang))}`,
+    // ohne freigeschaltetes Formular (DES6) nur die Kontaktseite, kein „Kontaktformular“
+    CONTACT_FORM_ENABLED
+      ? `- ${lang === 'de' ? 'Kontaktformular' : 'Contact form'}: ${abs(withLang('/kontakt', lang))}`
+      : `- ${lang === 'de' ? 'Kontaktseite' : 'Contact page'}: ${abs(withLang('/kontakt', lang))}`,
     `- LinkedIn: ${LINKEDIN_URL}`,
   ].join('\n');
 }
@@ -146,7 +153,7 @@ function cvMarkdown(lang: Lang): string {
 
 function projectMarkdown(project: Project, lang: Lang): string {
   const dict = getDictionary(lang);
-  const out = [`# ${project.title[lang]}`, '', project.teaser[lang], '', `## ${dict.sectionSituation}`, '', project.situation.value[lang].join('\n\n'), '', `## ${dict.sectionContribution}`, '', ...project.contribution.value[lang].map((c) => `- ${c}`)];
+  const out = [`# ${projectFullTitle(project, lang)}`, '', project.teaser[lang], '', `## ${dict.sectionSituation}`, '', project.situation.value[lang].join('\n\n'), '', `## ${dict.sectionContribution}`, '', ...project.contribution.value[lang].map((c) => `- ${c}`)];
   if (project.result.status === 'belegt') {
     out.push('', `## ${dict.sectionOutcome}`, '', project.result.value[lang].join('\n\n'));
   }
@@ -194,6 +201,13 @@ function legalMarkdown(doc: LegalDoc, title: string, lang: Lang): string {
   return out.join('\n');
 }
 
+/** Werkzeuge aus Orbitalis (TEX17): Projekttechnik-Kacheln + Tags ohne Kachel, keine Konzepte wie RAG. */
+export function usesTools(project: Project, lang: Lang): string[] {
+  const tools = project.skills.map((id) => skillById(id)).filter((sk) => sk.category === 'build').map((sk) => (sk.tile ?? sk.name)[lang]);
+  const names = new Set(project.skills.map((id) => skillById(id)).flatMap((sk) => [sk.name.de, sk.name.en].map((v) => v.toLowerCase())));
+  return [...tools, ...project.tags.filter((t) => !names.has(t.toLowerCase()))];
+}
+
 function usesMarkdown(lang: Lang): string {
   const dict = getDictionary(lang);
   const orbitalis = PROJECTS.find((p) => p.id === 'orbitalis')!;
@@ -202,9 +216,7 @@ function usesMarkdown(lang: Lang): string {
     '',
     dict.pages.uses.lede,
     '',
-    dict.usesEmpty,
-    '',
-    `${dict.usesFromProjects} ([${orbitalis.shortTitle[lang]}](${abs(withLang(`/projekte/${orbitalis.slug[lang]}`, lang))})): ${orbitalis.tags.join(', ')}`,
+    `${dict.usesFromProjects[0]}[${orbitalis.shortTitle[lang]}](${abs(withLang(`/projekte/${orbitalis.slug[lang]}`, lang))})${dict.usesFromProjects[1]}: ${usesTools(orbitalis, lang).join(', ')}`,
     '',
   ].join('\n');
 }
@@ -233,7 +245,8 @@ function pointerMarkdown(path: string, lang: Lang): string | null {
     return null;
   }
   const extra = key === 'kontakt' ? `\n\n${contactMd(lang)}` : '';
-  return `# ${page.title}\n\n${page.lede}${extra}\n\n${lang === 'de' ? 'HTML-Fassung' : 'HTML version'}: ${abs(withLang(path, lang))}\n`;
+  const lede = key === 'kontakt' ? contactPageLede(lang) : page.lede;
+  return `# ${page.title}\n\n${lede}${extra}\n\n${lang === 'de' ? 'HTML-Fassung' : 'HTML version'}: ${abs(withLang(path, lang))}\n`;
 }
 
 export function notFoundMarkdown(path: string, lang: Lang): string {
@@ -242,8 +255,14 @@ export function notFoundMarkdown(path: string, lang: Lang): string {
     : `# 404 – Page not found\n\nThere is no page at \`${path}\` on yannick-beck.de.\n\n- Homepage: ${SITE}/en\n- Sitemap: ${SITE}/sitemap.xml\n- Overview for agents: ${SITE}/llms.txt\n`;
 }
 
+/** Ghost-Beitrag: Titel, Auszug und ein klarer Verweis auf den Volltext (HTML). */
+function ghostMd(post: { title?: string | null; custom_excerpt?: string | null; excerpt?: string | null }, bare: string, lang: Lang): string {
+  const full = lang === 'de' ? 'Volltext' : 'Full text';
+  return `# ${post.title ?? bare}\n\n${post.custom_excerpt || post.excerpt || ''}\n\n${full}: ${abs(withLang(bare, lang))}\n`;
+}
+
 /** Markdown zu einem Pfad (mit /en-Präfix) – null = unbekannt (404). */
-export async function markdownFor(pathname: string): Promise<{ lang: Lang; body: string } | null> {
+export async function markdownFor(pathname: string): Promise<{ lang: Lang; body: string; noindex?: boolean } | null> {
   const lang: Lang = pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'de';
   const bare = (lang === 'en' ? pathname.replace(/^\/en/, '') : pathname).replace(/\/$/, '') || '/';
   const segs = bare.split('/').filter(Boolean);
@@ -268,8 +287,13 @@ export async function markdownFor(pathname: string): Promise<{ lang: Lang; body:
     if (project) {
       return { lang, body: projectMarkdown(project, lang) };
     }
+    // Wie die HTML-Route (PER5): nur Ghost-Beiträge mit Tag „project“ der Sprache – und die
+    // sind dort noindex (Nutzerentscheidung: nur zwei Projekte), also auch hier
+    if (!(await getProjectSlugs(lang)).includes(segs[1])) {
+      return null;
+    }
     const post = await getBySlug(segs[1], lang);
-    return post ? { lang, body: `# ${post.title ?? segs[1]}\n\n${post.custom_excerpt || post.excerpt || ''}\n\n${abs(withLang(bare, lang))}\n` } : null;
+    return post ? { lang, body: ghostMd(post, bare, lang), noindex: true } : null;
   }
   if (bare === '/blog') {
     const posts = await getPosts(lang);
@@ -279,7 +303,7 @@ export async function markdownFor(pathname: string): Promise<{ lang: Lang; body:
   }
   if (segs[0] === 'blog' && segs.length === 2) {
     const post = await getBySlug(segs[1], lang);
-    return post ? { lang, body: `# ${post.title ?? segs[1]}\n\n${post.custom_excerpt || post.excerpt || ''}\n\n${abs(withLang(bare, lang))}\n` } : null;
+    return post ? { lang, body: ghostMd(post, bare, lang) } : null;
   }
   if (bare === '/impressum' || bare === '/datenschutz') {
     const dict = getDictionary(lang);

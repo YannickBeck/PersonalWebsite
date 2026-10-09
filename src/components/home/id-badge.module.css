@@ -5,7 +5,12 @@
  * Scheckkarten-Ausweis, Bandlänge) sind feste Verhältnisse.
  *
  * Die Bewegung setzt id-badge.tsx per Inline-Transform (Pendel am .swing, Drehen/Kippen an
- * .card); hier steht nur der Ruhezustand. Feste Maße → kein Layout-Shift.
+ * .card); hier steht nur der Ruhezustand.
+ *
+ * Höhe (A115): Beide Seiten liegen im selben Rasterfeld der Karte; die Karte ist mindestens
+ * so hoch wie das Kartenformat, sonst so hoch wie die längere Seite. So schneidet die Rückseite
+ * unter 360px Breite und mit WCAG-Textabständen (1.4.12) nichts mehr ab. Der Inhalt steht im
+ * Server-HTML → kein Layout-Shift. Schrift der Rückseite mindestens 12px (DES7).
  */
 .badge {
   --card-w: min(17rem, 72vw);
@@ -25,14 +30,13 @@
 
 .rig {
   width: var(--card-w);
-  height: calc(var(--strap-h) + var(--card-h));
   touch-action: pan-y;
 }
 
 /* Drehpunkt des Pendels: oberes Ende des Bands */
 .swing {
   position: relative;
-  height: 100%;
+  padding-block-start: var(--strap-h);
   transform-origin: 50% 0;
 }
 
@@ -94,11 +98,10 @@
 }
 
 .card {
-  position: absolute;
-  top: var(--strap-h);
-  left: 0;
+  position: relative;
+  display: grid;
   width: var(--card-w);
-  height: var(--card-h);
+  min-height: var(--card-h);
   transform-style: preserve-3d;
   cursor: grab;
   user-select: none;
@@ -111,8 +114,8 @@
 }
 
 .face {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
@@ -209,7 +212,7 @@
 /* ---------- Rückseite ---------- */
 .backName {
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   padding-block-end: var(--spacing-1);
   border-block-end: var(--border-width) solid var(--color-border);
 }
@@ -233,48 +236,42 @@
 }
 
 .stations {
-  gap: var(--spacing-1-5);
+  gap: var(--spacing-2);
 }
 
 .station {
   display: grid;
-  grid-template-columns: 4.6rem minmax(0, 1fr);
+  grid-template-columns: 5.25rem minmax(0, 1fr);
   gap: var(--spacing-2);
   align-items: baseline;
 }
 
+/* 12px Mono für die Jahre, 14px für Titel und Sprachen (vorher 9,2–10px, DES7) */
 .years {
   font-family: var(--font-family-code);
-  font-size: calc(var(--font-size-xs) * 0.92);
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
-.stationText {
-  display: flex;
-  flex-direction: column;
-  font-size: var(--font-size-xs);
+.stationTitle {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
   line-height: 1.3;
 }
 
-.stationTitle {
-  font-weight: var(--font-weight-semibold);
-}
-
-.stationOrg {
-  color: var(--color-text-secondary);
-}
-
 .languages {
-  gap: var(--spacing-0-5);
-  font-size: var(--font-size-xs);
+  gap: var(--spacing-1);
+  font-size: 0.875rem;
   line-height: 1.35;
-  color: var(--color-text-secondary);
 }
 
 .languageName {
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+}
+
+.languageLevel {
+  color: var(--color-text-secondary);
 }
 
 .linkedin {

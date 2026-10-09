@@ -15,7 +15,8 @@ import { SkillTable } from './skill-table';
  * unsichtbaren Tab-Stopps entstehen) – auch für Agenten und ohne JavaScript im HTML.
  */
 export function SkillsSection({ id, number, lang }: { id: string; number: string; lang: Lang }) {
-  const h = getDictionary(lang).home;
+  const dict = getDictionary(lang);
+  const h = dict.home;
   const tiles = skillTiles(lang);
   const categories = SKILL_CATEGORIES.map((c) => ({ id: c.id, label: c.label[lang], short: c.short[lang] }));
   return (
@@ -32,6 +33,7 @@ export function SkillsSection({ id, number, lang }: { id: string; number: string
           evidence: h.skillsEvidence,
           source: h.skillsSource,
           license: h.skillsLicense,
+          newTab: dict.newTab,
           kinds: h.evidenceKinds,
         }}
       />

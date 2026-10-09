@@ -76,7 +76,7 @@ export async function renderOgImage(lang: Lang) {
           <div style={{ display: 'flex', fontFamily: 'Display', fontSize: 120, lineHeight: 0.9, letterSpacing: -1 }}>
             {PERSON.role.value[lang].toUpperCase()}
           </div>
-          <div style={{ display: 'flex', fontSize: 30, color: '#5C5850' }}>{PERSON.focusLine.value[lang]}</div>
+          <div style={{ display: 'flex', fontSize: 30, color: '#5C5850' }}>{PERSON.focusLine.value[lang].join(' · ')}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, fontSize: 24, color: '#5C5850' }}>
             <div style={{ width: 12, height: 12, borderRadius: 999, background: '#5B3FE0' }} />
             yannick-beck.de

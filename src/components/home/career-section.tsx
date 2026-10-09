@@ -88,7 +88,8 @@ export function CareerSection({ id, number, lang }: { id: string; number: string
                       {s.thesis ? (
                         <p className={styles.thesis}>
                           <span className={styles.thesisLabel}>{h.careerThesis}</span>
-                          <span className={styles.thesisTitle}>„{s.thesis.title[lang]}“</span>
+                          {/* Anführungszeichen je Sprache (TEX15) */}
+                          <span className={styles.thesisTitle}>{lang === 'de' ? `„${s.thesis.title[lang]}“` : `“${s.thesis.title[lang]}”`}</span>
                           <a href={`#${anchor.project(s.thesis.projectId)}`} data-jump="" className={`${styles.thesisLink}`}>
                             {h.careerToProject}
                           </a>
@@ -123,7 +124,7 @@ export function CareerSection({ id, number, lang }: { id: string; number: string
                 <span className={styles.when}>{formatYears(e.start, e.end, lang)}</span>
                 <span className={styles.what}>
                   <span className={styles.role}>{e.degree[lang]}</span>
-                  <span className={styles.org}>{e.school}</span>
+                  <span className={styles.org}>{e.school[lang]}</span>
                 </span>
               </li>
             ))}

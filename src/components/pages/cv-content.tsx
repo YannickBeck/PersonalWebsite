@@ -13,7 +13,7 @@ import { Gap } from '@/components/gap';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { CERTIFICATIONS, EDUCATION, FOCUS_LIST, LANGUAGES, LINKEDIN_URL, PERSON, STATIONS, projectById } from '@/content/profile';
 import { labelChips, projectHref } from '@/content/profile-view';
-import { formatPeriod, formatYears } from '@/lib/period';
+import { formatPeriod, formatYears, sentenceList } from '@/lib/period';
 import styles from './cv-content.module.css';
 
 /**
@@ -36,13 +36,14 @@ export function CvContent({ lang }: { lang: Lang }) {
         size="display"
         kicker={page.title}
         title={PERSON.name}
-        lede={`${PERSON.role.value[lang]} · ${PERSON.focusLine.value[lang]}`}
+        lede={`${PERSON.role.value[lang]} · ${PERSON.focusLine.value[lang].join(' · ')}`}
         meta={
           <VStack gap={4}>
             <Text color="secondary" className={styles.contactLine}>
               {PERSON.location.value[lang]} ·{' '}
               <Link href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" color="primary" hasUnderline>
                 linkedin.com/in/yannickbeck
+                <span className="yb-sr-only"> ({dict.newTab})</span>
               </Link>
             </Text>
             <HStack gap={2} wrap="wrap" className="print-hide">
@@ -107,7 +108,7 @@ export function CvContent({ lang }: { lang: Lang }) {
                       {s.thesis.title[lang]}
                     </Link>
                     <Text type="supporting" color="secondary">
-                      {dict.cvThesisFocus}: {s.thesis.focus[lang].join(', ')}
+                      {dict.cvThesisFocus}: {sentenceList(s.thesis.focus[lang], lang)}
                     </Text>
                   </div>
                 ) : null}
@@ -131,7 +132,7 @@ export function CvContent({ lang }: { lang: Lang }) {
                 <Heading level={3} className={styles.role}>
                   {e.degree[lang]}
                 </Heading>
-                <Text color="secondary">{e.school}</Text>
+                <Text color="secondary">{e.school[lang]}</Text>
               </VStack>
             </li>
           ))}

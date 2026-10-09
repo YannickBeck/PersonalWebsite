@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react';
 import type { SkillCategory } from '@/content/profile';
 import type { HomeEvidence, SkillTileData } from '@/content/profile-view';
 import { onJump } from './home-jump';
@@ -14,6 +14,8 @@ export interface SkillTableLabels {
   evidence: string;
   source: string;
   license: string;
+  /** „öffnet in neuem Tab“ (A126) */
+  newTab: string;
   kinds: Record<HomeEvidence['kind'], string>;
 }
 
@@ -42,11 +44,18 @@ const two = (n: number) => String(n).padStart(2, '0');
  *   Filter auf, der sie verdeckt (home-jump.tsx).
  * - Hover ist nie nötig: Klick/Tippen/Tastatur wählen, das Detailfeld zeigt alles. Eine
  *   vollständige Textliste für Screenreader rendert skills-section.tsx serverseitig.
+ * - Name der Kachel aus ihrem Inhalt (A114, Label-in-Name): sichtbares Kürzel + Kurzname und,
+ *   wo er fehlt oder abweicht, der volle Name als sr-only („Ms, Microsoft 365“). Die Nummer
+ *   bleibt dekorativ.
+ * - Auswahl per Zeiger (Klick/Tippen), während das Detailfeld unter dem Raster außer Sicht
+ *   liegt (schmale Breiten): das Feld rückt in Sicht (block: nearest, A118). Pfeiltasten
+ *   scrollen nicht – dort wäre das bei jedem Schritt störend.
  */
 export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProps) {
   const [selected, setSelected] = useState(tiles[0]?.id);
   const [filter, setFilter] = useState<SkillCategory | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const tableId = `${baseId}-table`;
   const panelId = `${baseId}-panel`;
   const hintId = `${baseId}-hint`;
@@ -77,6 +86,27 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
         setSelected(first.id);
       }
     }
+  };
+
+  /** Zeiger-Auswahl (event.detail > 0; Enter/Leertaste liefern 0): Detailfeld in Sicht holen. */
+  const pick = (event: MouseEvent<HTMLButtonElement>, id: SkillTileData['id']) => {
+    setSelected(id);
+    if (event.detail === 0) {
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      const panel = panelRef.current;
+      if (!panel) {
+        return;
+      }
+      const r = panel.getBoundingClientRect();
+      // Sichtbar genug: Kopf des Feldes (Kachel + Name) steht im Fenster
+      if (r.top >= 0 && r.top + Math.min(r.height, 220) <= window.innerHeight) {
+        return;
+      }
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      panel.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+    });
   };
 
   const focusTile = (id: string) => {
@@ -185,7 +215,6 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
                 role="tab"
                 aria-selected={isSelected}
                 aria-controls={panelId}
-                aria-label={t.name}
                 tabIndex={isSelected && on ? 0 : -1}
                 inert={!on}
                 data-skill={t.id}
@@ -193,16 +222,19 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
                 data-jump-focus=""
                 data-jump-scroll={tableId}
                 className={`${styles.tile} yb-skill-tile yb-cat`}
-                onClick={() => setSelected(t.id)}
+                onClick={(event) => pick(event, t.id)}
               >
                 <span className={styles.tileNum} aria-hidden="true">
                   {two(t.n)}
                 </span>
-                <span className={styles.tileSymbol} aria-hidden="true">
-                  {t.symbol}
-                </span>
-                <span className={styles.tileName} aria-hidden="true">
+                <span className={styles.tileSymbol}>{t.symbol}</span>
+                <span className={styles.tileName}>
+                  <span className="yb-sr-only">, </span>
                   {t.tile}
+                </span>
+                {/* voller Name für Screenreader – ausgeblendet, wo der sichtbare Kurzname ihn schon nennt */}
+                <span className={`${styles.tileFull} yb-sr-only`} data-same={t.tile.replace(/\u00AD/g, '') === t.name ? '' : undefined}>
+                  , {t.name}
                 </span>
               </button>
             );
@@ -210,6 +242,7 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
         </div>
 
         <div
+          ref={panelRef}
           role="tabpanel"
           id={panelId}
           aria-labelledby={current.anchor}
@@ -258,18 +291,25 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
                 </li>
               ))}
             </ul>
+            {current.source || current.logo ? (
             <p className={styles.detailSource}>
-              {labels.source}: {current.source}
+              {current.source ? (
+                <>
+                  {labels.source}: {current.source}
+                </>
+              ) : null}
               {current.logo ? (
                 <>
-                  <br />
+                  {current.source ? <br /> : null}
                   {current.logo.credit} ·{' '}
                   <a href={current.logo.licenseUrl} target="_blank" rel="noopener noreferrer license" className={styles.detailSourceLink}>
                     {labels.license} {current.logo.license}
+                    <span className="yb-sr-only"> ({labels.newTab})</span>
                   </a>
                 </>
               ) : null}
             </p>
+            ) : null}
           </div>
         </div>
       </div>

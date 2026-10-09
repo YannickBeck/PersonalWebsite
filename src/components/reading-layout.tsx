@@ -43,7 +43,7 @@ export function ReadingLayout({
   const shortToc = hasToc && toc.length < 4;
   return (
     <Section>
-      <Grid columns={1} gap={8} className={`${styles.reading} ${hasAside ? styles.withAside : ''}`}>
+      <Grid columns={1} gap={8} className={`${styles.reading} ${hasAside ? styles.withAside : ''} ${cover ? '' : styles.noCover}`}>
         {cover ? <VStack className={styles.cover}>{cover}</VStack> : null}
         <VStack gap={8} className={styles.main}>
           {children}

@@ -5,7 +5,8 @@
  * Regeln
  * - Entwurf, keine Rechtsberatung. Beschrieben wird nur, was die Website technisch tatsächlich
  *   tut (Code in diesem Repo, docs/kontaktformular.md) bzw. was der Betrieb belegt
- *   (Coolify hinter Cloudflare, Ghost unter cms.yannick-beck.de).
+ *   (Coolify hinter Cloudflare, Ghost unter cms.yannick-beck.de). Hoster und Log-Dauer sind
+ *   nicht belegt (Fix-Runde 1, TEX1) und bleiben OFFEN, bis Yannick sie bestätigt.
  * - Fehlende Pflichtangaben (Anschrift, E-Mail, Rechtsgrundlagen, Fristen) sind `open` und
  *   erscheinen – anders als die übrigen Lücken – AUCH in Produktion als „OFFEN: …“
  *   (LegalOpen, src/components/pages/legal-content.tsx): Ein Rechtstext ohne diese Zeilen sähe
@@ -78,8 +79,9 @@ export const IMPRINT: LegalDoc = {
         },
         {
           open: {
-            de: 'E-Mail-Adresse: §\u00A05 DDG verlangt eine Adresse für elektronische Post. Mit der Entscheidung „keine öffentliche E-Mail-Adresse“ abstimmen.',
-            en: 'Email address: §\u00A05 DDG requires an address for electronic mail. Reconcile with the decision “no public email address”.',
+            // Begründung (Konflikt mit „keine öffentliche E-Mail“) nur in GAPS/content-status (TEX6)
+            de: 'E-Mail-Adresse (§\u00A05 DDG)',
+            en: 'Email address (§\u00A05 DDG)',
           },
         },
       ],
@@ -120,12 +122,13 @@ export const PRIVACY: LegalDoc = {
         {
           heading: { de: 'Hosting & Auslieferung', en: 'Hosting & delivery' },
           text: {
-            de: ['Diese Website läuft auf einem eigenen Server (Hetzner, Deutschland), verwaltet mit Coolify. Der Abruf von Seiten übermittelt technisch bedingt IP-Adresse und Zeitpunkt (Server-Logs, 7 Tage).'],
-            en: ['This website runs on its own server (Hetzner, Germany), managed with Coolify. Retrieving pages technically transmits IP address and time (server logs, 7 days).'],
+            de: ['Diese Website läuft auf einem eigenen Server, verwaltet mit Coolify. Beim Abruf einer Seite erhält der Server technisch bedingt deine IP-Adresse und den Zeitpunkt des Abrufs.'],
+            en: ['This website runs on its own server, managed with Coolify. When you open a page, the server receives your IP address and the time of the request for technical reasons.'],
           },
+          // Hoster und Log-Dauer stehen in keiner Quelle (TEX1): erst nach Bestätigung durch Yannick ergänzen
           open: {
-            de: 'Hoster, Standort und Speicherdauer der Server-Logs bestätigen (Angaben aus dem Vorgänger-Entwurf)',
-            en: 'Confirm host, location and retention of server logs (taken from the previous draft)',
+            de: 'Hoster, Serverstandort und Speicherdauer der Server-Logs',
+            en: 'Host, server location and retention period of the server logs',
           },
         },
         {
@@ -154,10 +157,11 @@ export const PRIVACY: LegalDoc = {
           },
         },
         {
-          heading: { de: 'CDN-Bibliotheken (jsDelivr)', en: 'CDN libraries (jsDelivr)' },
+          // Belegt durch den Code: das HTML aller Seiten lädt keine Fremd-Skripte (TEX1)
+          heading: { de: 'Externe Inhalte', en: 'External content' },
           text: {
-            de: ['Das Ghost-Portal-Skript wurde zeitweise über jsDelivr geladen (derzeit deaktiviert). Bei Reaktivierung: IP-Adresse an jsDelivr.'],
-            en: ['The Ghost portal script was temporarily loaded via jsDelivr (currently disabled). On reactivation: IP address to jsDelivr.'],
+            de: ['Diese Website bindet keine Skripte von fremden CDNs ein.'],
+            en: ['This website does not load scripts from third-party CDNs.'],
           },
         },
         {

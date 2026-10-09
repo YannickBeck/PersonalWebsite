@@ -14,6 +14,11 @@ import { suppressTransitions } from '@/lib/instant';
  *    Commit (nächster Frame) Scrollen (weich nur bei no-preference) und Fokus auf das
  *    Bedienelement des Ziels ([data-jump-focus]), kurze Markierung über data-yb-jumped;
  * 3. URL per replaceState – kein History-Eintrag ohne Next-State (wie section-nav.tsx, FUN2).
+ * Der Fokus wartet, bis das Ziel nicht mehr inert ist (A116): Ein Filter im Periodensystem
+ * macht Kacheln inert; hebt der Sprung ihn auf, ist die Kachel erst nach Reacts Commit wieder
+ * fokussierbar – ein zu früher focus() ließ den Fokus auf der Marke stehen.
+ * Auch die Aktionen des Einstiegs („Kontakt“, „Projekte“: Anker in .yb-hero-actions) laufen
+ * hierüber (A111): Sie setzen den Fokus in den Zielabschnitt, statt nur zu scrollen.
  * Beim Laden mit Anker (z. B. /#skill-rag von einer Projektseite) und bei hashchange wird das
  * Ziel nur ausgewählt/geöffnet; das Scrollen übernimmt der Browser bzw. Next.
  *
@@ -44,6 +49,11 @@ function prepare(id: string): HTMLElement | null {
   return el;
 }
 
+/** Fokussierbar = nicht in einem inerten Teilbaum (Filter im Periodensystem, A116). */
+function focusable(el: HTMLElement): boolean {
+  return !el.closest('[inert]');
+}
+
 function jump(id: string) {
   // Ziel öffnet ohne Übergang: Akkordeon/Details stehen im nächsten Frame in ihrer
   // endgültigen Höhe – sonst zielte das Scrollen auf eine Position, die sich noch verschiebt
@@ -54,30 +64,47 @@ function jump(id: string) {
     return;
   }
   window.history.replaceState(window.history.state, '', `#${id}`);
-  window.requestAnimationFrame(() => {
+  let tries = 0;
+  const run = () => {
+    const target = document.getElementById(id) ?? el;
+    // Ganze Abschnitte (Aktionen des Einstiegs) bekommen den Fokus selbst wie bei der
+    // Abschnittsnavigation; sonst das Bedienelement des Ziels
+    const focusEl =
+      target.matches('[data-jump-focus], section') ? target : (target.querySelector<HTMLElement>('[data-jump-focus]') ?? target);
+    // Noch inert (Commit des Filter-Wechsels steht aus): einen weiteren Frame warten, höchstens 10
+    if (!focusable(focusEl) && tries < 10) {
+      tries += 1;
+      window.requestAnimationFrame(run);
+      return;
+    }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const scrollId = el.dataset.jumpScroll;
-    const scrollEl = (scrollId && document.getElementById(scrollId)) || el;
+    const scrollId = target.dataset.jumpScroll;
+    const scrollEl = (scrollId && document.getElementById(scrollId)) || target;
     scrollEl.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-    const focusEl = el.matches('[data-jump-focus]') ? el : (el.querySelector<HTMLElement>('[data-jump-focus]') ?? el);
     focusEl.focus({ preventScroll: true });
-    el.setAttribute('data-yb-jumped', '');
-    window.setTimeout(() => el.removeAttribute('data-yb-jumped'), MARK_MS);
-  });
+    target.setAttribute('data-yb-jumped', '');
+    window.setTimeout(() => target.removeAttribute('data-yb-jumped'), MARK_MS);
+  };
+  window.requestAnimationFrame(run);
 }
 
 export function HomeJump() {
   useEffect(() => {
+    // Capture-Phase: Die Aktionen des Einstiegs sind Next-Links (Astryx-Button → TransitionLink),
+    // deren Klick-Handler den Anker sonst selbst ansteuert (nur scrollen, Fokus bleibt stehen –
+    // A111). Hier vorher abgefangen und nicht weitergereicht.
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return;
       }
-      const link = (event.target as Element | null)?.closest?.('a[data-jump]');
+      // data-jump-Anker und die Aktionen des Einstiegs (Astryx-Button reicht data-* nicht durch)
+      const link = (event.target as Element | null)?.closest?.('a[data-jump], .yb-hero-actions a[href^="#"]');
       const id = link?.getAttribute('href')?.replace(/^#/, '');
       if (!id || !document.getElementById(id)) {
         return;
       }
       event.preventDefault();
+      event.stopPropagation();
       jump(id);
     };
     const fromHash = () => {
@@ -86,11 +113,11 @@ export function HomeJump() {
         prepare(id);
       }
     };
-    document.addEventListener('click', onClick);
+    document.addEventListener('click', onClick, true);
     window.addEventListener('hashchange', fromHash);
     fromHash();
     return () => {
-      document.removeEventListener('click', onClick);
+      document.removeEventListener('click', onClick, true);
       window.removeEventListener('hashchange', fromHash);
     };
   }, []);

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     path: '/',
     title: 'Yannick Beck – IT Consultant',
     description:
-      'Yannick Beck, IT Consultant aus Sandhausen: Microsoft Cloud & AI, Modern Workplace, Identity & Security. Werdegang, Projekte und Kontakt.',
+      'Yannick Beck, IT Consultant in Sandhausen (Baden-Württemberg): Microsoft Cloud & AI, Modern Workplace, Identity & Security. Werdegang, Projekte und Kontakt.',
     type: 'profile',
   }),
   // absolute (FUN10): sonst ergänzt das Template „%s · Yannick Beck“ den Namen doppelt

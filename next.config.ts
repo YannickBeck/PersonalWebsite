@@ -55,14 +55,26 @@ const nextConfig: NextConfig = {
     return {
       // Accept: text/markdown → Markdown-Fassung bzw. Markdown-404 (src/app/api/md, mit
       // Vary: Accept). Vor dem Dateisystem, damit auch statische Seiten und unbekannte Pfade
-      // erfasst werden; _next und api bleiben unberührt. Browser senden text/markdown nie.
+      // erfasst werden. Nur Seitenpfade (PER1): Pfade mit Dateiendung (llms.txt, robots.txt,
+      // sitemap.xml, rss.xml, Bilder, favicon) sowie _next, api und og bleiben unberührt –
+      // sonst bekam, wer Markdown bevorzugt, für /llms.txt eine Markdown-404. „/“ passt weiter
+      // ([^.]* darf leer sein). Browser senden text/markdown nie.
+      // Accept-Gewichte (PER8): ausdrücklich abgelehnt (text/markdown;q=0) → HTML. Eine volle
+      // q-Auswertung (z. B. text/html;q=1, text/markdown;q=0.1 → HTML) geht in rewrites nicht,
+      // nur in Code; bekannte Einschränkung (AGENTS.md).
       // Gemessen (Next 16.3.6): Für vorgerenderte HTML-Seiten überschreibt Next die Vary-Liste –
-      // weder headers() noch ein Proxy bringen „Accept“ in die HTML-Antwort (OFFEN: CDN-Regel,
-      // falls HTML je am Edge gecacht wird).
+      // weder headers() noch ein Proxy bringen „Accept“ in die HTML-Antwort. Deshalb ist die
+      // Markdown-Antwort „private“ (PER4, OFFEN: CDN-Regel, falls HTML je am Edge gecacht wird).
       beforeFiles: [
         {
-          source: "/:path((?!_next/|api/).*)",
-          has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+          source: "/:path((?!_next/|api/|og/)[^.]*)",
+          has: [
+            {
+              type: "header",
+              key: "accept",
+              value: "(?!.*text/markdown\\s*;\\s*q\\s*=\\s*0(?:\\.0{0,3})?\\s*(?:[,;]|$)).*text/markdown.*",
+            },
+          ],
           destination: "/api/md/:path",
         },
       ],

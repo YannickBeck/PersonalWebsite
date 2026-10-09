@@ -6,13 +6,14 @@ import { PageHero } from '@/components/page-hero';
 import { ChipList, PlainChip, SkillChipLink } from '@/components/skill-chip';
 import { Gap } from '@/components/gap';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
-import { projectById } from '@/content/profile';
+import { projectById, skillById } from '@/content/profile';
 import { anchor, extraTags, projectHref, skillChips } from '@/content/profile-view';
 
 /**
  * Uses (Redesign B4): Es gibt (noch) keine belegte Werkzeugliste. Statt leerer Seite oder
- * erfundener Einträge: ein ehrlicher Satz und die belegte Technik aus dem Projekt Orbitalis
- * (Fähigkeits-Kacheln mit Sprung ins Periodensystem, übrige Tags neutral).
+ * erfundener Einträge: die Lede sagt es ehrlich, darunter die belegte Technik aus dem Projekt
+ * Orbitalis (nur Werkzeuge: Projekttechnik-Kacheln mit Sprung ins Periodensystem, übrige Tags
+ * neutral – Fix-Runde 1, TEX17).
  * Nicht in Navigation und Sitemap (routes.ts UNLISTED_ROUTES), URL bleibt erreichbar.
  */
 export function UsesContent({ lang }: { lang: Lang }) {
@@ -25,18 +26,17 @@ export function UsesContent({ lang }: { lang: Lang }) {
       <PageHero kicker={page.title} title={dict.usesTitle} lede={page.lede} />
       <Section>
         <VStack gap={6} maxWidth={720}>
-          <Text as="p" type="large" textWrap="pretty">
-            {dict.usesEmpty}
-          </Text>
           <VStack gap={3}>
-            <Text type="label" color="secondary" id="uses-orbitalis">
-              {dict.usesFromProjects}:{' '}
+            <Text as="p" type="large" textWrap="pretty" id="uses-orbitalis">
+              {dict.usesFromProjects[0]}
               <Link href={projectHref(orbitalis, lang)} color="primary" hasUnderline>
                 {orbitalis.shortTitle[lang]}
               </Link>
+              {dict.usesFromProjects[1]}
             </Text>
+            {/* Nur Werkzeuge (Projekttechnik), keine Konzepte wie RAG oder LLMs (TEX17) */}
             <ChipList labelledBy="uses-orbitalis">
-              {skillChips(orbitalis.skills, lang).map((chip) => (
+              {skillChips(orbitalis.skills.filter((id) => skillById(id).category === 'build'), lang).map((chip) => (
                 <li key={chip.id}>
                   <SkillChipLink chip={chip} href={`${home}#${anchor.skill(chip.id)}`} />
                 </li>

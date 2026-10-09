@@ -632,7 +632,9 @@ html[data-yb-instant] *::details-content {
    die Reihe hat feste Höhe (beide Inhalte sind immer gesetzt), außerhalb verschiebt sich
    nichts (CLS 0, gemessen), und sie folgt immer einer Eingabe. Inhalt blendet erst ein, wenn
    der Platz da ist; der Streifen blendet aus/ein. Untereinander: Inhalt klappt über
-   grid-template-rows (0fr → 1fr) auf. */
+   grid-template-rows (0fr → 1fr) auf – NUR dort (Container < 640px, gleiche Grenze wie
+   projects.module.css). Nebeneinander lief die zweite Layout-Transition sonst parallel zu
+   flex-basis mit (PER9). */
 @media (prefers-reduced-motion: no-preference) {
   .yb-acc-item {
     transition:
@@ -640,8 +642,10 @@ html[data-yb-instant] *::details-content {
       background-color var(--yb-motion-micro) var(--ease-standard);
   }
 
-  .yb-acc-inner {
-    transition: grid-template-rows var(--duration-medium) var(--yb-ease-move);
+  @container (max-width: 639px) {
+    .yb-acc-inner {
+      transition: grid-template-rows var(--duration-medium) var(--yb-ease-move);
+    }
   }
 
   .yb-acc-fade,

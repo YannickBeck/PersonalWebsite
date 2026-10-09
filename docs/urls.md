@@ -24,7 +24,7 @@ node scripts/link-check.mjs http://127.0.0.1:3304           # tote interne Links
 | `/leistungen` | „Schwerpunkte“: vier Themen aus dem Profil, kein Leistungskatalog |
 | `/uses` | ehrlich: Liste folgt, bis dahin die Technik aus Orbitalis (nicht in Navigation/Sitemap, noindex) |
 | `/blog`, `/blog/<slug>` | Beiträge aus Ghost; Suche/Filter erst ab vier Beiträgen |
-| `/kontakt` | Formular mit echtem Versand + LinkedIn |
+| `/kontakt` | LinkedIn + Formular mit echtem Versand (Formular erst mit `NEXT_PUBLIC_CONTACT_FORM=1`, sonst „Das Kontaktformular folgt“) |
 | `/newsletter` | ehrlich: Anmeldung nur auf Einladung, RSS-Feed und LinkedIn als Wege; Demo-Formular nur in der Vorschau |
 | `/impressum`, `/datenschutz` | Entwurf aus `src/content/legal.ts`; fehlende Pflichtangaben auch in Produktion als „OFFEN“ |
 | `/content-status` | Lückenliste (noindex, nur in der Vorschau verlinkt) |
@@ -56,4 +56,24 @@ Markdown-Umschreibung für Agenten.
 
 `/rss.xml`, `/en/rss.xml` (im `<head>` jeder Seite als `alternate` verlinkt), `/sitemap.xml`,
 `/robots.txt`, `/llms.txt`, `/og/de`, `/og/en`, `/placeholders/*.svg` (alte Demo-Cover, weiter
-ausgeliefert). Unbekannte Pfade → 404 (HTML bzw. Markdown bei `Accept: text/markdown`).
+ausgeliefert). Unbekannte Pfade → 404 (HTML bzw. Markdown bei `Accept: text/markdown`). Dateien
+(Pfade mit Endung) und `/og/*` bekommen auch mit `Accept: text/markdown` ihr Original (Fix-Runde 1,
+PER1).
+
+Bekannt und hingenommen (Fix-Runde 1):
+
+- **Alte Seitenanker auf `/leistungen` (FUN6):** Die Live-Startseite verlinkte
+  `/leistungen#beratung`, `#umsetzung`, `#begleitung` (EN-Slugs `consulting`, `implementation`,
+  `support`). Die Leistungspakete sind bewusst entfallen; die Seite hat jetzt die Anker `cloud`,
+  `identity`, `ai`, `consulting`. Nur `#consulting` trifft zufällig, die übrigen öffnen die Seite
+  oben (200). Alias-Anker nur, falls alte Links von außen bekannt werden.
+- **Unbekannte Blog-Slugs (FUN1):** `/blog/<unbekannt>` und `/en/blog/<unknown>` liefern Status
+  404, aber als leere `__next_error__`-Hülle (ohne JS kein Text, Titel „Yannick Beck“); mit JS
+  rendert der Client die gerahmte 404. Ursache: `notFound()` im On-Demand-Pfad (`dynamicParams`
+  muss für neue Ghost-Beiträge `true` bleiben). Der Live-Stand `2d636c6` verhält sich gleich.
+  Agenten bekommen die Markdown-404. Projekt-Slugs sind davon nicht betroffen
+  (`dynamicParams = false` → statische globale 404).
+- **Server-Log bei unbekannten Projekt-Slugs (FUN2):** Jeder Aufruf von `/projekte/<unbekannt>`
+  schreibt `Error: Internal: NoFallbackError` samt Stacktrace ins Log (Next 16.3.6 mit
+  `dynamicParams = false`); die Antwort selbst ist korrekt (404, globale 404). Log-Alarme
+  darauf nicht anschlagen lassen (Filter auf `NoFallbackError`).

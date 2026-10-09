@@ -24,6 +24,11 @@ import nf from '@/components/pages/not-found.module.css';
  * geänderter Text ergäbe einen Hydration-Fehler (React #418, gemessen). Genau eine H1.
  * Ohne JS: deutsche Fassung plus eine englische Zeile mit Link. Status 404 setzt Next. Agenten
  * mit Accept: text/markdown bekommen eine Markdown-404 (next.config rewrites → /api/md).
+ *
+ * Fix-Runde 1: Marke im <header>, Gegensprache und Rechtliches im <footer> (A125: nichts
+ * außerhalb von Landmarks); die englische Fassung bekommt die Spiegelzeile zur deutschen
+ * Startseite (FUN5); Impressum und Datenschutz als statische Links. Inhaltslinie wie die übrigen
+ * Seiten (Rahmen 1120px, DES9).
  */
 // Zweisprachig: Next/React setzen <title> beim Hydrieren zurück, ein Austausch per Script hält nicht
 export const metadata: Metadata = {
@@ -49,6 +54,16 @@ function Both({ de, en }: { de: ReactNode; en: ReactNode }) {
 
 const LINKS = ['/', '/projekte', '/cv', '/kontakt'] as const;
 
+/**
+ * Feste Mindestbreite je Pille (em, gemessen: Fustat und ihre Ersatzschrift, jeweils der größere
+ * Wert, Fix-Runde 1): Diese Seite bekommt von Next keine Schrift-Preloads, beim Schrifttausch
+ * wurden die Pillen sonst 2–4px breiter und schoben die folgenden an (CLS). Text linksbündig.
+ */
+const PILL_EM: Record<Lang, Record<(typeof LINKS)[number], number>> = {
+  de: { '/': 8.6, '/projekte': 6.22, '/cv': 7.49, '/kontakt': 6.02 },
+  en: { '/': 11.84, '/projekte': 6.18, '/cv': 3.9, '/kontakt': 6.17 },
+};
+
 function label(href: (typeof LINKS)[number], lang: Lang): string {
   const dict = getDictionary(lang);
   return href === '/'
@@ -71,21 +86,23 @@ export default function GlobalNotFound() {
       <body>
         <Section className={styles.frame}>
           <VStack gap={10} maxWidth={720}>
-            <Both
-              de={
-                // eslint-disable-next-line @next/next/no-html-link-for-pages -- globale 404: bewusst ein Dokument-Link
-                <a href="/" className={styles.brand}>
-                  <BrandMark />
-                  <Text weight="semibold">Yannick Beck</Text>
-                </a>
-              }
-              en={
-                <a href="/en" className={styles.brand}>
-                  <BrandMark />
-                  <Text weight="semibold">Yannick Beck</Text>
-                </a>
-              }
-            />
+            <header>
+              <Both
+                de={
+                  // eslint-disable-next-line @next/next/no-html-link-for-pages -- globale 404: bewusst ein Dokument-Link
+                  <a href="/" className={styles.brand}>
+                    <BrandMark />
+                    <Text weight="semibold">Yannick Beck</Text>
+                  </a>
+                }
+                en={
+                  <a href="/en" className={styles.brand}>
+                    <BrandMark />
+                    <Text weight="semibold">Yannick Beck</Text>
+                  </a>
+                }
+              />
+            </header>
             <main id="main">
               <VStack gap={6}>
                 <VStack gap={4}>
@@ -105,12 +122,20 @@ export default function GlobalNotFound() {
                     <li key={href}>
                       <Both
                         de={
-                          <a href={withLang(href, 'de')} className={`${styles.pill} ${i === 0 ? styles.primary : ''}`}>
+                          <a
+                            href={withLang(href, 'de')}
+                            className={`${styles.pill} ${i === 0 ? styles.primary : ''}`}
+                            style={{ minWidth: `${PILL_EM.de[href]}em` }}
+                          >
                             {label(href, 'de')}
                           </a>
                         }
                         en={
-                          <a href={withLang(href, 'en')} className={`${styles.pill} ${i === 0 ? styles.primary : ''}`}>
+                          <a
+                            href={withLang(href, 'en')}
+                            className={`${styles.pill} ${i === 0 ? styles.primary : ''}`}
+                            style={{ minWidth: `${PILL_EM.en[href]}em` }}
+                          >
                             {label(href, 'en')}
                           </a>
                         }
@@ -120,14 +145,61 @@ export default function GlobalNotFound() {
                 </HStack>
               </VStack>
             </main>
-            <Text as="p" color="secondary" className={styles.otherLang}>
-              <span lang="en">
-                {en.notFoundTitle} –{' '}
-                <a href="/en" className={styles.link}>
-                  {en.otherLangHome}
-                </a>
-              </span>
-            </Text>
+            <footer className={styles.footer}>
+              {/* Gegensprache: DE-Fassung → englische Zeile, EN-Fassung → deutsche Zeile (FUN5) */}
+              {/* Hinweis und Link je eine Zeile, beide linksbündig: Ihre Lage hängt nicht von der
+                  Breite des anderen ab (die Schrift lädt hier ohne Preload nach; Text in derselben
+                  Zeile rutschte beim Schriftwechsel um 3px – CLS) */}
+              <Text as="p" color="secondary">
+                <span lang="en" className={styles.de}>
+                  {en.notFoundTitle}.
+                  <br />
+                  <a href="/en" className={styles.link}>
+                    {en.otherLangHome}
+                  </a>
+                </span>
+                <span lang="de" className={styles.en}>
+                  {de.notFoundTitle}.
+                  <br />
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- globale 404: bewusst ein Dokument-Link */}
+                  <a href="/" className={styles.link}>
+                    {de.otherLangHome}
+                  </a>
+                </span>
+              </Text>
+              {/* Rechtliches untereinander (gleicher Grund wie oben: keine Lage, die von der Breite des
+                  Nachbarn abhängt) */}
+              <ul className={styles.legal}>
+                <li>
+                  <Both
+                    de={
+                      <a href="/impressum" className={styles.link}>
+                        {de.pages.impressum.title}
+                      </a>
+                    }
+                    en={
+                      <a href="/en/impressum" className={styles.link}>
+                        {en.pages.impressum.title}
+                      </a>
+                    }
+                  />
+                </li>
+                <li>
+                  <Both
+                    de={
+                      <a href="/datenschutz" className={styles.link}>
+                        {de.pages.datenschutz.title}
+                      </a>
+                    }
+                    en={
+                      <a href="/en/datenschutz" className={styles.link}>
+                        {en.pages.datenschutz.title}
+                      </a>
+                    }
+                  />
+                </li>
+              </ul>
+            </footer>
           </VStack>
         </Section>
       </body>

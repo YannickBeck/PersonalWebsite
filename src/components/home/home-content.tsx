@@ -36,7 +36,11 @@ export function HomeContent({ lang }: { lang: Lang }) {
       <PersonJsonLd lang={lang} />
       <Hero id={start.id} lang={lang} />
       <div className={styles.sections}>
-        <SectionNav items={sections.map(({ id, label, number }) => ({ id, label, number }))} label={dict.home.sectionNavLabel} />
+        <SectionNav
+          items={sections.map(({ id, label, number }) => ({ id, label, number }))}
+          label={dict.home.sectionNavLabel}
+          hint={dict.home.sectionNavHint}
+        />
         {rest.map((s) => {
           const Component = SECTION[s.key as Exclude<HomeSectionKey, 'start'>];
           return <Component key={s.key} id={s.id} number={s.number} lang={lang} />;

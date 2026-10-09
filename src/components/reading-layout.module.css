@@ -80,6 +80,11 @@
     align-items: start;
   }
 
+  /* Ohne Titelbild (z. B. Bachelorarbeit, Fix-Runde 1): keine leere Bildzeile samt Abstand */
+  .withAside.noCover {
+    grid-template-areas: 'main aside';
+  }
+
   .withAside .cover {
     grid-area: cover;
   }

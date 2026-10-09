@@ -52,13 +52,24 @@ export function homeSections(lang: Lang): HomeSectionInfo[] {
   return keys.map((key, i) => ({ key, id: s[key].id, label: s[key].label, number: String(i).padStart(2, '0') }));
 }
 
+/**
+ * Voller Projekttitel für Meta-Titel, llms.txt und Markdown: Der Titel im Modell steht ohne die
+ * Art (die zeigt die Kennung darüber). Enthält er den Kurztitel nicht („KI-Unterstützung …“),
+ * kommt der Kurztitel davor („Bachelorarbeit: KI-Unterstützung …“, TEX11).
+ */
+export function projectFullTitle(project: Project, lang: Lang): string {
+  const title = project.title[lang];
+  const short = project.shortTitle[lang];
+  return title.startsWith(short) ? title : `${short}: ${title}`;
+}
+
 /** Karten-Daten (ContentCard) für ein Projekt aus dem Content-Modell. */
 export function projectCard(project: Project, lang: Lang) {
   const year = project.period.status === 'belegt' ? project.period.value[lang] : null;
   return {
     kind: 'project' as const,
     slug: project.slug[lang],
-    title: project.title[lang],
+    title: projectFullTitle(project, lang),
     href: projectHref(project, lang),
     excerpt: project.teaser[lang],
     image: null,
@@ -114,7 +125,7 @@ export function homeEvidence(ev: Evidence, lang: Lang): HomeEvidence {
     }
     case 'education': {
       const e = EDUCATION.find((x) => x.id === ev.id)!;
-      return { kind: ev.kind, label: `${e.degree[lang]} · ${e.school}`, href: `#${anchor.career(e.id)}`, note: formatYears(e.start, e.end, lang) };
+      return { kind: ev.kind, label: `${e.degree[lang]} · ${e.school[lang]}`, href: `#${anchor.career(e.id)}`, note: formatYears(e.start, e.end, lang) };
     }
     case 'cert': {
       const c = CERTIFICATIONS.find((x) => x.id === ev.id)!;
@@ -164,6 +175,7 @@ export interface SkillTileData {
   tile: string;
   category: SkillCategory;
   evidence: HomeEvidence[];
+  /** Quelle; leer, wenn alle Belege LinkedIn-Profilstellen sind (steht dann schon im Beleg, DES8). */
   source: string;
   logo?: { src: string; credit: string; license: string; licenseUrl: string };
 }
@@ -171,6 +183,23 @@ export interface SkillTileData {
 /** Fähigkeiten in Rasterreihenfolge: nach Kategorie (SKILL_CATEGORIES), darin wie in SKILLS. */
 export function orderedSkills(): Skill[] {
   return SKILL_CATEGORIES.flatMap((c) => SKILLS.filter((s) => s.category === c.id));
+}
+
+/**
+ * Belege fürs Detailfeld: mehrere Profilstellen in EINER Zeile („LinkedIn-Profil: Headline,
+ * Zusammenfassung“) statt je Stelle eine Zeile mit derselben Art (DES8).
+ */
+function groupProfileEvidence(evidence: Evidence[], lang: Lang): HomeEvidence[] {
+  const out: HomeEvidence[] = [];
+  const parts: string[] = [];
+  for (const ev of evidence) {
+    if (ev.kind === 'profile') {
+      parts.push(PROFILE_PART[lang][ev.id]);
+    } else {
+      out.push(homeEvidence(ev, lang));
+    }
+  }
+  return parts.length ? [{ kind: 'profile', label: parts.join(', ') }, ...out] : out;
 }
 
 export function skillTiles(lang: Lang): SkillTileData[] {
@@ -182,8 +211,8 @@ export function skillTiles(lang: Lang): SkillTileData[] {
     name: s.name[lang],
     tile: (s.tile ?? s.name)[lang],
     category: s.category,
-    evidence: s.evidence.map((ev) => homeEvidence(ev, lang)),
-    source: sourceName(s.quelle, lang),
+    evidence: groupProfileEvidence(s.evidence, lang),
+    source: s.evidence.every((ev) => ev.kind === 'profile') ? '' : sourceName(s.quelle, lang),
     logo: s.logo
       ? {
           src: `/logos/${s.logo}.svg`,

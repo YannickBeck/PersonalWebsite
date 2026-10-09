@@ -3,10 +3,27 @@
  * als .de und .en im HTML; html[data-yb-404="en"] (Boot-Script, vor dem ersten Paint) schaltet
  * auf Englisch. Ohne JS bleibt die deutsche Fassung samt englischer Zeile sichtbar. Nur Tokens.
  */
+/* Rahmen wie contentWidth 1120 der übrigen Seiten: Marke und H1 auf derselben Inhaltslinie
+   (1440px: 176px, DES9); vorher 1120 + 2 × 16 → 16px zu weit links */
 .frame > :global(.astryx-section) {
   --astryx-section-padding-block-start: var(--spacing-12);
-  max-width: calc(1120px + 2 * var(--spacing-4));
+  max-width: 1120px;
   margin-inline: auto;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.legal {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
 }
 
 .en {
@@ -91,9 +108,6 @@
   border-radius: var(--radius-inner);
 }
 
-:global(html[data-yb-404='en']) .otherLang {
-  display: none;
-}
 
 /*
  * CLS (B4, gemessen): Diese Seite bekommt von Next keine Schrift-Preloads (anders als die

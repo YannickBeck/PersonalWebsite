@@ -15,7 +15,7 @@ export function ProjectsContent({ lang }: { lang: Lang }) {
       <Section>
         <div className={styles.list}>
           {PROJECTS.map((p, i) => (
-            <ProjectRow key={p.id} project={p} n={i + 1} lang={lang} eager={i === 0} />
+            <ProjectRow key={p.id} project={p} n={i + 1} lang={lang} />
           ))}
         </div>
       </Section>

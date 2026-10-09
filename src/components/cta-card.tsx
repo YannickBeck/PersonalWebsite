@@ -5,9 +5,11 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
-import { ArrowRight } from '@/components/icons';
 
-/** Ruhiger Abschluss mit einer Hauptaktion (Kontakt), gleich auf Startseite und Unterseiten. */
+/**
+ * Ruhiger Abschluss mit einer Hauptaktion (Kontakt), gleich auf Startseite und Unterseiten.
+ * Ohne Pfeil: Pfeile (↗) nur an externen Links, interne Aktionen ohne (DES13).
+ */
 export function CtaCard({
   title,
   text,
@@ -32,7 +34,6 @@ export function CtaCard({
             variant="primary"
             size="lg"
             href={href}
-            endContent={<ArrowRight />}
           />
         </HStack>
       </Card>

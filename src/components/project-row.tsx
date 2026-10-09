@@ -1,40 +1,36 @@
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
-import { ItemCover } from '@/components/item-cover';
-import { coverMeta, coverSeed } from '@/components/content-card';
+import { ProjectVisual } from '@/components/project-visual';
 import { MorphSource } from '@/components/morph';
 import { TransitionLink } from '@/components/transition-link';
 import { ChipList, PlainChip, SkillChipLink } from '@/components/skill-chip';
-import { ArrowRight, ExternalArrow } from '@/components/icons';
+import { ExternalArrow } from '@/components/icons';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import type { Project } from '@/content/profile';
-import { anchor, extraTags, projectCard, projectHref, skillChips } from '@/content/profile-view';
+import { anchor, extraTags, projectHref, skillChips } from '@/content/profile-view';
 import styles from './project-row.module.css';
 
 /**
  * Ein Projekt als Zeile (Redesign B4): Nummer in der Display-Schrift, „Art · Jahr“, H2, Satz,
- * Fähigkeiten als Kacheln (Sprung ins Periodensystem), Aktionen; rechts das generative Cover
- * (Morph-Quelle zur Detailseite). Das Cover ist zusätzlich ein Link für die Maus (aria-hidden,
- * nicht fokussierbar) – Tastatur und Screenreader nutzen „Details ansehen“.
+ * Fähigkeiten als Kacheln (Sprung ins Periodensystem), Aktionen; rechts die Projekt-Grafik
+ * (project-visual.tsx: Ablauf bzw. Titelblatt, Morph-Quelle zur Detailseite). Sie ist
+ * zusätzlich ein Link für die Maus (aria-hidden, nicht fokussierbar) – Tastatur und
+ * Screenreader nutzen „Details ansehen“. Pfeile nur an externen Links (↗, DES13).
  */
 export function ProjectRow({
   project,
   n,
   lang,
-  eager = false,
   headingLevel = 2,
 }: {
   project: Project;
   n: number;
   lang: Lang;
-  eager?: boolean;
   /** 2 unter der H1 (/projekte), 3 unter einer H2 (Detailseite: „Weiteres Projekt“). */
   headingLevel?: 2 | 3;
 }) {
   const dict = getDictionary(lang);
-  const card = projectCard(project, lang);
-  const cover = coverMeta(card, lang);
   const href = projectHref(project, lang);
   const titleId = `project-${project.id}-title`;
   const source = project.links.find((l) => l.kind === 'source');
@@ -76,12 +72,11 @@ export function ProjectRow({
             aria-label={`${dict.home.projectDetails}: ${project.shortTitle[lang]}`}
             variant="primary"
             href={href}
-            endContent={<ArrowRight />}
           />
           {source ? (
             <Button
               label={dict.factsCode}
-              aria-label={`${dict.factsCode}: ${source.label[lang]} (GitHub)`}
+              aria-label={`${dict.factsCode}: ${source.label[lang]} (GitHub, ${dict.newTab})`}
               variant="secondary"
               href={source.href}
               target="_blank"
@@ -93,7 +88,7 @@ export function ProjectRow({
       </div>
       <TransitionLink href={href} aria-hidden="true" tabIndex={-1} className={`${styles.cover} yb-card`}>
         <MorphSource morphKey={href}>
-          <ItemCover src={null} seed={coverSeed(card.slug, lang)} label={cover.label} motif={cover.motif} variant="hero" eager={eager} />
+          <ProjectVisual project={project} lang={lang} decorative />
         </MorphSource>
       </TransitionLink>
     </article>

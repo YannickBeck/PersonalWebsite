@@ -52,14 +52,22 @@ interface SendError {
  *
  * - Natives <form method="dialog"> (FUN1): ohne JS bzw. vor der Hydration verlässt nichts den
  *   Browser und nichts landet in der URL. Mit JS sendet onSubmit JSON per fetch.
- * - Beim Laden fragt das Formular GET /api/kontakt: Ist der Versand konfiguriert, kommt ein
- *   signiertes Token zurück (Mindest-Ausfüllzeit). Ist er es nicht, liegt eine ehrliche
- *   Meldung mit LinkedIn-Weg ÜBER dem Formular (absolut positioniert → kein Layout-Shift) und
- *   das Formular ist inert – kein Schein-Erfolg.
+ * - Gerendert nur, wenn das Formular beim Build freigeschaltet ist (NEXT_PUBLIC_CONTACT_FORM,
+ *   contact-block.tsx, DES6). Beim Laden fragt es GET /api/kontakt: Ist der Versand
+ *   konfiguriert, kommt ein signiertes Token zurück (Mindest-Ausfüllzeit). Fehlen die
+ *   Laufzeit-Variablen trotzdem, liegt eine ehrliche Meldung mit LinkedIn-Weg ÜBER dem Formular
+ *   (absolut positioniert → kein Layout-Shift) und das Formular ist inert – kein Schein-Erfolg.
+ *   Die Meldung ist KEINE Live-Region (A117): Sie entsteht ohne Zutun beim Laden und soll nicht
+ *   ungefragt vorgelesen werden; man liest sie, wenn man hinkommt.
  * - Spam-Schutz: Honeypot-Feld (für Menschen unsichtbar, nicht fokussierbar), Mindest-
  *   Ausfüllzeit über das Token, Rate-Limit auf dem Server.
- * - Rückmeldung (A117): ungültig → Fokus aufs erste aria-invalid-Feld; Ergebnis in einer
- *   dauerhaft eingehängten Live-Region; danach Fokus zurück auf den Senden-Button.
+ * - Rückmeldung: ungültig → Fokus aufs erste aria-invalid-Feld. Ergebnis als Astryx-Banner,
+ *   der erst nach dem Absenden eingehängt wird und selbst die Live-Rolle trägt (Erfolg
+ *   role="status", Fehler role="alert" – Astryx-Empfehlung); keine zweite Region drumherum
+ *   (A123: verschachtelte Live-Regionen). Danach Fokus zurück auf den Senden-Button.
+ * - Während des Sendens bleibt der Button fokussierbar (isInterruptible: Spinner und aria-busy,
+ *   aber nicht disabled – sonst fiel der Fokus auf <body>, A122); Doppelklicks fängt die
+ *   phase-Prüfung in onSubmit ab.
  * - Einwilligung: Pflicht-Checkbox, Link zur Datenschutzerklärung.
  */
 export function ContactForm({ lang }: { lang: Lang }) {
@@ -229,7 +237,8 @@ export function ContactForm({ lang }: { lang: Lang }) {
   const linkedIn = (
     <Button
       label={dict.contactLinkedInAction}
-      aria-label={dict.linkedinExternal}
+      // Name beginnt mit dem sichtbaren Text (Label-in-Name, WCAG 2.5.3, A113)
+      aria-label={`${dict.contactLinkedInAction} (${dict.newTab})`}
       variant="secondary"
       size="sm"
       href={LINKEDIN_URL}
@@ -243,6 +252,10 @@ export function ContactForm({ lang }: { lang: Lang }) {
 
   return (
     <VStack gap={4}>
+      {/* Ohne JavaScript: Hinweis VOR dem Formular, nicht erst unter dem Senden-Button (FUN4) */}
+      <noscript>
+        <Text color="secondary">{dict.formNoScript}</Text>
+      </noscript>
       <div className={styles.wrap} data-unavailable={unavailable ? 'true' : undefined}>
         <form
           ref={formRef}
@@ -327,12 +340,14 @@ export function ContactForm({ lang }: { lang: Lang }) {
                 variant="primary"
                 size="lg"
                 isLoading={phase === 'sending'}
+                isInterruptible
               />
             </HStack>
           </VStack>
         </form>
-        {/* Ehrlicher Zustand ohne Konfiguration: über dem (inerten) Formular, kein Layout-Shift */}
-        <div className={styles.veil} role="status" aria-live="polite">
+        {/* Ehrlicher Zustand ohne Konfiguration: über dem (inerten) Formular, kein Layout-Shift;
+            keine Live-Region (A117) */}
+        <div className={styles.veil}>
           {unavailable ? (
             <Card elevation="high" className={styles.veilCard}>
               <VStack gap={3}>
@@ -348,8 +363,8 @@ export function ContactForm({ lang }: { lang: Lang }) {
           ) : null}
         </div>
       </div>
-      {/* Dauerhaft eingehängte Live-Region: nur ihr Inhalt wechselt (A117) */}
-      <VStack ref={resultRef} role="status" aria-live="polite" className={styles.result}>
+      {/* Ergebnis: der Banner trägt die Live-Rolle selbst (A123) */}
+      <VStack ref={resultRef} className={styles.result}>
         {phase === 'done' ? <Banner status="success" title={dict.contactOkTitle} description={dict.contactOkText} /> : null}
         {phase === 'error' && error ? (
           <Banner
@@ -360,9 +375,6 @@ export function ContactForm({ lang }: { lang: Lang }) {
           />
         ) : null}
       </VStack>
-      <noscript>
-        <Text color="secondary">{dict.formNoScript}</Text>
-      </noscript>
     </VStack>
   );
 }

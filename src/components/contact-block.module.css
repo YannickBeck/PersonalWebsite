@@ -28,6 +28,11 @@
     gap: var(--spacing-10);
   }
 
+  /* Ohne freigeschaltetes Formular (DES6): LinkedIn-Karte | Zusatzangaben, gleich breit */
+  .pending {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
   /* LinkedIn bleibt beim Ausfüllen in Sicht */
   .aside {
     position: sticky;
