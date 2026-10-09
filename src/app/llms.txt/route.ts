@@ -2,10 +2,12 @@ import { PERSON, PROJECTS, INTRO, FOCUS_LIST, LINKEDIN_URL } from '@/content/pro
 import { SITE } from '@/lib/markdown';
 import { projectFullTitle } from '@/content/profile-view';
 import { CONTACT_FORM_ENABLED } from '@/lib/contact-flag';
+import { BLOG_LISTED } from '@/lib/routes';
 
 /**
  * llms.txt (llmstxt.org) – statisch beim Build aus dem Content-Modell. Enthält den von
- * Is-Agentic geforderten Abschnitt „Wann diese Seite nützlich ist“ (when-to-use).
+ * Is-Agentic geforderten Abschnitt „Wann diese Seite nützlich ist“ (when-to-use). Der Blog steht
+ * nur drin, solange er gelistet ist (routes.ts BLOG_LISTED, JURY1-4).
  */
 export const dynamic = 'force-static';
 
@@ -38,8 +40,7 @@ ${INTRO.value.de[0]}
 ${PROJECTS.map((p) => `- [${projectFullTitle(p, 'de')}](${SITE}/projekte/${p.slug.de}): ${p.teaser.de}`).join('\n')}
 - [Schwerpunkte](${SITE}/leistungen): Themen aus dem Profil (kein Leistungskatalog)
 - [Kontakt](${SITE}/kontakt): ${CONTACT_FORM_ENABLED ? 'Kontaktformular und LinkedIn' : 'LinkedIn, das Kontaktformular folgt noch'}
-- [Blog](${SITE}/blog): Artikel aus dem CMS
-- [English version](${SITE}/en)
+${BLOG_LISTED ? `- [Blog](${SITE}/blog): Artikel aus dem CMS\n` : ''}- [English version](${SITE}/en)
 
 ## Profile
 

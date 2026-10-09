@@ -5,6 +5,11 @@ Zwei Quellen, klar getrennt:
 ## 1. Ghost-CMS (`cms.yannick-beck.de/ghost/`) — echte redaktionelle Inhalte
 
 - **Blog-Artikel:** Posts mit Tag `#lang-de` bzw. `#lang-en` (interne Tags).
+- **Blog sichtbar machen (Fix-Runde 2, JURY1-4):** Solange Ghost nur Beispielbeiträge enthält
+  („Hallo Welt“, „Coming soon“), stehen Blog und Newsletter nicht in Navigation, Footer, Sitemap
+  und llms.txt (noindex, URLs erreichbar). Nach dem ersten eigenen Beitrag: Beispielbeiträge in
+  Ghost löschen, `/blog` und `/newsletter` aus `UNLISTED_ROUTES` in `src/lib/routes.ts`
+  streichen, neu bauen.
 - **Projekte:** Posts mit Tag `project` **plus** Sprach-Tag.
 - **Bereich eines Projekts** (Filter auf /projekte: Webentwicklung, CMS, Automatisierung):
   interner Tag `#bereich-web`, `#bereich-cms` oder `#bereich-automation` (hat Vorrang);

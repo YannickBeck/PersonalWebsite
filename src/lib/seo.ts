@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import type { Lang } from '@/i18n/dictionaries';
-import { counterpartPath } from '@/lib/routes';
+import { BLOG_LISTED, counterpartPath, isUnlisted } from '@/lib/routes';
 import { OG_ALT, OG_SIZE } from '@/lib/og';
 
 /** Vorschaubild je Sprache (src/app/og/[lang]/route.ts). */
@@ -23,6 +23,9 @@ function url(lang: Lang, bare: string): string {
  *
  * hreflang zeigt nur auf existierende Gegenstücke (FUN4): Detailseiten über die
  * Übersetzungszuordnung (TRANSLATION_MAP); ohne Gegenstück nur die eigene Sprache.
+ *
+ * Nicht gelistete Bereiche (routes.ts UNLISTED_ROUTES, z. B. /uses, /blog/…) sind immer noindex;
+ * der RSS-Verweis im <head> steht nur, solange der Blog gelistet ist (JURY1-4).
  */
 export function pageMeta({
   lang,
@@ -41,6 +44,7 @@ export function pageMeta({
   type?: 'website' | 'profile' | 'article';
 }): Metadata {
   const canonical = url(lang, path);
+  const hidden = noindex || isUnlisted(path);
   const otherLang: Lang = lang === 'de' ? 'en' : 'de';
   const other = counterpartPath(path);
   const languages: Record<string, string> = { [lang]: canonical };
@@ -54,11 +58,14 @@ export function pageMeta({
   return {
     title,
     description,
-    // RSS-Feed der Sprache auffindbar (B4: Blog und Newsletter verweisen darauf)
+    // RSS-Feed der Sprache auffindbar (B4: Blog und Newsletter verweisen darauf) – nur mit
+    // gelistetem Blog; der Feed selbst bleibt erreichbar
     alternates: {
       canonical,
       languages,
-      types: { 'application/rss+xml': [{ url: url(lang, '/rss.xml'), title: lang === 'de' ? 'Yannick Beck – Blog' : 'Yannick Beck – Blog (English)' }] },
+      ...(BLOG_LISTED
+        ? { types: { 'application/rss+xml': [{ url: url(lang, '/rss.xml'), title: lang === 'de' ? 'Yannick Beck – Blog' : 'Yannick Beck – Blog (English)' }] } }
+        : {}),
     },
     openGraph: {
       title,
@@ -70,6 +77,6 @@ export function pageMeta({
       images: [{ url: ogImageUrl(lang), width: OG_SIZE.width, height: OG_SIZE.height, alt: OG_ALT[lang] }],
     },
     twitter: { card: 'summary_large_image', title, description, images: [ogImageUrl(lang)] },
-    ...(noindex ? { robots: { index: false } } : {}),
+    ...(hidden ? { robots: { index: false } } : {}),
   };
 }

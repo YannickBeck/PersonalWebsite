@@ -8,6 +8,8 @@ import { getDictionary, type Lang } from '@/i18n/dictionaries';
  * Entschieden wird beim Build (die Seiten sind statisch), damit nichts nachträglich springt.
  * Der Versand selbst braucht weiterhin die Laufzeit-Variablen CONTACT_* (docs/kontaktformular.md);
  * fehlen sie trotz Flag, zeigt das Formular den Hinweis „Versand gerade nicht verfügbar“.
+ * Am selben Schalter hängen (Fix-Runde 2, JURY1-1): Impressum und Datenschutz
+ * (src/content/legal.ts), llms.txt, Markdown und /api/kontakt (ohne Flag nimmt sie nichts an).
  * Kein Geheimnis: Der Wert landet im Browser-Bundle.
  */
 export const CONTACT_FORM_ENABLED = process.env.NEXT_PUBLIC_CONTACT_FORM === '1';

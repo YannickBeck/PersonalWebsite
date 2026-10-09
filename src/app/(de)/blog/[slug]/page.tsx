@@ -43,6 +43,8 @@ async function metaFor(slug: string): Promise<Metadata> {
     title: post.title,
     description: post.custom_excerpt || post.excerpt || undefined,
     alternates: canonical.alternates,
+    // noindex, solange der Blog nicht gelistet ist (routes.ts UNLISTED_ROUTES, JURY1-4)
+    robots: canonical.robots,
     openGraph: {
       title: post.title,
       description: post.custom_excerpt || post.excerpt || undefined,

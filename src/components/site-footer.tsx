@@ -10,6 +10,7 @@ import { BrandMark } from '@/components/brand-mark';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { LINKEDIN_URL } from '@/content/links';
 import { SHOW_GAPS } from '@/lib/gaps';
+import { isUnlisted } from '@/lib/routes';
 import { useRouteLang } from '@/i18n/route-lang';
 import styles from './site-footer.module.css';
 
@@ -50,23 +51,26 @@ function Group({ group, isCurrent }: { group: FooterGroup; isCurrent: (href: str
 
 /**
  * Linkgruppen (Nutzerentscheidung): alle Seiten erreichbar, Kontaktwege nur Formular + LinkedIn
- * (keine öffentliche E-Mail, kein GitHub). /uses ist mangels belegter Inhalte nicht verlinkt
- * (URL bleibt erreichbar); /content-status nur in der Vorschau.
+ * (keine öffentliche E-Mail, kein GitHub). Nicht gelistete Bereiche (UNLISTED_ROUTES) sind nicht
+ * verlinkt (URLs bleiben erreichbar); /content-status nur in der Vorschau.
  */
 function groups(lang: Lang): FooterGroup[] {
   const dict = getDictionary(lang);
   const g = dict.footerGroups;
   const p = dict.pages;
+  // Nicht gelistete Bereiche (routes.ts UNLISTED_ROUTES: /uses, bis zu eigenen Beiträgen auch
+  // /blog und /newsletter – JURY1-4) fehlen hier; ihre URLs bleiben erreichbar.
+  const pageLinks: [string, string][] = [
+    [p['ueber-mich'].title, '/ueber-mich'],
+    [p.projekte.title, '/projekte'],
+    [p.leistungen.title, '/leistungen'],
+    [p.cv.title, '/cv'],
+    [p.blog.title, '/blog'],
+    [p.newsletter.title, '/newsletter'],
+  ];
   const pages: FooterGroup = {
     title: g.pages,
-    links: [
-      { label: p['ueber-mich'].title, href: withLang('/ueber-mich', lang) },
-      { label: p.projekte.title, href: withLang('/projekte', lang) },
-      { label: p.leistungen.title, href: withLang('/leistungen', lang) },
-      { label: p.cv.title, href: withLang('/cv', lang) },
-      { label: p.blog.title, href: withLang('/blog', lang) },
-      { label: p.newsletter.title, href: withLang('/newsletter', lang) },
-    ],
+    links: pageLinks.filter(([, bare]) => !isUnlisted(bare)).map(([label, bare]) => ({ label, href: withLang(bare, lang) })),
   };
   const contact: FooterGroup = {
     title: g.contact,

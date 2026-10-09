@@ -19,10 +19,30 @@ export const PUBLIC_ROUTES = [
 ] as const;
 
 /**
- * Erreichbar, aber nicht in der Sitemap: /uses hat noch keine belegten Inhalte (noindex,
- * nicht in der Navigation – Nutzerentscheidung „URL erreichbar, aus Navigation/Sitemap nehmen“).
+ * Erreichbar, aber nicht gelistet: nicht in Hauptnavigation, Footer, Sitemap und llms.txt,
+ * dazu noindex (HTML über pageMeta, Markdown per X-Robots-Tag) – gilt auch für Unterseiten
+ * (/blog/<slug>), siehe isUnlisted().
+ * - /uses: noch keine belegte Werkzeugliste (Nutzerentscheidung „URL erreichbar, aus
+ *   Navigation/Sitemap nehmen“).
+ * - /blog und /newsletter (Fix-Runde 2, JURY1-4): Ghost enthält bisher nur Beispielbeiträge
+ *   („Hallo Welt“ DE/EN, Ghost-Standardbeitrag „Coming soon“ EN). Die Hauptnavigation soll nicht
+ *   auf einen Testbeitrag führen. Sobald eigene Beiträge veröffentlicht sind: beide Einträge
+ *   hier streichen und neu bauen (Lücke blog-posts, docs/content-guide.md).
  */
-export const UNLISTED_ROUTES: ReadonlySet<string> = new Set<string>(['/uses']);
+export const UNLISTED_ROUTES: ReadonlySet<string> = new Set<string>(['/uses', '/blog', '/newsletter']);
+
+/**
+ * Pfad (mit oder ohne /en-Präfix) liegt in einem nicht gelisteten Bereich – auch Unterseiten
+ * wie /blog/<slug> bzw. /en/blog/<slug>.
+ */
+export function isUnlisted(path: string): boolean {
+  const segs = path.split('/').filter(Boolean);
+  const first = segs[0] === 'en' ? segs[1] : segs[0];
+  return first !== undefined && UNLISTED_ROUTES.has(`/${first}`);
+}
+
+/** Blog gelistet? Steuert RSS-Verweis im <head>, Blogbeiträge in der Sitemap und llms.txt. */
+export const BLOG_LISTED = !isUnlisted('/blog');
 
 /** In beiden Sprachen vorhanden, aber nicht in der Sitemap (noindex). */
 export const NOINDEX_ROUTES = ['/content-status'] as const;

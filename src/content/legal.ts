@@ -16,9 +16,15 @@
  *   https://recht.dfn.de/wp-content/uploads/2024/05/Informationspflicht-beim-Betrieb-von-Telemediendiensten0524.pdf
  *   https://www.ihk-muenchen.de/de/Service/Recht-und-Steuern/Internetrecht/Impressum-im-Internet/
  * - Ton: Du-Ansprache, sachlich, wie die übrige Seite.
+ * - An den Formular-Schalter gekoppelt (Fix-Runde 2, JURY1-1): Ohne `NEXT_PUBLIC_CONTACT_FORM=1`
+ *   (CONTACT_FORM_ENABLED, src/lib/contact-flag.ts) nennt das Impressum nur LinkedIn, und die
+ *   Datenschutzerklärung hat statt des Abschnitts „Kontaktformular“ (Übertragung, Resend,
+ *   Spam-Schutz) nur einen kurzen Abschnitt „Kontakt“. /api/kontakt nimmt dann ebenfalls nichts
+ *   an. Gilt für HTML und Markdown, beide lesen IMPRINT/PRIVACY von hier.
  */
 import type { L } from '@/content/profile';
 import { LINKEDIN_URL } from '@/content/links';
+import { CONTACT_FORM_ENABLED } from '@/lib/contact-flag';
 
 export interface LegalLink {
   label: L;
@@ -49,6 +55,75 @@ export interface LegalDoc {
 
 const NAME: L<string[]> = { de: ['Yannick Beck'], en: ['Yannick Beck'] };
 
+const LINKEDIN_LINK: LegalLink = { label: { de: 'LinkedIn-Profil', en: 'LinkedIn profile' }, href: LINKEDIN_URL, external: true };
+
+/**
+ * Datenschutz zum Kontaktformular – nur mit freigeschaltetem Formular (CONTACT_FORM_ENABLED).
+ * id `kontaktformular` ist das Ziel des Links unter der Einwilligung im Formular.
+ */
+const CONTACT_FORM_BLOCK: LegalBlock = {
+  id: 'kontaktformular',
+  heading: { de: 'Kontaktformular', en: 'Contact form' },
+  entries: [
+    {
+      text: {
+        de: ['Übertragen werden Name, E-Mail-Adresse, optional ein Anliegen, die Nachricht und deine Einwilligung. Die Angaben gehen verschlüsselt an den Server dieser Website und von dort als E-Mail an mich. Antworten gehen an die angegebene E-Mail-Adresse.'],
+        en: ['The form transmits your name, email address, an optional subject, the message and your consent. The data is sent encrypted to this website’s server and from there to me as an email. Replies go to the email address you entered.'],
+      },
+    },
+    {
+      text: {
+        de: ['Die E-Mail verschickt der Dienst Resend über seine Programmierschnittstelle.'],
+        en: ['The email is sent by the Resend service via its API.'],
+      },
+      open: {
+        de: 'Anbieter, Sitz, Auftragsverarbeitungsvertrag und ggf. Grundlage für die Übermittlung in ein Drittland',
+        en: 'Provider, registered office, data processing agreement and, if applicable, the basis for transfers to a third country',
+      },
+    },
+    {
+      text: {
+        de: ['Diese Website speichert keine Nachrichten und schreibt keine Inhalte, Namen oder Adressen in Protokolle. Die Nachricht liegt danach in meinem E-Mail-Postfach.'],
+        en: ['This website stores no messages and writes no content, names or addresses to logs. The message then sits in my email inbox.'],
+      },
+      open: { de: 'Speicherdauer im Postfach und beim Versanddienst', en: 'Retention period in the inbox and at the delivery service' },
+    },
+    {
+      text: {
+        de: ['Gegen massenhaften Versand zählt der Server Anfragen je IP-Adresse. Die Adresse wird dafür nur als gesalzener Prüfwert (Hash) im Arbeitsspeicher gehalten, rund zehn Minuten lang, und nirgends gespeichert. Ein unsichtbares Feld und eine Mindest-Ausfüllzeit helfen zusätzlich gegen Bots.'],
+        en: ['To slow down mass sending, the server counts requests per IP address. For this, the address is only kept in memory as a salted hash for about ten minutes and is never stored. A hidden field and a minimum fill-in time also help against bots.'],
+      },
+    },
+    {
+      text: {
+        de: ['Grundlage der Verarbeitung ist deine Einwilligung im Formular; du kannst sie jederzeit widerrufen.'],
+        en: ['The processing is based on your consent in the form; you can withdraw it at any time.'],
+      },
+      open: { de: 'Rechtsgrundlage und Widerrufsweg rechtlich prüfen lassen', en: 'Have the legal basis and the withdrawal route legally reviewed' },
+    },
+    {
+      text: {
+        de: ['Ohne Formular erreichst du mich über LinkedIn; dort gelten die Datenschutzbestimmungen von LinkedIn.'],
+        en: ['Without the form, you can reach me on LinkedIn; LinkedIn’s privacy policy applies there.'],
+      },
+    },
+  ],
+};
+
+/** Ohne freigeschaltetes Formular (JURY1-1): kein Formular, kein Versanddienst – nur LinkedIn. */
+const CONTACT_BLOCK: LegalBlock = {
+  id: 'kontakt',
+  heading: { de: 'Kontakt', en: 'Contact' },
+  entries: [
+    {
+      text: {
+        de: ['Diese Website hat derzeit kein Kontaktformular und nimmt keine Nachrichten entgegen. Du erreichst mich über LinkedIn; dort gelten die Datenschutzbestimmungen von LinkedIn.'],
+        en: ['This website currently has no contact form and does not accept messages. You can reach me on LinkedIn; LinkedIn’s privacy policy applies there.'],
+      },
+    },
+  ],
+};
+
 export const IMPRINT: LegalDoc = {
   notice: {
     de: 'Keine Rechtsberatung. Mit „OFFEN“ markierte Angaben fehlen noch. Ob und in welchem Umfang eine Impressumspflicht besteht, ist rechtlich zu prüfen.',
@@ -67,16 +142,22 @@ export const IMPRINT: LegalDoc = {
       id: 'kontakt',
       heading: { de: 'Kontakt', en: 'Contact' },
       entries: [
-        {
-          text: {
-            de: ['Du erreichst mich über das Kontaktformular oder auf LinkedIn.'],
-            en: ['You can reach me via the contact form or on LinkedIn.'],
-          },
-          links: [
-            { label: { de: 'Kontaktformular', en: 'Contact form' }, href: '/kontakt' },
-            { label: { de: 'LinkedIn-Profil', en: 'LinkedIn profile' }, href: LINKEDIN_URL, external: true },
-          ],
-        },
+        CONTACT_FORM_ENABLED
+          ? {
+              text: {
+                de: ['Du erreichst mich über das Kontaktformular oder auf LinkedIn.'],
+                en: ['You can reach me via the contact form or on LinkedIn.'],
+              },
+              links: [
+                { label: { de: 'Kontaktformular', en: 'Contact form' }, href: '/kontakt' },
+                LINKEDIN_LINK,
+              ],
+            }
+          : {
+              // ohne freigeschaltetes Formular kein Verweis darauf (JURY1-1)
+              text: { de: ['Du erreichst mich auf LinkedIn.'], en: ['You can reach me on LinkedIn.'] },
+              links: [LINKEDIN_LINK],
+            },
         {
           open: {
             // Begründung (Konflikt mit „keine öffentliche E-Mail“) nur in GAPS/content-status (TEX6)
@@ -181,54 +262,7 @@ export const PRIVACY: LegalDoc = {
         },
       ],
     },
-    {
-      id: 'kontaktformular',
-      heading: { de: 'Kontaktformular', en: 'Contact form' },
-      entries: [
-        {
-          text: {
-            de: ['Übertragen werden Name, E-Mail-Adresse, optional ein Anliegen, die Nachricht und deine Einwilligung. Die Angaben gehen verschlüsselt an den Server dieser Website und von dort als E-Mail an mich. Antworten gehen an die angegebene E-Mail-Adresse.'],
-            en: ['The form transmits your name, email address, an optional subject, the message and your consent. The data is sent encrypted to this website’s server and from there to me as an email. Replies go to the email address you entered.'],
-          },
-        },
-        {
-          text: {
-            de: ['Die E-Mail verschickt der Dienst Resend über seine Programmierschnittstelle.'],
-            en: ['The email is sent by the Resend service via its API.'],
-          },
-          open: {
-            de: 'Anbieter, Sitz, Auftragsverarbeitungsvertrag und ggf. Grundlage für die Übermittlung in ein Drittland',
-            en: 'Provider, registered office, data processing agreement and, if applicable, the basis for transfers to a third country',
-          },
-        },
-        {
-          text: {
-            de: ['Diese Website speichert keine Nachrichten und schreibt keine Inhalte, Namen oder Adressen in Protokolle. Die Nachricht liegt danach in meinem E-Mail-Postfach.'],
-            en: ['This website stores no messages and writes no content, names or addresses to logs. The message then sits in my email inbox.'],
-          },
-          open: { de: 'Speicherdauer im Postfach und beim Versanddienst', en: 'Retention period in the inbox and at the delivery service' },
-        },
-        {
-          text: {
-            de: ['Gegen massenhaften Versand zählt der Server Anfragen je IP-Adresse. Die Adresse wird dafür nur als gesalzener Prüfwert (Hash) im Arbeitsspeicher gehalten, rund zehn Minuten lang, und nirgends gespeichert. Ein unsichtbares Feld und eine Mindest-Ausfüllzeit helfen zusätzlich gegen Bots.'],
-            en: ['To slow down mass sending, the server counts requests per IP address. For this, the address is only kept in memory as a salted hash for about ten minutes and is never stored. A hidden field and a minimum fill-in time also help against bots.'],
-          },
-        },
-        {
-          text: {
-            de: ['Grundlage der Verarbeitung ist deine Einwilligung im Formular; du kannst sie jederzeit widerrufen.'],
-            en: ['The processing is based on your consent in the form; you can withdraw it at any time.'],
-          },
-          open: { de: 'Rechtsgrundlage und Widerrufsweg rechtlich prüfen lassen', en: 'Have the legal basis and the withdrawal route legally reviewed' },
-        },
-        {
-          text: {
-            de: ['Ohne Formular erreichst du mich über LinkedIn; dort gelten die Datenschutzbestimmungen von LinkedIn.'],
-            en: ['Without the form, you can reach me on LinkedIn; LinkedIn’s privacy policy applies there.'],
-          },
-        },
-      ],
-    },
+    CONTACT_FORM_ENABLED ? CONTACT_FORM_BLOCK : CONTACT_BLOCK,
     {
       id: 'rechte',
       heading: { de: 'Deine Rechte', en: 'Your rights' },

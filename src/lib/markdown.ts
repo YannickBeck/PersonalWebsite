@@ -25,7 +25,7 @@ import {
 } from '@/content/profile';
 import { IMPRINT, LEGAL_OPEN, PRIVACY, type LegalDoc } from '@/content/legal';
 import { formatPeriod } from '@/lib/period';
-import { KNOWN_ROUTES } from '@/lib/routes';
+import { KNOWN_ROUTES, NOINDEX_ROUTES, isUnlisted } from '@/lib/routes';
 import { getBySlug, getPosts, getProjectSlugs } from '@/lib/ghost';
 import { projectFullTitle } from '@/content/profile-view';
 import { sentenceList } from '@/lib/period';
@@ -261,8 +261,23 @@ function ghostMd(post: { title?: string | null; custom_excerpt?: string | null; 
   return `# ${post.title ?? bare}\n\n${post.custom_excerpt || post.excerpt || ''}\n\n${full}: ${abs(withLang(bare, lang))}\n`;
 }
 
-/** Markdown zu einem Pfad (mit /en-Präfix) – null = unbekannt (404). */
-export async function markdownFor(pathname: string): Promise<{ lang: Lang; body: string; noindex?: boolean } | null> {
+type MarkdownResult = { lang: Lang; body: string; noindex?: boolean };
+
+/**
+ * Markdown zu einem Pfad (mit /en-Präfix) – null = unbekannt (404). noindex wie die HTML-Fassung:
+ * nicht gelistete Bereiche (UNLISTED_ROUTES inkl. Unterseiten, z. B. /uses, /blog/…) und
+ * NOINDEX_ROUTES (/content-status) bekommen X-Robots-Tag: noindex (Fix-Runde 2).
+ */
+export async function markdownFor(pathname: string): Promise<MarkdownResult | null> {
+  const found = await markdownForPath(pathname);
+  const bare = pathname.replace(/^\/en(?=\/|$)/, '').replace(/\/$/, '') || '/';
+  if (found && (isUnlisted(bare) || (NOINDEX_ROUTES as readonly string[]).includes(bare))) {
+    return { ...found, noindex: true };
+  }
+  return found;
+}
+
+async function markdownForPath(pathname: string): Promise<MarkdownResult | null> {
   const lang: Lang = pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'de';
   const bare = (lang === 'en' ? pathname.replace(/^\/en/, '') : pathname).replace(/\/$/, '') || '/';
   const segs = bare.split('/').filter(Boolean);

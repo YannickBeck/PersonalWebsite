@@ -1,4 +1,5 @@
 // API-Tests für /api/kontakt gegen den lokalen Resend-Mock (docs/kontaktformular.md).
+// Build mit NEXT_PUBLIC_CONTACT_FORM=1 – ohne das Flag nimmt die API nichts an (Fix-Runde 2).
 //   node scripts/resend-mock.mjs 3362
 //   (Server mit CONTACT_RESEND_API_KEY=re_test_fake_0000000000 CONTACT_TO=inbox@example.test
 //    CONTACT_FROM='Website <kontakt@example.test>' CONTACT_RESEND_BASE_URL=http://127.0.0.1:3362)
@@ -32,7 +33,7 @@ await fetch(`${mock}/__reset`, { method: 'POST' });
 
 // 1. Status
 const st = await (await fetch(`${base}/api/kontakt`)).json();
-check('GET: available + Token (Ausgabe.Nonce.Signatur)', st.available === true && /^\d+\.[\w-]+\.[\w-]+$/.test(st.token));
+check('GET: available + form + Token (Ausgabe.Nonce.Signatur)', st.available === true && st.form === true && /^\d+\.[\w-]+\.[\w-]+$/.test(st.token), JSON.stringify({ available: st.available, form: st.form }));
 
 // 2. Zu schnell
 let r = await post(payload(await token()));

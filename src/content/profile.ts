@@ -212,8 +212,8 @@ export const GAPS: GapEntry[] = [
     label: { de: 'Eigene Blogbeiträge in Ghost', en: 'Own blog posts in Ghost' },
     where: { de: '/blog', en: '/en/blog' },
     need: {
-      de: 'Ghost enthält bisher den Beispielbeitrag „Hallo Welt“ (DE/EN) und den Ghost-Standardbeitrag „Coming soon“ (EN); der Projekt-Beispielbeitrag wird nicht gelistet',
-      en: 'Ghost currently holds the sample post “Hello World” (DE/EN) and Ghost’s default post “Coming soon” (EN); the sample project post is not listed',
+      de: 'Ghost enthält bisher den Beispielbeitrag „Hallo Welt“ (DE/EN) und den Ghost-Standardbeitrag „Coming soon“ (EN); der Projekt-Beispielbeitrag wird nicht gelistet. Bis zu eigenen Beiträgen stehen Blog und Newsletter nicht in Navigation, Footer und Sitemap (noindex, URLs erreichbar). Danach Beispielbeiträge in Ghost löschen und /blog, /newsletter aus UNLISTED_ROUTES (src/lib/routes.ts) nehmen.',
+      en: 'Ghost currently holds the sample post “Hello World” (DE/EN) and Ghost’s default post “Coming soon” (EN); the sample project post is not listed. Until there are own posts, blog and newsletter are not in the navigation, footer or sitemap (noindex, URLs reachable). Then delete the sample posts in Ghost and remove /blog, /newsletter from UNLISTED_ROUTES (src/lib/routes.ts).',
     },
   },
   {
@@ -224,8 +224,8 @@ export const GAPS: GapEntry[] = [
     },
     where: { de: '/kontakt, Startseite Abschnitt Kontakt', en: '/en/kontakt, homepage section Contact' },
     need: {
-      de: 'Resend-Konto mit bestätigter Absender-Domain; CONTACT_RESEND_API_KEY, CONTACT_FROM und CONTACT_TO zur Laufzeit setzen und mit NEXT_PUBLIC_CONTACT_FORM=1 neu bauen (docs/kontaktformular.md). Bis dahin zeigen Startseite und /kontakt nur LinkedIn mit dem Satz „Das Kontaktformular folgt noch“.',
-      en: 'Resend account with a verified sender domain; set CONTACT_RESEND_API_KEY, CONTACT_FROM and CONTACT_TO at runtime and rebuild with NEXT_PUBLIC_CONTACT_FORM=1 (docs/kontaktformular.md). Until then the homepage and /kontakt only show LinkedIn with “The contact form will follow”.',
+      de: 'Resend-Konto mit bestätigter Absender-Domain; CONTACT_RESEND_API_KEY, CONTACT_FROM und CONTACT_TO zur Laufzeit setzen und mit NEXT_PUBLIC_CONTACT_FORM=1 neu bauen, danach Ende-zu-Ende-Test (docs/kontaktformular.md). Bis dahin zeigen Startseite und /kontakt nur LinkedIn mit dem Satz „Das Kontaktformular folgt noch“, Impressum und Datenschutz nennen kein Formular und /api/kontakt nimmt nichts an.',
+      en: 'Resend account with a verified sender domain; set CONTACT_RESEND_API_KEY, CONTACT_FROM and CONTACT_TO at runtime, rebuild with NEXT_PUBLIC_CONTACT_FORM=1, then run an end-to-end test (docs/kontaktformular.md). Until then the homepage and /kontakt only show LinkedIn with “The contact form will follow”, imprint and privacy policy do not mention a form and /api/kontakt accepts nothing.',
     },
   },
   {
@@ -248,8 +248,8 @@ export const GAPS: GapEntry[] = [
     label: { de: 'Datenschutzerklärung vervollständigen', en: 'Complete the privacy policy' },
     where: { de: '/datenschutz', en: '/en/datenschutz' },
     need: {
-      de: 'Verantwortliche Stelle (Anschrift, E-Mail), Hoster, Serverstandort und Log-Dauer angeben (in keiner Quelle belegt), Cloudflare und Resend (Anbieter, Rechtsgrundlage, Drittland), Speicherdauer, Betroffenenrechte – rechtlich prüfen lassen. Offene Punkte stehen auch in Produktion als „OFFEN“ auf der Seite.',
-      en: 'Controller (address, email), state host, server location and log retention (not documented in any source), Cloudflare and Resend (provider, legal basis, third country), retention periods, data subject rights – have it legally reviewed. Open items are shown as “OPEN” on the page in production too.',
+      de: 'Verantwortliche Stelle (Anschrift, E-Mail), Hoster, Serverstandort und Log-Dauer angeben (in keiner Quelle belegt), Cloudflare (Anbieter, Rechtsgrundlage, Drittland), Betroffenenrechte – rechtlich prüfen lassen. Mit freigeschaltetem Kontaktformular kommen Resend (Anbieter, Auftragsverarbeitung, Drittland), Speicherdauer und Rechtsgrundlage des Formulars dazu. Offene Punkte stehen auch in Produktion als „OFFEN“ auf der Seite.',
+      en: 'Controller (address, email), state host, server location and log retention (not documented in any source), Cloudflare (provider, legal basis, third country), data subject rights – have it legally reviewed. Once the contact form is enabled, Resend (provider, data processing agreement, third country), retention periods and the legal basis of the form are added. Open items are shown as “OPEN” on the page in production too.',
     },
   },
   {

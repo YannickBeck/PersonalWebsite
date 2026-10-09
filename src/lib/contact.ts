@@ -62,6 +62,8 @@ export type ContactResponse =
 
 export interface ContactStatus {
   available: boolean;
+  /** Formular in diesem Build freigeschaltet (NEXT_PUBLIC_CONTACT_FORM=1) – Diagnose nach dem Deploy. */
+  form?: boolean;
   token?: string;
 }
 

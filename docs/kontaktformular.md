@@ -1,6 +1,6 @@
 # Kontaktformular
 
-Stand: Redesign B2, ergänzt in Fix-Runde 1 (2026-10). Das Formular steht auf `/kontakt`,
+Stand: Redesign B2, ergänzt in Fix-Runde 1 und 2 (2026-10). Das Formular steht auf `/kontakt`,
 `/en/kontakt` und im Abschnitt „Kontakt“ der Startseite. Es versendet echte E-Mails über die
 REST-API von [Resend](https://resend.com/docs/api-reference/emails/send-email), per `fetch` und
 ohne zusätzliche Abhängigkeit.
@@ -19,6 +19,19 @@ Die Variable ist kein Geheimnis (sie landet im Browser-Bundle). Den Versand selb
 weiterhin die Laufzeit-Variablen `CONTACT_*`; fehlen sie trotz Flag, greift der Hinweis
 „Versand gerade nicht verfügbar“ (unten).
 
+Seit Fix-Runde 2 (JURY1-1) hängt alles Weitere am selben Schalter:
+
+| | ohne Flag | mit `NEXT_PUBLIC_CONTACT_FORM=1` |
+| --- | --- | --- |
+| Startseite, `/kontakt` | LinkedIn-Karte, „Das Kontaktformular folgt“ | Formular + LinkedIn |
+| `/impressum` (Kontakt) | „Du erreichst mich auf LinkedIn.“ | „… über das Kontaktformular oder auf LinkedIn.“ + Link `/kontakt` |
+| `/datenschutz` | Abschnitt „Kontakt“ (`#kontakt`): kein Formular, nur LinkedIn | Abschnitt „Kontaktformular“ (`#kontaktformular`): Übertragung, Resend, Spam-Schutz, Einwilligung – mit OFFEN-Punkten |
+| `/api/kontakt` | `GET` → `{"available":false,"form":false}`, `POST` → `503 unavailable` – auch wenn `CONTACT_*` gesetzt sind | wie unten beschrieben |
+| llms.txt, Markdown | nennen kein Formular | nennen das Formular |
+
+Damit verarbeitet die Website ohne Flag keine Nachrichten, über die die Datenschutzerklärung
+nichts sagt. Die Rechtstexte kommen aus `src/content/legal.ts` (HTML und Markdown).
+
 ## Bausteine
 
 | Datei | Aufgabe |
@@ -31,12 +44,12 @@ weiterhin die Laufzeit-Variablen `CONTACT_*`; fehlen sie trotz Flag, greift der 
 ## Ablauf
 
 1. Beim Laden ruft das Formular `GET /api/kontakt` auf.
-   - Versand konfiguriert: `{ "available": true, "token": "<ms>.<nonce>.<hmac>" }`. Das Token
+   - Versand konfiguriert: `{ "available": true, "form": true, "token": "<ms>.<nonce>.<hmac>" }`. Das Token
      ist der signierte Ausgabezeitpunkt plus eine Zufalls-Nonce (Fix-Runde 1, FUN3: vorher
      waren in derselben Millisekunde ausgegebene Tokens identisch). Der Schlüssel wird aus dem
      API-Key abgeleitet, eine eigene Variable ist dafür nicht nötig.
    - Nicht konfiguriert (nur noch, wenn `NEXT_PUBLIC_CONTACT_FORM=1` gebaut wurde, die
-     Laufzeit-Variablen aber fehlen): `{ "available": false }`. Über dem Formular erscheint der
+     Laufzeit-Variablen aber fehlen): `{ "available": false, "form": true }`. Über dem Formular erscheint der
      Hinweis „Versand gerade nicht verfügbar“ mit dem LinkedIn-Weg. Das Formular ist dann
      `inert` (gedämpft, nicht bedienbar). Der Hinweis liegt absolut darüber, damit nichts
      verrutscht (CLS 0, gemessen). Er ist keine Live-Region (A117): Screenreader lesen ihn,
@@ -44,7 +57,7 @@ weiterhin die Laufzeit-Variablen `CONTACT_*`; fehlen sie trotz Flag, greift der 
 2. Absenden: Der Browser prüft die Felder (gleiche Regeln wie der Server) und schickt JSON an
    `POST /api/kontakt`.
 3. Der Server prüft der Reihe nach:
-   1. Konfiguration vorhanden, sonst `503 unavailable`
+   1. Formular im Build freigeschaltet und Konfiguration vorhanden, sonst `503 unavailable`
    2. `Content-Type: application/json` und kein `Sec-Fetch-Site: cross-site`, sonst `400 bad_request`
    3. Rate-Limit je IP: höchstens 5 Anfragen in 10 Minuten, sonst `429 rate_limited` mit `Retry-After`
    4. Größe höchstens 32 KB (`413`), gültiges JSON (`400 bad_request`)
@@ -77,8 +90,9 @@ Region drumherum – A123) und in Sicht gescrollt wird. OFFEN: mit echtem Screen
   Prozess. Abgelaufene Einträge werden spätestens nach rund 11 Minuten verworfen.
 - Nichts wird gespeichert, es gibt keine Datenbank. Die Nachricht existiert danach nur als
   E-Mail (Postfach, Versanddienst).
-- Text der Datenschutzerklärung: Abschnitt „Kontaktformular“ auf `/datenschutz`. Er ist ein
-  Entwurf, die rechtlichen Angaben in eckigen Klammern sind OFFEN (keine Rechtsberatung).
+- Text der Datenschutzerklärung: Abschnitt „Kontaktformular“ auf `/datenschutz` (nur mit Flag,
+  siehe oben). Er ist ein Entwurf; fehlende rechtliche Angaben stehen dort als „OFFEN“ (auch in
+  Produktion, keine Rechtsberatung).
 
 ## Grenzen
 
@@ -91,17 +105,38 @@ Region drumherum – A123) und in Sicht gescrollt wird. OFFEN: mit echtem Screen
 - Ohne JavaScript sendet das Formular nichts (`<form method="dialog">`). Ein `<noscript>`-Hinweis
   über dem Formular sagt das (seit Fix-Runde 1 vor den Feldern, FUN4).
 
-## Einrichten (Produktion)
+## Einrichten (Produktion) – vor der Freigabe, macht Yannick
 
-1. Resend-Konto anlegen und die Absender-Domain bestätigen (DNS-Einträge bei Resend).
-   OFFEN: Konto und Domain existieren noch nicht bzw. sind nicht bestätigt.
-2. In Coolify als Laufzeit-Variablen setzen (siehe `docs/environment.md`):
-   `CONTACT_RESEND_API_KEY`, `CONTACT_FROM`, `CONTACT_TO`.
-3. Zusätzlich die Build-Variable `NEXT_PUBLIC_CONTACT_FORM=1` setzen (in Coolify als
-   „Build Variable“; das Dockerfile reicht sie per `ARG` an `pnpm build` weiter) und neu bauen.
-4. `curl -s https://yannick-beck.de/api/kontakt` prüfen: Die Antwort muss `"available":true`
-   enthalten.
-5. Eine Testnachricht über `/kontakt` schicken und den Eingang prüfen.
+Stand Fix-Runde 2: nichts davon ist erledigt (OFFEN, Lücke `contact-delivery`). Ein Agent kann
+das nicht übernehmen: Konto, Domain-Bestätigung und API-Key sind Yannicks Zugangsdaten.
+
+1. Resend-Konto anlegen und die Absender-Domain bestätigen (DNS-Einträge bei Resend,
+   https://resend.com/docs/dashboard/domains/introduction).
+2. In Coolify als **Laufzeit**-Variablen setzen (siehe `docs/environment.md`):
+   `CONTACT_RESEND_API_KEY` (geheim), `CONTACT_FROM` (Adresse auf der bestätigten Domain),
+   `CONTACT_TO`. Für den API-Key in Coolify die Build-Verfügbarkeit ausschalten – er wird nur
+   zur Laufzeit gelesen und soll nicht in Build-Argumenten bzw. Image-Metadaten landen
+   (Coolify-Doku: „Traditional Docker build arguments can appear in image metadata“,
+   https://coolify.io/docs/knowledge-base/environment-variables).
+3. Die **Build**-Variable `NEXT_PUBLIC_CONTACT_FORM=1` setzen und neu bauen. Laut Coolify-Doku
+   (Dockerfile-Build-Pack, Abschnitt „Build arguments“:
+   https://coolify.io/docs/applications/build-packs/dockerfile) kann Coolify Build-Variablen
+   als Docker-Build-Argumente übergeben; das Dockerfile nimmt sie per
+   `ARG NEXT_PUBLIC_CONTACT_FORM` an und setzt sie für `pnpm build`. Steht die Einstellung
+   „Build arguments“ unter Advanced → Build auf „Managed manually in Dockerfile“, kommt der Wert
+   nicht an. OFFEN: an der echten Coolify-Instanz noch nicht geprüft.
+4. Nach dem Deploy prüfen:
+   - `curl -s https://yannick-beck.de/api/kontakt` → `"available":true,"form":true`.
+     `"form":false` heißt: Das Build-Argument ist nicht angekommen (Schritt 3).
+     `"available":false,"form":true` heißt: Laufzeit-Variablen fehlen (Schritt 2).
+   - `/kontakt` zeigt das Formular, `/datenschutz#kontaktformular` den Formular-Abschnitt,
+     `/impressum` nennt das Kontaktformular.
+5. Ende-zu-Ende-Test auf der Zielumgebung: eine Testnachricht über `/kontakt` schicken (nach
+   mindestens 3 s), Eingang im Postfach `CONTACT_TO` prüfen, mit „Antworten“ prüfen, dass die
+   Antwort an die eingegebene Adresse geht (`reply_to`). Im Container-Log darf nur
+   `[kontakt] sent status=200` stehen, kein Inhalt.
+6. Danach die OFFEN-Punkte im Datenschutz-Abschnitt (Resend: Anbieter, Auftragsverarbeitung,
+   Drittland; Speicherdauer; Rechtsgrundlage) klären und in `src/content/legal.ts` eintragen.
 
 ## Lokal testen (ohne echte Keys)
 

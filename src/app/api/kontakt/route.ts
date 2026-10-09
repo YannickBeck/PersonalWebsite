@@ -20,16 +20,27 @@ import {
   reserveToken,
   sendContactMail,
 } from '@/lib/contact-server';
+import { CONTACT_FORM_ENABLED } from '@/lib/contact-flag';
 
 /**
  * Kontaktformular (Route Handler, Doku: node_modules/next/dist/docs/01-app/03-api-reference/
  * 03-file-conventions/route.md). Läuft nur zur Anfragezeit; Konfiguration aus der Umgebung
  * (docs/environment.md), Ablauf und Tests: docs/kontaktformular.md.
  *
- *   GET  → { available, token? }   Versand konfiguriert? + signierter Ausgabezeitpunkt
+ *   GET  → { available, form, token? }   Versand möglich? Formular im Build? + signierter Ausgabezeitpunkt
  *   POST → { ok } | { ok:false, error, fields?, retryAfter? }
+ *
+ * Nur mit freigeschaltetem Formular (NEXT_PUBLIC_CONTACT_FORM=1, Fix-Runde 2 / JURY1-1): Ohne
+ * Flag gibt es weder Formular noch den Datenschutz-Abschnitt dazu – dann nimmt auch die API
+ * nichts an (available:false, POST 503), selbst wenn CONTACT_* gesetzt sind. `form` zeigt nach
+ * einem Deploy, ob das Build-Argument angekommen ist (docs/kontaktformular.md).
  */
 export const dynamic = 'force-dynamic';
+
+/** Versand-Konfiguration – nur, wenn das Formular in diesem Build freigeschaltet ist. */
+function activeConfig() {
+  return CONTACT_FORM_ENABLED ? contactConfig() : null;
+}
 
 const NO_STORE = { 'Cache-Control': 'no-store' };
 
@@ -38,11 +49,11 @@ function reply(body: ContactResponse | ContactStatus, status = 200, extra?: Reco
 }
 
 export function GET(): Response {
-  const cfg = contactConfig();
+  const cfg = activeConfig();
   if (!cfg) {
-    return reply({ available: false });
+    return reply({ available: false, form: CONTACT_FORM_ENABLED });
   }
-  return reply({ available: true, token: issueToken(cfg) });
+  return reply({ available: true, form: true, token: issueToken(cfg) });
 }
 
 function str(v: unknown): string {
@@ -50,7 +61,7 @@ function str(v: unknown): string {
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
-  const cfg = contactConfig();
+  const cfg = activeConfig();
   if (!cfg) {
     logEvent('unavailable');
     return reply({ ok: false, error: 'unavailable' }, 503);

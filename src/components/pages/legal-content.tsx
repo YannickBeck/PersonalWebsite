@@ -39,7 +39,8 @@ const DOCS: Record<'impressum' | 'datenschutz', { doc: LegalDoc; gap: GapId }> =
  * Impressum und Datenschutz (Redesign B4): EIN Aufbau für beide Sprachen und beide Seiten aus
  * src/content/legal.ts. Kopf wie alle Unterseiten (Kennung „Rechtliches“, schlichte H1 ohne
  * Akzent-Wort), ein ruhiger Hinweis (Entwurf, keine Rechtsberatung), dann die Abschnitte als
- * H2 mit Anker (#kontaktformular – Ziel des Links im Formular). Lesebreite.
+ * H2 mit Anker (#kontaktformular – Ziel des Links im Formular; den Abschnitt gibt es nur mit
+ * freigeschaltetem Formular, sonst #kontakt, siehe legal.ts). Lesebreite.
  */
 export function LegalContent({ kind, lang }: { kind: 'impressum' | 'datenschutz'; lang: Lang }) {
   const dict = getDictionary(lang);

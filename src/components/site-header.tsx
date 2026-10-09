@@ -16,7 +16,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { BrandMark } from '@/components/brand-mark';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { useRouteLang } from '@/i18n/route-lang';
-import { counterpartPath } from '@/lib/routes';
+import { counterpartPath, isUnlisted } from '@/lib/routes';
 import { navTransitionTypes } from '@/lib/transitions';
 import { markNavigationStart } from '@/components/route-transition';
 import styles from './site-header.module.css';
@@ -58,6 +58,9 @@ export function SiteHeader() {
   const pathname = usePathname();
   const lang = useRouteLang();
   const dict = getDictionary(lang);
+  // Nicht gelistete Bereiche (routes.ts UNLISTED_ROUTES, z. B. /blog bis zu eigenen Beiträgen)
+  // stehen nicht in der Navigation; ihre URLs bleiben erreichbar.
+  const navItems = dict.nav.filter((item) => !isUnlisted(item.href));
   // Drawer gilt nur für den Pfad, auf dem er geöffnet wurde: Navigation schließt ihn
   // ohne Effekt (kein setState im Effekt, react-hooks/set-state-in-effect).
   const [menuPath, setMenuPath] = useState<string | null>(null);
@@ -89,7 +92,7 @@ export function SiteHeader() {
       <TopNav
         label={dict.menuTitle}
         heading={<TopNavHeading logo={<BrandMark />} heading={dict.brand} headingHref={homeHref} />}
-        startContent={dict.nav.map((item) => (
+        startContent={navItems.map((item) => (
           <TopNavItem
             key={item.href}
             className={`${styles.desktopOnly} yb-nav-item`}
@@ -141,7 +144,7 @@ export function SiteHeader() {
       >
         <VStack gap={4}>
           <VStack gap={0.5} as="nav" aria-label={dict.menuTitle}>
-            {dict.nav.map((item) => (
+            {navItems.map((item) => (
               <SideNavItem
                 key={item.href}
                 label={item.label}

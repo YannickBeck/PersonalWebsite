@@ -23,9 +23,9 @@ node scripts/link-check.mjs http://127.0.0.1:3304           # tote interne Links
 | `/cv` | Lebenslauf aus dem Content-Modell, druckbar (3 Seiten A4, gemessen) |
 | `/leistungen` | „Schwerpunkte“: vier Themen aus dem Profil, kein Leistungskatalog |
 | `/uses` | ehrlich: Liste folgt, bis dahin die Technik aus Orbitalis (nicht in Navigation/Sitemap, noindex) |
-| `/blog`, `/blog/<slug>` | Beiträge aus Ghost; Suche/Filter erst ab vier Beiträgen |
-| `/kontakt` | LinkedIn + Formular mit echtem Versand (Formular erst mit `NEXT_PUBLIC_CONTACT_FORM=1`, sonst „Das Kontaktformular folgt“) |
-| `/newsletter` | ehrlich: Anmeldung nur auf Einladung, RSS-Feed und LinkedIn als Wege; Demo-Formular nur in der Vorschau |
+| `/blog`, `/blog/<slug>` | Beiträge aus Ghost; Suche/Filter erst ab vier Beiträgen. Seit Fix-Runde 2 (JURY1-4) nicht in Navigation, Footer, Sitemap und llms.txt, noindex – bis eigene Beiträge da sind (`UNLISTED_ROUTES` in `src/lib/routes.ts`) |
+| `/kontakt` | LinkedIn + Formular mit echtem Versand (Formular erst mit `NEXT_PUBLIC_CONTACT_FORM=1`, sonst „Das Kontaktformular folgt“; Rechtstexte und `/api/kontakt` folgen demselben Schalter) |
+| `/newsletter` | ehrlich: Anmeldung nur auf Einladung, RSS-Feed und LinkedIn als Wege; Demo-Formular nur in der Vorschau. Wie `/blog` vorerst nicht gelistet, noindex |
 | `/impressum`, `/datenschutz` | Entwurf aus `src/content/legal.ts`; fehlende Pflichtangaben auch in Produktion als „OFFEN“ |
 | `/content-status` | Lückenliste (noindex, nur in der Vorschau verlinkt) |
 
