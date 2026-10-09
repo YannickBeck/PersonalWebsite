@@ -34,11 +34,22 @@ export interface AccordionItem {
  * aufklappen: Ein <noscript>-Link über dem geschlossenen Eintrag führt dann zur Detailseite
  * (FUN4) – sonst wäre das zweite Projekt auf der Startseite unerreichbar.
  *
- * Layout (projects.module.css): Ab 640px Breite nebeneinander; beide Inhalte sind immer in
+ * Layout (projects.module.css): Ab 900px Breite nebeneinander; beide Inhalte sind immer in
  * voller Breite gesetzt, der geschlossene Eintrag beschneidet nur – die Höhe der Reihe ist
  * damit die des längeren Projekts und ändert sich beim Wechsel nicht. Schmaler: Akkordeon
  * untereinander. Übergänge: motion.css §7 (nur no-preference).
  */
+/**
+ * Unsichtbarer Anfang des Button-Namens (WCAG 2.5.3, Fix-Runde 3): Der geschlossene Streifen
+ * zeigt „02 Bachelorarbeit“ (aria-hidden), der Button trägt den Projekttitel. Damit ein
+ * Sprachbefehl mit dem sichtbaren Streifen-Text trifft, beginnt der Name mit Nummer und
+ * Kurztitel – „02 Bachelorarbeit: KI-Unterstützung …“; steckt der Kurztitel schon im Titel
+ * („Orbitalis: …“), nur die Nummer. Offen steht dieselbe Folge sichtbar als Kopfzeile darüber.
+ */
+function namePrefix(it: AccordionItem): string {
+  return it.title.startsWith(it.shortTitle) ? `${it.number} ` : `${it.number} ${it.shortTitle}: `;
+}
+
 export function ProjectAccordion({ items, label }: { items: AccordionItem[]; label: string }) {
   const [open, setOpen] = useState(items[0]?.id);
   const listRef = useRef<HTMLUListElement>(null);
@@ -108,6 +119,7 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
                       data-jump-focus=""
                       onClick={() => setOpen(it.id)}
                     >
+                      <span className="yb-sr-only">{namePrefix(it)}</span>
                       {it.title}
                       <span className={styles.chevron} aria-hidden="true" />
                     </button>
@@ -126,7 +138,10 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
               {isOpen ? null : (
                 <noscript>
                   <a href={it.href} className={styles.noscriptLink}>
-                    <span className="yb-sr-only">{it.title}</span>
+                    <span className="yb-sr-only">
+                      {namePrefix(it)}
+                      {it.title}
+                    </span>
                   </a>
                 </noscript>
               )}

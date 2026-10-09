@@ -24,15 +24,16 @@ node scripts/link-check.mjs http://127.0.0.1:3304           # tote interne Links
 | `/leistungen` | „Schwerpunkte“: vier Themen aus dem Profil, kein Leistungskatalog |
 | `/uses` | ehrlich: Liste folgt, bis dahin die Technik aus Orbitalis (nicht in Navigation/Sitemap, noindex) |
 | `/blog`, `/blog/<slug>` | Beiträge aus Ghost; Suche/Filter erst ab vier Beiträgen. Seit Fix-Runde 2 (JURY1-4) nicht in Navigation, Footer, Sitemap und llms.txt, noindex – bis eigene Beiträge da sind (`UNLISTED_ROUTES` in `src/lib/routes.ts`) |
-| `/kontakt` | LinkedIn + Formular mit echtem Versand (Formular erst mit `NEXT_PUBLIC_CONTACT_FORM=1`, sonst „Das Kontaktformular folgt“; Rechtstexte und `/api/kontakt` folgen demselben Schalter) |
+| `/kontakt` | LinkedIn + Formular mit echtem Versand (Formular erst mit `NEXT_PUBLIC_CONTACT_FORM=1`, sonst „Das Kontaktformular folgt noch“; Rechtstexte und `/api/kontakt` folgen demselben Schalter) |
 | `/newsletter` | ehrlich: Anmeldung nur auf Einladung, RSS-Feed und LinkedIn als Wege; Demo-Formular nur in der Vorschau. Wie `/blog` vorerst nicht gelistet, noindex |
 | `/impressum`, `/datenschutz` | Entwurf aus `src/content/legal.ts`; fehlende Pflichtangaben auch in Produktion als „OFFEN“ |
 | `/content-status` | Lückenliste (noindex, nur in der Vorschau verlinkt) |
 
 Ghost-Beiträge, die live existieren und erreichbar bleiben: `/blog/hallo-welt-warum-diese-website`,
-`/en/blog/hello-world-why-this-website`, `/en/blog/coming-soon` (Ghost-Standardbeitrag),
-`/projekte/beispielprojekt-me-website`, `/en/projekte/sample-project-me-website` (Ghost-Beitrag mit
-Tag „project“: erreichbar, noindex, nicht gelistet).
+`/en/blog/hello-world-why-this-website`, `/en/blog/coming-soon` (Ghost-Standardbeitrag). Der
+Ghost-Testbeitrag „Beispielprojekt“ (Tag „project“, Entwicklernotiz „Tag-Konvention … Echte
+Inhalte folgen.“) leitet seit Fix-Runde 3 weiter (siehe unten); `/blog/<slug>` rendert keine
+Beiträge mit Tag „project“ mehr.
 
 ## Weiterleitungen (308, `next.config.ts`)
 
@@ -40,6 +41,8 @@ Tag „project“: erreichbar, noindex, nicht gelistet).
 |---|---|---|
 | `/projekte/demo-projekt-webseite`, `…-cms-migration`, `…-deploy-pipeline` | `/projekte` | Demo-Projekte eines anderen Agenten, im Redesign entfernt |
 | `/en/projekte/demo-project-website`, `…-cms-migration`, `…-deploy-pipeline` | `/en/projekte` | dto. |
+| `/projekte/beispielprojekt-me-website`, `/blog/beispielprojekt-me-website` | `/projekte` | Ghost-Testprojekt mit Entwicklernotiz, war live indexiert (Fix-Runde 3, beide Builds; Slugs in `src/lib/ghost-samples.ts`) |
+| `/en/projekte/sample-project-me-website`, `/en/blog/sample-project-me-website` | `/en/projekte` | dto. |
 | `/blog/demo-*` (6 Slugs) | `/blog` | Demo-Artikel – **nur Produktion**; im Vorschau-Build gibt es sie weiter |
 | `/en/blog/demo-*` (6 Slugs) | `/en/blog` | dto. |
 | `/about` | `/ueber-mich` | alte Ghost-Adresse |

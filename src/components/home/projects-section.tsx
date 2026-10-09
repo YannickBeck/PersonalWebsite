@@ -15,10 +15,10 @@ import styles from './projects.module.css';
 
 /**
  * Inhalt eines Projekts im Akkordeon (Server): Projekt-Grafik (Ablauf bzw. Titelblatt,
- * project-visual.tsx – Morph-Quelle zur Detailseite), Links, Ausgangslage, neu gebaute Teile
- * bzw. Schwerpunkte, Ergebnis (nur wenn belegt),
- * Fähigkeiten als kleine Kacheln mit Sprung ins Periodensystem. Kurzfassung aus
- * project.brief (gekürzt, nichts ergänzt); die Langfassung steht auf der Detailseite.
+ * project-visual.tsx – Morph-Quelle zur Detailseite), Links, ein Absatz, die neu gebauten Teile
+ * bzw. Schwerpunkte und die Fähigkeiten als kleine Kacheln mit Sprung ins Periodensystem.
+ * Kurzfassung aus project.brief (gekürzt, nichts ergänzt); Ausgangslage und Ergebnis stehen auf
+ * der Detailseite (Fix-Runde 3: beide Projekte etwa gleich hoch, die feste Reihe bleibt voll).
  */
 function ProjectPanel({ project, lang }: { project: Project; lang: Lang }) {
   const dict = getDictionary(lang);
@@ -36,16 +36,9 @@ function ProjectPanel({ project, lang }: { project: Project; lang: Lang }) {
         {project.id === 'orbitalis' ? <Gap id="orbitalis-media" lang={lang} block /> : null}
       </div>
       <div className={styles.blocks}>
-        <div className={styles.block}>
-          <Heading level={4} className={styles.blockTitle}>
-            {dict.sectionSituation}
-          </Heading>
-          {brief.situation[lang].map((p) => (
-            <Text key={p.slice(0, 24)} as="p" textWrap="pretty">
-              {p}
-            </Text>
-          ))}
-        </div>
+        <Text as="p" textWrap="pretty">
+          {(brief.summary ?? project.teaser)[lang]}
+        </Text>
         <div className={styles.block}>
           <Heading level={4} className={styles.blockTitle}>
             {brief.pointsLabel === 'focus' ? dict.cvThesisFocus : dict.sectionContribution}
@@ -58,18 +51,8 @@ function ProjectPanel({ project, lang }: { project: Project; lang: Lang }) {
             ))}
           </ul>
         </div>
-        {brief.result ? (
-          <div className={styles.block}>
-            <Heading level={4} className={styles.blockTitle}>
-              {dict.sectionOutcome}
-            </Heading>
-            <Text as="p" textWrap="pretty">
-              {brief.result[lang]}
-            </Text>
-          </div>
-        ) : project.result.status === 'offen' ? (
-          <Gap id={project.result.gap} lang={lang} block />
-        ) : null}
+        {/* Ergebnis nur auf der Detailseite; offen → Lücke in der Vorschau */}
+        {project.result.status === 'offen' ? <Gap id={project.result.gap} lang={lang} block /> : null}
       </div>
       <div className={`${styles.block} ${styles.chips}`}>
         <Text type="supporting" color="secondary" as="p" id={`${anchor.project(project.id)}-skills`}>

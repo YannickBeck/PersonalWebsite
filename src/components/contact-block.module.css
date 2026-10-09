@@ -16,10 +16,15 @@
 }
 
 .avatar {
-  width: var(--size-element-lg);
-  height: var(--size-element-lg);
+  width: var(--spacing-12);
+  height: var(--spacing-12);
   border-radius: var(--radius-full);
   object-fit: cover;
+}
+
+/* „Wer dir antwortet“ (Fix-Runde 3): Lesespalte, nicht breiter als die Karte daneben */
+.who {
+  max-width: 640px;
 }
 
 @media (min-width: 900px) {
@@ -28,7 +33,7 @@
     gap: var(--spacing-10);
   }
 
-  /* Ohne freigeschaltetes Formular (DES6): LinkedIn-Karte | Zusatzangaben, gleich breit */
+  /* Ohne freigeschaltetes Formular (DES6): LinkedIn-Karte | „Wer dir antwortet“, gleich breit */
   .pending {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }

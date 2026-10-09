@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { ogImageUrl, pageMeta } from '@/lib/seo';
 import { detailOr404 } from '@/components/detail-page';
 import { ArticleDetail } from '@/components/article-detail';
-import { getBySlug, getPostSlugs } from '@/lib/ghost';
+import { getPostBySlug, getPostSlugs } from '@/lib/ghost';
 import { demoArticleBySlug, demoArticlesByLang } from '@/content/demo-articles';
 import { SHOW_GAPS } from '@/lib/gaps';
 
@@ -28,7 +28,7 @@ async function metaFor(slug: string): Promise<Metadata> {
       }),
     };
   }
-  const post = await getBySlug(slug, 'en');
+  const post = await getPostBySlug(slug, 'en');
   if (!post) {
     return {};
   }
@@ -73,5 +73,5 @@ export default async function BlogDetailEn({
   if (demo) {
     return <ArticleDetail lang="en" item={demo} />;
   }
-  return detailOr404(await getBySlug(slug, 'en'), 'en');
+  return detailOr404(await getPostBySlug(slug, 'en'), 'en');
 }

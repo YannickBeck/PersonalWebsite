@@ -18,7 +18,14 @@ export function SkillsSection({ id, number, lang }: { id: string; number: string
   const dict = getDictionary(lang);
   const h = dict.home;
   const tiles = skillTiles(lang);
-  const categories = SKILL_CATEGORIES.map((c) => ({ id: c.id, label: c.label[lang], short: c.short[lang] }));
+  // Name der Filter-Pille beginnt mit dem sichtbaren Kurzwort (WCAG 2.5.3, Fix-Runde 3): der
+  // volle Bereichsname, wenn er damit anfängt („KI & Automatisierung“), sonst „Cloud (Microsoft
+  // Cloud & Modern Workplace)“ – vorher hieß „Technik“ für Sprachsteuerung „Projekttechnik …“
+  const categories = SKILL_CATEGORIES.map((c) => {
+    const label = c.label[lang];
+    const short = c.short[lang];
+    return { id: c.id, label, short, name: label.toLowerCase().startsWith(short.toLowerCase()) ? label : `${short} (${label})` };
+  });
   return (
     <HomeSection id={id} number={number} title={h.skillsTitle} lede={h.skillsLede}>
       <SkillTable
@@ -47,7 +54,7 @@ export function SkillsSection({ id, number, lang }: { id: string; number: string
                 .filter((t) => t.category === c.id)
                 .map((t) => (
                   <li key={t.id}>
-                    {t.name} ({t.symbol}). {h.skillsEvidence}:{' '}
+                    <span lang={t.nameLang}>{t.name}</span> ({t.symbol}). {h.skillsEvidence}:{' '}
                     {t.evidence.map((ev, i) => (
                       <span key={`${ev.kind}-${ev.label}`}>
                         {i > 0 ? '; ' : ''}

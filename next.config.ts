@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { GHOST_SAMPLE_PROJECTS } from "./src/lib/ghost-samples";
 
 /**
  * Alte Demo-Adressen des Live-Stands 2d636c6 (Inhalte eines anderen Agenten, im Redesign
@@ -39,6 +40,12 @@ function legacy(prefix: string, slugs: string[], destination: string) {
 const LEGACY_REDIRECTS = [
   legacy("/projekte", DEMO_PROJECTS.de, "/projekte"),
   legacy("/en/projekte", DEMO_PROJECTS.en, "/en/projekte"),
+  // Ghost-Testprojekt mit Entwicklernotiz (Fix-Runde 3): in beiden Builds auf die Übersicht;
+  // Liste in src/lib/ghost-samples.ts (dort lässt auch ghost.ts den Beitrag aus)
+  legacy("/projekte", [...GHOST_SAMPLE_PROJECTS.de], "/projekte"),
+  legacy("/en/projekte", [...GHOST_SAMPLE_PROJECTS.en], "/en/projekte"),
+  legacy("/blog", [...GHOST_SAMPLE_PROJECTS.de], "/projekte"),
+  legacy("/en/blog", [...GHOST_SAMPLE_PROJECTS.en], "/en/projekte"),
   ...(SHOW_GAPS
     ? []
     : [legacy("/blog", DEMO_ARTICLES.de, "/blog"), legacy("/en/blog", DEMO_ARTICLES.en, "/en/blog")]),

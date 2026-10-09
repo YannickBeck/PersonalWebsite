@@ -12,7 +12,7 @@ import { ExternalArrow } from '@/components/icons';
 import { Gap } from '@/components/gap';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { CERTIFICATIONS, EDUCATION, FOCUS_LIST, LANGUAGES, LINKEDIN_URL, PERSON, STATIONS, projectById } from '@/content/profile';
-import { labelChips, projectHref } from '@/content/profile-view';
+import { labelChips, projectHref, stationPlace } from '@/content/profile-view';
 import { formatPeriod, formatYears, sentenceList } from '@/lib/period';
 import styles from './cv-content.module.css';
 
@@ -79,8 +79,9 @@ export function CvContent({ lang }: { lang: Lang }) {
                   </Heading>
                   <Text color="secondary">
                     {s.org}
-                    {s.place ? ` · ${s.place[lang]}` : ''}
+                    {stationPlace(s, lang) ? ` · ${stationPlace(s, lang)}` : ''}
                   </Text>
+                  {lang === 'en' && s.enRole ? <Gap id={s.enRole.gap} lang={lang} /> : null}
                 </VStack>
                 {s.summary ? (
                   <Text as="p" textWrap="pretty">

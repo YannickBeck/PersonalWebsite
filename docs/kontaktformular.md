@@ -10,10 +10,18 @@ ohne zusätzliche Abhängigkeit.
 Das Formular erscheint nur in einem Build mit `NEXT_PUBLIC_CONTACT_FORM=1`
 (`src/lib/contact-flag.ts`, Dockerfile-`ARG`). Ohne die Variable zeigen Startseite und
 `/kontakt` statt eines ausgegrauten Formulars einen kompakten, ehrlichen Zustand: die
-LinkedIn-Karte als Hauptweg („Auf LinkedIn schreiben“) und den Satz „Das Kontaktformular
-folgt“; die Ledes passen sich an. Entschieden wird beim Build, weil die Seiten statisch sind –
-so springt nach dem Laden nichts um. (Der Formular-Code wird über den statischen Import trotzdem
-mitgeladen; gemessen ein Chunk mit 39 KB unkomprimiert auf `/`.)
+LinkedIn-Karte als Hauptweg („Auf LinkedIn schreiben“) neben „Wer dir antwortet“, der Satz „Das
+Kontaktformular folgt noch“ steht einmal in der Lede. Entschieden wird beim Build, weil die Seiten
+statisch sind – so springt nach dem Laden nichts um.
+
+Seit Fix-Runde 3 lädt der Formular-Code ohne Flag gar nicht: `ContactBlock` bindet das Formular
+über `src/components/contact-form-lazy.tsx` ein (`next/dynamic` in einer Client-Komponente – lädt
+den Chunk nur, wenn das Formular gerendert wird). Ein statischer Import, aber auch `next/dynamic`
+direkt in der Server-Komponente, zog den Chunk in jedes Seiten-Bundle (Next-Doku
+lazy-loading.md: Server-Komponenten splitten Client-Komponenten nicht ab; gemessen). Gemessen
+(Produktions-Build, Skripte der vorgerenderten Seite): `/` und `/en` 1.029.325 → 991.399 B roh
+(−37,9 KB; gzip −14,6 KB), `/kontakt` −38,5 KB roh (gzip −14,2 KB). Mit Flag wird das Formular
+weiter serverseitig gerendert; der Chunk lädt beim Hydrieren nach.
 
 Die Variable ist kein Geheimnis (sie landet im Browser-Bundle). Den Versand selbst steuern
 weiterhin die Laufzeit-Variablen `CONTACT_*`; fehlen sie trotz Flag, greift der Hinweis
@@ -23,7 +31,7 @@ Seit Fix-Runde 2 (JURY1-1) hängt alles Weitere am selben Schalter:
 
 | | ohne Flag | mit `NEXT_PUBLIC_CONTACT_FORM=1` |
 | --- | --- | --- |
-| Startseite, `/kontakt` | LinkedIn-Karte, „Das Kontaktformular folgt“ | Formular + LinkedIn |
+| Startseite, `/kontakt` | LinkedIn-Karte + „Wer dir antwortet“, Lede „… Das Kontaktformular folgt noch.“ | Formular + LinkedIn + „Wer dir antwortet“ |
 | `/impressum` (Kontakt) | „Du erreichst mich auf LinkedIn.“ | „… über das Kontaktformular oder auf LinkedIn.“ + Link `/kontakt` |
 | `/datenschutz` | Abschnitt „Kontakt“ (`#kontakt`): kein Formular, nur LinkedIn | Abschnitt „Kontaktformular“ (`#kontaktformular`): Übertragung, Resend, Spam-Schutz, Einwilligung – mit OFFEN-Punkten |
 | `/api/kontakt` | `GET` → `{"available":false,"form":false}`, `POST` → `503 unavailable` – auch wenn `CONTACT_*` gesetzt sind | wie unten beschrieben |

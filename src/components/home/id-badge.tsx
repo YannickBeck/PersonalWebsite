@@ -12,16 +12,17 @@ export interface IdBadgeData {
   name: string;
   role: string;
   org: string;
-  /** Drei Stationen bei einem Arbeitgeber (DES7: Arbeitgeber einmal im Label, nicht je Zeile). */
+  /** Stationen bei einem Arbeitgeber (DES7: Arbeitgeber einmal im Label, nicht je Zeile). */
   stations: { id: string; years: string; title: string }[];
-  languages: { name: string; level: string }[];
+  /** Zertifikate: Aussteller + Kurzname (lang, wenn er nicht die Seitensprache ist). */
+  certs: { id: string; issuer: string; title: string; lang?: string }[];
   linkedin: string;
   labels: {
     group: string;
     flip: string;
     hint: string;
     stations: string;
-    languages: string;
+    certs: string;
     linkedin: string;
     linkedinExternal: string;
   };
@@ -358,11 +359,14 @@ export function IdBadge({ data }: { data: IdBadgeData }) {
                   </li>
                 ))}
               </ol>
-              <p className={styles.label}>{data.labels.languages}</p>
-              <ul className={styles.languages}>
-                {data.languages.map((l) => (
-                  <li key={l.name}>
-                    <span className={styles.languageName}>{l.name}</span> <span className={styles.languageLevel}>{l.level}</span>
+              <p className={styles.label}>{data.labels.certs}</p>
+              <ul className={styles.facts}>
+                {data.certs.map((c) => (
+                  <li key={c.id}>
+                    <span className={styles.factName}>{c.issuer}</span>{' '}
+                    <span className={styles.factNote} lang={c.lang}>
+                      {c.title}
+                    </span>
                   </li>
                 ))}
               </ul>

@@ -108,8 +108,9 @@ export function SiteHeader() {
         ))}
         endContent={
           <HStack gap={1} vAlign="center">
-            {/* Sichtbar „EN“/„DE“, Name „English (EN)“/„Deutsch (DE)“ (A124, enthält das sichtbare
-                Kürzel); hrefLang/lang setzt TransitionLink für Links in die andere Sprache. */}
+            {/* Sichtbar „EN“/„DE“, Name „EN (English)“/„DE (Deutsch)“ (A124; beginnt mit dem
+                sichtbaren Kürzel, WCAG 2.5.3 – Fix-Runde 3); hrefLang/lang setzt TransitionLink
+                für Links in die andere Sprache. */}
             <Button
               className={styles.langInBar}
               variant="ghost"

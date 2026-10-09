@@ -20,7 +20,11 @@ import { suppressTransitions } from '@/lib/instant';
  * Auch die Aktionen des Einstiegs („Kontakt“, „Projekte“: Anker in .yb-hero-actions) laufen
  * hierüber (A111): Sie setzen den Fokus in den Zielabschnitt, statt nur zu scrollen.
  * Beim Laden mit Anker (z. B. /#skill-rag von einer Projektseite) und bei hashchange wird das
- * Ziel nur ausgewählt/geöffnet; das Scrollen übernimmt der Browser bzw. Next.
+ * Ziel ausgewählt/geöffnet; das Scrollen übernimmt der Browser bzw. Next. Ausnahme (Fix-Runde
+ * 3): Ziele mit `data-jump-scroll` (Kacheln des Periodensystems) – der Browser stellte die
+ * Kachel oben hin, Kopf und Detailfeld lagen dann über dem Bildschirm. Wie beim Sprung in der
+ * Seite rückt das Raster in Sicht, aber nur, solange die Seite noch an der Ankerposition steht
+ * (nicht nach wiederhergestellter Scrollposition beim Neuladen oder Zurück).
  *
  * <HomeJump /> steht in home-content.tsx NACH den Abschnitten: Effekte laufen in Baum-
  * Reihenfolge, die Abschnitte haben ihre Listener dann schon registriert.
@@ -88,6 +92,31 @@ function jump(id: string) {
   window.requestAnimationFrame(run);
 }
 
+/** Steht das Ziel dort, wohin der Browser einen Anker scrollt (scroll-padding + scroll-margin)? */
+function atAnchorPosition(target: HTMLElement): boolean {
+  const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+  const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+  return Math.abs(target.getBoundingClientRect().top - (pad + margin)) <= 4;
+}
+
+/** Nach dem Anker-Scroll des Browsers: Ziele mit data-jump-scroll auf ihren Rahmen scrollen. */
+function alignHashTarget(id: string) {
+  const align = () => {
+    const target = document.getElementById(id);
+    const scrollId = target?.dataset.jumpScroll;
+    const scrollEl = scrollId ? document.getElementById(scrollId) : null;
+    if (target && scrollEl && atAnchorPosition(target)) {
+      scrollEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+  };
+  // zwei Frames: Auswahl (Filter aufheben) ist dann committet
+  window.requestAnimationFrame(() => window.requestAnimationFrame(align));
+  // Chrome scrollt beim Abschluss des Ladens noch einmal zum Anker, wenn niemand gescrollt hat
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', () => window.requestAnimationFrame(align), { once: true });
+  }
+}
+
 export function HomeJump() {
   useEffect(() => {
     // Capture-Phase: Die Aktionen des Einstiegs sind Next-Links (Astryx-Button → TransitionLink),
@@ -109,8 +138,8 @@ export function HomeJump() {
     };
     const fromHash = () => {
       const id = decodeURIComponent(window.location.hash.slice(1));
-      if (id) {
-        prepare(id);
+      if (id && prepare(id)) {
+        alignHashTarget(id);
       }
     };
     document.addEventListener('click', onClick, true);

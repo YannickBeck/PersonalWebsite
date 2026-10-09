@@ -89,6 +89,7 @@ export function t<T>(value: L<T>, lang: Lang): T {
 export type GapId =
   | 'cert-dates'
   | 'cert-en-title'
+  | 'station-en-role'
   | 'thesis-result'
   | 'thesis-period'
   | 'thesis-link'
@@ -136,6 +137,18 @@ export const GAPS: GapEntry[] = [
     need: {
       de: 'LinkedIn zeigt nur den deutschen Namen; vermutlich „Microsoft Certified: Information Security Administrator Associate“ – bitte bestätigen',
       en: 'LinkedIn only shows the German name; probably “Microsoft Certified: Information Security Administrator Associate” – please confirm',
+    },
+  },
+  {
+    id: 'station-en-role',
+    label: {
+      de: 'Englische Rollenbezeichnung bei GEBHARDT bestätigen',
+      en: 'Confirm the English job title at GEBHARDT',
+    },
+    where: { de: 'Englische Seiten (Werdegang, CV)', en: 'English pages (career, CV)' },
+    need: {
+      de: 'LinkedIn nennt nur „Elektrotechniker – Automatisierung“. Die englischen Seiten zeigen „Electrical technician – automation“ (eigene Übersetzung, Rolle statt Fachgebiet) – bitte bestätigen oder die eigene Bezeichnung nennen.',
+      en: 'LinkedIn only gives “Elektrotechniker – Automatisierung”. The English pages show “Electrical technician – automation” (own translation, a role rather than a field) – please confirm or provide your preferred title.',
     },
   },
   {
@@ -225,7 +238,7 @@ export const GAPS: GapEntry[] = [
     where: { de: '/kontakt, Startseite Abschnitt Kontakt', en: '/en/kontakt, homepage section Contact' },
     need: {
       de: 'Resend-Konto mit bestätigter Absender-Domain; CONTACT_RESEND_API_KEY, CONTACT_FROM und CONTACT_TO zur Laufzeit setzen und mit NEXT_PUBLIC_CONTACT_FORM=1 neu bauen, danach Ende-zu-Ende-Test (docs/kontaktformular.md). Bis dahin zeigen Startseite und /kontakt nur LinkedIn mit dem Satz „Das Kontaktformular folgt noch“, Impressum und Datenschutz nennen kein Formular und /api/kontakt nimmt nichts an.',
-      en: 'Resend account with a verified sender domain; set CONTACT_RESEND_API_KEY, CONTACT_FROM and CONTACT_TO at runtime, rebuild with NEXT_PUBLIC_CONTACT_FORM=1, then run an end-to-end test (docs/kontaktformular.md). Until then the homepage and /kontakt only show LinkedIn with “The contact form will follow”, imprint and privacy policy do not mention a form and /api/kontakt accepts nothing.',
+      en: 'Resend account with a verified sender domain; set CONTACT_RESEND_API_KEY, CONTACT_FROM and CONTACT_TO at runtime, rebuild with NEXT_PUBLIC_CONTACT_FORM=1, then run an end-to-end test (docs/kontaktformular.md). Until then the homepage and /kontakt only show LinkedIn with “The contact form is still to come”, imprint and privacy policy do not mention a form and /api/kontakt accepts nothing.',
     },
   },
   {
@@ -255,7 +268,7 @@ export const GAPS: GapEntry[] = [
   {
     id: 'language-levels-de',
     label: { de: 'Deutsche Bezeichnung des Englisch-Niveaus', en: 'German label of the English level' },
-    where: { de: 'Startseite (Karte, Kurz und knapp), /ueber-mich, /cv', en: 'German pages only' },
+    where: { de: 'Startseite (Kurz und knapp), /ueber-mich, /cv', en: 'German pages only' },
     need: {
       de: 'Der Export nennt „Professional Working“. Bitte die deutsche LinkedIn-Anzeige der Stufe nennen; bis dahin steht die wörtliche Übersetzung „berufliche Arbeitskenntnisse“.',
       en: 'The export says “Professional Working”. Please provide the German LinkedIn label of the level; until then the German pages use a literal translation.',
@@ -450,6 +463,8 @@ export interface Station extends Beleg {
   closing?: L;
   /** Abschlussarbeit (nur Studium). */
   thesis?: Thesis;
+  /** EN-Rollenbezeichnung ist eine eigene Übersetzung, noch unbestätigt (Lücke station-en-role). */
+  enRole?: Open;
 }
 
 export interface Thesis {
@@ -606,8 +621,11 @@ export const STATIONS: Station[] = [
     status: 'belegt',
     fundstelle: 'Berufserfahrung',
     org: 'GEBHARDT Fördertechnik GmbH',
-    role: { de: 'Elektrotechniker\u00a0– Automatisierung', en: 'Electrical engineering\u00a0– automation' },
-    short: { de: 'Elektrotechniker\u00a0– Automatisierung', en: 'Electrical engineering\u00a0– automation' },
+    // EN: Rolle statt Fachgebiet (vorher „Electrical engineering – automation“, Jury Fix-Runde 3);
+    // eigene Übersetzung, bis Yannick sie bestätigt (station-en-role)
+    role: { de: 'Elektrotechniker\u00a0– Automatisierung', en: 'Electrical technician\u00a0– automation' },
+    short: { de: 'Elektrotechniker\u00a0– Automatisierung', en: 'Electrical technician\u00a0– automation' },
+    enRole: open('station-en-role', 'linkedin'),
     start: '2018-08',
     end: '2020-01',
     place: { de: 'Sinsheim', en: 'Sinsheim' },
@@ -677,6 +695,8 @@ export interface Certification extends Beleg {
   /** Name laut LinkedIn. lang = Sprache des Namens (für lang-Auszeichnung auf EN-Seiten). */
   name: L;
   nameLang: L<Lang>;
+  /** Kurzform ohne Aussteller (Ausweiskarte) – gekürzt aus `name`, nichts ergänzt. */
+  short: L;
   issuer: string;
   date: Maybe<string>;
   /** Offizieller EN-Titel, falls unbestätigt. */
@@ -696,6 +716,7 @@ export const CERTIFICATIONS: Certification[] = [
       en: 'Microsoft Zertifiziert: Mitarbeiter für Informationssicherheit-Administration',
     },
     nameLang: { de: 'de', en: 'de' },
+    short: { de: 'Informations\u00ADsicherheit-Administration', en: 'Informations\u00ADsicherheit-Administration' },
     issuer: 'Microsoft',
     date: open('cert-dates', 'linkedin'),
     enTitle: open('cert-en-title', 'linkedin'),
@@ -707,6 +728,7 @@ export const CERTIFICATIONS: Certification[] = [
     fundstelle: 'Certifications',
     name: { de: 'KPN Technical Accreditation Exam', en: 'KPN Technical Accreditation Exam' },
     nameLang: { de: 'en', en: 'en' },
+    short: { de: 'Technical Accreditation Exam', en: 'Technical Accreditation Exam' },
     issuer: 'KPN',
     date: open('cert-dates', 'linkedin'),
   },
@@ -725,11 +747,14 @@ export interface ProjectLink {
 }
 
 /**
- * Kurzfassung für das Projekt-Akkordeon der Startseite: gekürzt aus situation/contribution/
- * result bzw. den Schwerpunkten – nichts ergänzt. Die Detailseite zeigt die Langfassung.
+ * Kurzfassung für das Projekt-Akkordeon der Startseite: ein Absatz und die Stichpunkte, gekürzt
+ * aus den Belegen – nichts ergänzt. Ausgangslage und Ergebnis stehen auf der Detailseite
+ * (Fix-Runde 3: die offene Orbitalis-Karte war ~1.150px hoch, bei offener Bachelorarbeit blieb
+ * rund ein Drittel der festen Reihe leer).
  */
 export interface ProjectBrief extends Beleg {
-  situation: L<string[]>;
+  /** Absatz unter dem Titel; fehlt → der Teaser des Projekts (Orbitalis). */
+  summary?: L;
   points: L<string[]>;
   /**
    * Überschrift der Stichpunkte: 'added' = was im Projekt neu gebaut wurde (Orbitalis – wer
@@ -737,8 +762,6 @@ export interface ProjectBrief extends Beleg {
    * (Bachelorarbeit).
    */
   pointsLabel: 'added' | 'focus';
-  /** Ergebnis kurz; fehlt, solange das Ergebnis offen ist (Lücke im Projekt). */
-  result?: L;
 }
 
 export interface Project {
@@ -865,18 +888,11 @@ export const PROJECTS: Project[] = [
       },
       'README, Eigenleistungen/SUMMARY.md',
     ),
+    // Absatz = Teaser (Ablauf und „sendet selbst“ zeigt die Grafik daneben)
     brief: {
       quelle: 'github:YannickBeck/Abgabe_Orbitalis',
       status: 'belegt',
       fundstelle: 'README, Eigenleistungen/SUMMARY.md (gekürzt)',
-      situation: {
-        de: [
-          'Ausgangspunkt waren osTicket und das Plugin „AI Reply Assistant“, ein einfacher LLM-Connector. Ziel waren Antwortvorschläge für Support-Tickets, vollständig lokal und ohne Datenweitergabe an externe Dienste.',
-        ],
-        en: [
-          'The starting point was osTicket and the “AI Reply Assistant” plugin, a simple LLM connector. The goal was reply suggestions for support tickets, fully local and without sending data to external services.',
-        ],
-      },
       points: {
         de: [
           'RAG-Service mit Python/FastAPI, LlamaIndex und Ollama-Embeddings',
@@ -892,10 +908,6 @@ export const PROJECTS: Project[] = [
         ],
       },
       pointsLabel: 'added',
-      result: {
-        de: 'Zu einem Ticket schreibt das System einen Antwortentwurf als interne Notiz, mit Quellen, Tags und Konfidenz. Es verschickt nichts automatisch.',
-        en: 'For a ticket, the system writes a reply draft as an internal note, with sources, tags and a confidence value. It sends nothing automatically.',
-      },
     },
     tags: ['osTicket', 'PHP', 'Python', 'FastAPI', 'LlamaIndex', 'Ollama', 'RAG', 'MariaDB', 'Debian 13'],
     links: [
@@ -966,14 +978,11 @@ export const PROJECTS: Project[] = [
       quelle: 'linkedin',
       status: 'belegt',
       fundstelle: 'Berufserfahrung → Duales Studium (gekürzt)',
-      // Der volle Titel steht im Akkordeon im Titelblatt der Projekt-Grafik (lesbarer Text)
-      situation: {
-        de: [
-          'Abschlussarbeit im dualen Studium Wirtschaftsinformatik\u00a0– Sales & Consulting, in dem ich an IT-Consulting- und Presales-Themen mitgearbeitet habe.',
-        ],
-        en: [
-          'Final thesis of the dual degree in Business Informatics\u00a0– Sales & Consulting, in which I contributed to IT consulting and presales topics.',
-        ],
+      // Der volle Titel steht im Akkordeon im Titelblatt der Projekt-Grafik (lesbarer Text); der
+      // Teaser wiederholte ihn und die Schwerpunkte – deshalb ein eigener Absatz
+      summary: {
+        de: 'Abschlussarbeit im dualen Studium Wirtschaftsinformatik\u00a0– Sales & Consulting, in dem ich an IT-Consulting- und Presales-Themen mitgearbeitet habe.',
+        en: 'Final thesis of the dual degree in Business Informatics\u00a0– Sales & Consulting, in which I contributed to IT consulting and presales topics.',
       },
       points: THESIS.focus,
       pointsLabel: 'focus',
@@ -1009,9 +1018,10 @@ export const SKILL_CATEGORIES: { id: SkillCategory; label: L; short: L }[] = [
   { id: 'cloud', label: { de: 'Microsoft Cloud & Modern Workplace', en: 'Microsoft Cloud & Modern Workplace' }, short: { de: 'Cloud', en: 'Cloud' } },
   { id: 'identity', label: { de: 'Identity & Security', en: 'Identity & Security' }, short: { de: 'Identity', en: 'Identity' } },
   { id: 'ai', label: { de: 'KI & Automatisierung', en: 'AI & Automation' }, short: { de: 'KI', en: 'AI' } },
-  { id: 'infra', label: { de: 'Infrastruktur & Betrieb', en: 'Infrastructure & Operations' }, short: { de: 'Betrieb', en: 'Operations' } },
+  // Kurzwort vorn (Fix-Runde 3, WCAG 2.5.3): Der Name der Filter-Pille beginnt mit dem sichtbaren Wort
+  { id: 'infra', label: { de: 'Betrieb & Infrastruktur', en: 'Operations & Infrastructure' }, short: { de: 'Betrieb', en: 'Operations' } },
   { id: 'consulting', label: { de: 'Beratung & Presales', en: 'Consulting & Presales' }, short: { de: 'Beratung', en: 'Consulting' } },
-  { id: 'build', label: { de: 'Projekttechnik (Orbitalis)', en: 'Project stack (Orbitalis)' }, short: { de: 'Technik', en: 'Stack' } },
+  { id: 'build', label: { de: 'Technik (Orbitalis)', en: 'Stack (Orbitalis)' }, short: { de: 'Technik', en: 'Stack' } },
 ];
 
 /** Profilstellen, die eine Fähigkeit belegen. */
@@ -1122,7 +1132,7 @@ export const SKILLS: Skill[] = [
   // Kachel, steht unter „Interessen“ (TEX4)
   skill('ai-automation', 'Au', 'AI Automation', 'ai', [P('summary'), P('focus')]),
   skill('ir', 'Ir', 'Information Retrieval', 'ai', [PR('bachelorarbeit')]),
-  // Infrastruktur & Betrieb
+  // Betrieb & Infrastruktur
   skill('client-server', 'Cs', { de: 'Client- und Serversysteme', en: 'Client and server systems' }, 'infra', [S('bechtle-ausbildung')], {
     tile: { de: 'Client & Server', en: 'Client & server' },
   }),
@@ -1135,9 +1145,10 @@ export const SKILLS: Skill[] = [
   }),
   skill('managed-services', 'Ma', 'Managed Services', 'infra', [S('bechtle-ausbildung')]),
   skill('automation-tech', 'At', { de: 'Automatisierungstechnik', en: 'Automation engineering' }, 'infra', [S('gebhardt'), E('dhbw-et')], {
-    // „Automation“ wie im belegten Studiengang „Elektrotechnik – Automation“; „Automatisierungs-“
-    // passte auch mit Trennstellen nicht in zwei Kachelzeilen (DES5)
-    tile: { de: 'Automation', en: 'Automation engineering' },
+    // „Automatisierung“ wie in der Rolle bei GEBHARDT („Elektrotechniker – Automatisierung“):
+    // „Automation“ stand direkt bei „Au – AI Automation“ und war verwechselbar (Fix-Runde 3);
+    // „Automatisierungs-“ passt auch mit Trennstellen nicht in zwei Kachelzeilen (DES5)
+    tile: { de: 'Automati\u00ADsierung', en: 'Automation engineering' },
   }),
   // Beratung & Presales
   skill('consulting', 'Co', 'IT Consulting', 'consulting', [P('focus'), S('bechtle-junior'), S('bechtle-studium')]),
@@ -1152,7 +1163,7 @@ export const SKILLS: Skill[] = [
     tile: { de: 'Dokumen\u00ADtation', en: 'Documen\u00ADtation' },
   }),
   skill('sales-consulting', 'Sc', 'Sales & Consulting', 'consulting', [P('headline'), P('focus'), E('dhbw-wi')]),
-  // Projekttechnik (Orbitalis, README/Eigenleistungen)
+  // Technik (Orbitalis, README/Eigenleistungen)
   skill('python', 'Py', 'Python', 'build', [PR('orbitalis')], { quelle: ORB }),
   skill('fastapi', 'Fa', 'FastAPI', 'build', [PR('orbitalis')], { quelle: ORB, logo: 'fastapi' }),
   skill('llamaindex', 'Li', 'LlamaIndex', 'build', [PR('orbitalis')], { quelle: ORB }),

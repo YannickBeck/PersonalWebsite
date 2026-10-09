@@ -9,6 +9,7 @@ import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { Emphasis } from '@/components/emphasis';
 import { ExternalArrow } from '@/components/icons';
 import {
+  CERTIFICATIONS,
   EDUCATION,
   GREETING,
   INTERESTS,
@@ -25,7 +26,8 @@ import { formatYears } from '@/lib/period';
 import { IdBadge, type IdBadgeData } from './id-badge';
 import styles from './home.module.css';
 
-const BADGE_STATIONS: Station['id'][] = ['bechtle-consultant', 'bechtle-studium', 'bechtle-ausbildung'];
+/** Alle Stationen beim heutigen Arbeitgeber (Fix-Runde 3: vorher drei von vier ohne Hinweis auf eine Auswahl). */
+const BADGE_STATIONS: Station['id'][] = ['bechtle-consultant', 'bechtle-studium', 'bechtle-junior', 'bechtle-ausbildung'];
 
 /** Daten der Ausweiskarte (nur Serialisierbares an die Client-Komponente, kein Content-Modell im Bundle). */
 function badgeData(lang: Lang): IdBadgeData {
@@ -35,21 +37,27 @@ function badgeData(lang: Lang): IdBadgeData {
     name: PERSON.name,
     role: PERSON.role.value[lang],
     org: PERSON.employer.value,
-    // Rückseite (DES7, A115): drei Stationen bei Bechtle, Arbeitgeber einmal im Label; der
-    // volle Werdegang steht direkt darunter in Abschnitt 04
+    // Rückseite (DES7, A115): alle vier Stationen bei Bechtle, Arbeitgeber einmal im Label; der
+    // volle Werdegang steht in Abschnitt 04. Darunter die Zertifikate statt der Sprachen – die
+    // stehen gleich daneben unter „Kurz und knapp“ (Fix-Runde 3).
     stations: STATIONS.filter((s) => BADGE_STATIONS.includes(s.id)).map((s) => ({
       id: s.id,
       years: formatYears(s.start, s.end, lang),
       title: s.short[lang],
     })),
-    languages: LANGUAGES.value.map((l) => ({ name: l.name[lang], level: l.level[lang] })),
+    certs: CERTIFICATIONS.map((c) => ({
+      id: c.id,
+      issuer: c.issuer,
+      title: c.short[lang],
+      lang: c.nameLang[lang] !== lang ? c.nameLang[lang] : undefined,
+    })),
     linkedin: LINKEDIN_URL,
     labels: {
       group: `${dict.home.badgeLabel}: ${PERSON.name}`,
       flip: dict.home.badgeFlip,
       hint: dict.home.badgeHint,
       stations: `${dict.home.badgeStations} · ${PERSON.employer.value}`,
-      languages: dict.home.badgeLanguages,
+      certs: dict.home.badgeCerts,
       linkedin: dict.linkedinLabel,
       linkedinExternal: dict.linkedinExternal,
     },

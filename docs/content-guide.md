@@ -46,10 +46,15 @@ Zwei Quellen, klar getrennt:
   zwei Zeichen, eindeutig), Name, Kategorie (`SKILL_CATEGORIES`), Belege (`evidence`: Station,
   Ausbildung, Zertifikat, Projekt oder Profilstelle). Kurzname für die Kachel (`tile`) nur, wenn der
   Name zu lang ist. Logo nur mit geprüfter Lizenz (`docs/skill-logos.md`).
-- **Projekt-Kurzfassung:** `brief` je Projekt (Akkordeon der Startseite) – nur gekürzt aus den
-  belegten Feldern `situation`/`contribution`/`result`; die Detailseite zeigt die Langfassung.
+- **Projekt-Kurzfassung:** `brief` je Projekt (Akkordeon der Startseite) – ein Absatz (`summary`,
+  fehlt er, der Teaser) und die Stichpunkte, nur gekürzt aus den belegten Feldern; Ausgangslage und
+  Ergebnis zeigt nur die Detailseite (Fix-Runde 3: beide Projekte etwa gleich hoch).
+- **Englische Rollenbezeichnungen:** Ist die EN-Fassung einer Station eine eigene Übersetzung,
+  `enRole: open('station-en-role')` setzen (GEBHARDT: „Electrical technician – automation“ für
+  „Elektrotechniker – Automatisierung“) – die Vorschau markiert sie auf EN-Seiten.
 - **Projekte:** nur `PROJECTS` in profile.ts (derzeit Orbitalis und Bachelorarbeit). Ghost-Beiträge
-  mit Tag `project` werden nicht gelistet (URL bleibt erreichbar, noindex).
+  mit Tag `project` werden nicht gelistet (URL bleibt erreichbar, noindex); Ghost-Testinhalte, die nie
+  erscheinen sollen, stehen in `src/lib/ghost-samples.ts` (308 auf die Übersicht, Fix-Runde 3).
 - **Rechtstexte:** `src/content/legal.ts` (Impressum, Datenschutz; DE+EN, auch für die Markdown-
   Fassung). Fehlende Pflichtangaben stehen als `open` und erscheinen – als einzige Lücken – auch in
   Produktion als „OFFEN: …“. Angabe da → Text eintragen, `open` löschen; vor der Veröffentlichung

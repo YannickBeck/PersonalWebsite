@@ -1,51 +1,23 @@
 import { Section } from '@astryxdesign/core/Section';
-import { VStack } from '@astryxdesign/core/VStack';
-import { Heading } from '@astryxdesign/core/Heading';
-import { Text } from '@astryxdesign/core/Text';
-import { MetadataList, MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { PageHero } from '@/components/page-hero';
 import { ContactBlock } from '@/components/contact-block';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
-import { FOCUS_AREAS, PERSON } from '@/content/profile';
 import { contactPageLede } from '@/lib/contact-flag';
-import { FactList } from '@/components/fact-list';
 
 /**
- * Kontakt (Redesign B4): Kopf wie Abschnitt 06 der Startseite („Schreib mir.“), darunter
- * dieselbe Komposition (contact-block.tsx: Formular mit echtem Versand über /api/kontakt +
- * LinkedIn-Karte), ergänzt um „Wer dir antwortet“. Keine öffentliche E-Mail-Adresse
- * (Nutzerentscheidung); ohne Versand-Konfiguration zeigt das Formular den ehrlichen Zustand.
+ * Kontakt (Redesign B4): Kopf wie der Kontakt-Abschnitt der Startseite („Schreib mir.“),
+ * darunter dieselbe Komposition (contact-block.tsx: Formular mit echtem Versand über
+ * /api/kontakt bzw. LinkedIn als Hauptweg, dazu „Wer dir antwortet“ – seit Fix-Runde 3 Teil der
+ * Komposition, auch auf der Startseite). Keine öffentliche E-Mail-Adresse (Nutzerentscheidung);
+ * ohne Versand-Konfiguration zeigt das Formular den ehrlichen Zustand.
  */
 export function ContactContent({ lang }: { lang: Lang }) {
-  const dict = getDictionary(lang);
-  const page = dict.pages.kontakt;
+  const page = getDictionary(lang).pages.kontakt;
   return (
     <>
-      <PageHero kicker={page.title} title={dict.home.contactTitle} lede={contactPageLede(lang)} />
+      <PageHero kicker={page.title} title={getDictionary(lang).home.contactTitle} lede={contactPageLede(lang)} />
       <Section>
-        <ContactBlock
-          lang={lang}
-          headingLevel={2}
-          extra={
-            <VStack gap={3}>
-              <Heading level={2}>{dict.contactWhoTitle}</Heading>
-              <MetadataList label={{ position: 'top' }}>
-                <MetadataListItem label={dict.contactRole}>
-                  <Text>
-                    {PERSON.name} · {PERSON.role.value[lang]} · {PERSON.employer.value}
-                  </Text>
-                </MetadataListItem>
-                <MetadataListItem label={dict.home.factPlace}>
-                  <Text>{PERSON.location.value[lang]}</Text>
-                </MetadataListItem>
-                {/* als kurze Liste statt ·-Kette (DES12: „KI &“ hing am Zeilenende) */}
-                <MetadataListItem label={dict.contactTopics}>
-                  <FactList items={FOCUS_AREAS.map((a) => ({ main: a.title[lang] }))} />
-                </MetadataListItem>
-              </MetadataList>
-            </VStack>
-          }
-        />
+        <ContactBlock lang={lang} headingLevel={2} />
       </Section>
     </>
   );

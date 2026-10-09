@@ -1,7 +1,7 @@
 import { Button } from '@astryxdesign/core/Button';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
 import { CERTIFICATIONS, EDUCATION, STATIONS, type Station } from '@/content/profile';
-import { anchor } from '@/content/profile-view';
+import { anchor, stationPlace } from '@/content/profile-view';
 import { formatPeriod, formatYears } from '@/lib/period';
 import { Gap } from '@/components/gap';
 import { HomeSection } from './home-section';
@@ -60,6 +60,7 @@ export function CareerSection({ id, number, lang }: { id: string; number: string
                       <span className={styles.what}>
                         <span className={styles.role}>{s.role[lang]}</span>
                         <span className={styles.org}>{s.org}</span>
+                        {lang === 'en' && s.enRole ? <Gap id={s.enRole.gap} lang={lang} /> : null}
                       </span>
                       <span className={`${styles.toggle} yb-career-toggle`} aria-hidden="true" />
                     </summary>
@@ -69,10 +70,10 @@ export function CareerSection({ id, number, lang }: { id: string; number: string
                           <dt>{h.careerPeriod}</dt>
                           <dd>{formatPeriod(s.start, s.end, lang)}</dd>
                         </div>
-                        {s.place ? (
+                        {stationPlace(s, lang) ? (
                           <div>
                             <dt>{h.careerPlace}</dt>
-                            <dd>{s.place[lang]}</dd>
+                            <dd>{stationPlace(s, lang)}</dd>
                           </div>
                         ) : null}
                       </dl>
@@ -105,8 +106,9 @@ export function CareerSection({ id, number, lang }: { id: string; number: string
                     <span className={styles.role}>{s.role[lang]}</span>
                     <span className={styles.org}>
                       {s.org}
-                      {s.place ? ` · ${s.place[lang]}` : ''}
+                      {stationPlace(s, lang) ? ` · ${stationPlace(s, lang)}` : ''}
                     </span>
+                    {lang === 'en' && s.enRole ? <Gap id={s.enRole.gap} lang={lang} /> : null}
                   </span>
                 </li>
               ),

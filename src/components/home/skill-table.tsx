@@ -23,7 +23,8 @@ export interface SkillTableProps {
   /** Basis für IDs (Abschnitts-ID). */
   baseId: string;
   tiles: SkillTileData[];
-  categories: { id: SkillCategory; label: string; short: string }[];
+  /** name = zugänglicher Name der Filter-Pille, beginnt mit dem sichtbaren Kurzwort (2.5.3) */
+  categories: { id: SkillCategory; label: string; short: string; name: string }[];
   labels: SkillTableLabels;
 }
 
@@ -45,8 +46,9 @@ const two = (n: number) => String(n).padStart(2, '0');
  * - Hover ist nie nötig: Klick/Tippen/Tastatur wählen, das Detailfeld zeigt alles. Eine
  *   vollständige Textliste für Screenreader rendert skills-section.tsx serverseitig.
  * - Name der Kachel aus ihrem Inhalt (A114, Label-in-Name): sichtbares Kürzel + Kurzname und,
- *   wo er fehlt oder abweicht, der volle Name als sr-only („Ms, Microsoft 365“). Die Nummer
- *   bleibt dekorativ.
+ *   nur wo er abweicht, der volle Name als sr-only („In, Intune, Microsoft Intune“; gleich:
+ *   „Ms, Microsoft 365“). Auf kleinen Kacheln ist der Kurzname nur für Screenreader da. Englische
+ *   Begriffe auf deutschen Seiten tragen lang="en" (Fix-Runde 3). Die Nummer bleibt dekorativ.
  * - Auswahl per Zeiger (Klick/Tippen), während das Detailfeld unter dem Raster außer Sicht
  *   liegt (schmale Breiten): das Feld rückt in Sicht (block: nearest, A118). Pfeiltasten
  *   scrollen nicht – dort wäre das bei jedem Schritt störend.
@@ -186,7 +188,7 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
             className={`${styles.pill} yb-skill-pill yb-cat`}
             data-category={c.id}
             aria-pressed={filter === c.id}
-            aria-label={c.label}
+            aria-label={c.name}
             onClick={() => chooseFilter(c.id)}
           >
             <span className={styles.swatch} aria-hidden="true" />
@@ -228,14 +230,18 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
                   {two(t.n)}
                 </span>
                 <span className={styles.tileSymbol}>{t.symbol}</span>
-                <span className={styles.tileName}>
+                {/* Kurzname: auf kleinen Kacheln nur für Screenreader (skills.module.css), sonst sichtbar */}
+                <span className={styles.tileName} lang={t.tileLang}>
                   <span className="yb-sr-only">, </span>
                   {t.tile}
                 </span>
-                {/* voller Name für Screenreader – ausgeblendet, wo der sichtbare Kurzname ihn schon nennt */}
-                <span className={`${styles.tileFull} yb-sr-only`} data-same={t.tile.replace(/\u00AD/g, '') === t.name ? '' : undefined}>
-                  , {t.name}
-                </span>
+                {/* voller Name nur, wenn er vom Kurznamen abweicht – sonst hörte man „Ms, Microsoft
+                    365, Microsoft 365“ (Textinhalt, Fix-Runde 3) */}
+                {t.same ? null : (
+                  <span className="yb-sr-only" lang={t.nameLang}>
+                    , {t.name}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -265,7 +271,9 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
                 {current.symbol}
               </span>
             )}
-            <h3 className={styles.detailName}>{current.name}</h3>
+            <h3 className={styles.detailName} lang={current.nameLang}>
+              {current.name}
+            </h3>
             <p className={styles.detailCategory}>
               <span className={styles.swatch} aria-hidden="true" />
               {category?.label}

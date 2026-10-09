@@ -30,7 +30,7 @@ async function get(path) {
 
 const sitemap = await (await fetch(`${base}/sitemap.xml`)).text();
 const pages = new Set([...sitemap.matchAll(/<loc>https:\/\/yannick-beck\.de([^<]*)<\/loc>/g)].map((m) => m[1] || '/'));
-for (const p of ['/uses', '/en/uses', '/content-status', '/en/content-status', '/gibt-es-nicht', '/en/gibt-es-nicht', '/projekte/beispielprojekt-me-website', '/en/projekte/sample-project-me-website']) {
+for (const p of ['/uses', '/en/uses', '/content-status', '/en/content-status', '/gibt-es-nicht', '/en/gibt-es-nicht']) {
   pages.add(p);
 }
 

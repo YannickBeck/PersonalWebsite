@@ -4,8 +4,9 @@
  * Wechsel die Breite tauschen – dafür hat Astryx keine Props. Nur Tokens; strukturelle Maße
  * (cqi, Streifenbreite) erlaubt. Übergänge: motion.css §7.
  *
- * Container = Akkordeon. < 640px: untereinander (Kopf immer sichtbar, Inhalt klappt auf).
- * ≥ 640px: nebeneinander. Beide Inhalte haben IMMER die Breite des offenen Eintrags
+ * Container = Akkordeon. < 900px: untereinander (Kopf immer sichtbar, Inhalt klappt auf; ab 640px
+ * Grafik und Text nebeneinander). ≥ 900px: nebeneinander (Fix-Runde 3: vorher ab 640px). Beide
+ * Inhalte haben IMMER die Breite des offenen Eintrags
  * (--open-w); der geschlossene Eintrag ist ein Streifen (--strip) und beschneidet nur. So hat
  * die Reihe die Höhe des längeren Projekts und springt beim Wechsel nicht.
  */
@@ -265,8 +266,29 @@
   color: var(--color-text-secondary);
 }
 
-/* ---------- nebeneinander ---------- */
-@container (min-width: 640px) {
+/* ---------- untereinander, breit (640–899): Grafik | Text, Fähigkeiten darunter ----------
+   Fix-Runde 3: Nebeneinander erst ab 900px. Dazwischen stand die Grafik in einer 13rem-Spalte,
+   der Ablauf von Orbitalis wurde dort ~600px hoch und trieb die feste Reihe auf ~950px – bei
+   offener Bachelorarbeit blieb ein Viertel leer. Untereinander ist jede Karte so hoch wie ihr
+   Inhalt; Aufklappen wie mobil (nach einer Eingabe). */
+@container (min-width: 640px) and (max-width: 899px) {
+  .panelGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'cover text' 'actions text' 'chips chips';
+    gap: var(--spacing-5) var(--spacing-6);
+  }
+
+  .head {
+    padding-inline: var(--spacing-6);
+  }
+
+  .panelInner {
+    padding-inline: var(--spacing-6);
+  }
+}
+
+/* ---------- nebeneinander (ab 900px) ---------- */
+@container (min-width: 900px) {
   .list {
     --strip: 5.5rem;
     --open-w: calc(100cqi - var(--strip) - var(--gap));
@@ -287,15 +309,33 @@
     box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
   }
 
+  /* Inhalt füllt die Reihe (Fix-Runde 3): Die Reihe ist so hoch wie das längere Projekt; beim
+     kürzeren wächst die Projekt-Grafik mit (Titelblatt bzw. Ablauf, .cover), statt dass unten
+     ein leerer Streifen bleibt. Die Prozenthöhe löst sich gegen die gestreckte Flex-Reihe auf
+     (definit, Flexbox §9.8) – keine Schleife, die Reihenhöhe bleibt beim Umschalten gleich. */
   .inner,
   .item[data-open='true'] .inner {
     display: flex;
     flex-direction: column;
     width: var(--open-w);
+    height: 100%;
   }
 
   .panel {
+    flex: 1 1 auto;
     overflow: visible;
+  }
+
+  .panelInner {
+    height: 100%;
+  }
+
+  .panelGrid {
+    height: 100%;
+  }
+
+  .cover > :first-child {
+    flex-grow: 1;
   }
 
   .head {
@@ -392,20 +432,20 @@
     rotate: 90deg;
   }
 
-  .panelGrid {
-    grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
-    grid-template-rows: auto auto 1fr auto;
-    grid-template-areas: 'cover text' 'actions text' '. text' 'chips chips';
-    gap: var(--spacing-5) var(--spacing-6);
-  }
 }
 
+/* ≥ 900: Grafik + Links links; Absatz, Stichpunkte und Fähigkeiten rechts (vorher standen die
+   Fähigkeiten links unter der Grafik – die linke Spalte trieb die Reihe auf ~790px). */
 @container (min-width: 900px) {
   .panelGrid {
     grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    grid-template-rows: auto auto auto 1fr;
-    grid-template-areas: 'cover text' 'actions text' 'chips text' '. text';
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: 'cover text' 'cover chips' 'actions chips';
     gap: var(--spacing-5) var(--spacing-8);
+  }
+
+  .chips {
+    align-self: start;
   }
 
   .title {

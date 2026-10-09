@@ -157,7 +157,9 @@
   overflow: hidden;
 }
 
-/* Kleine Kacheln (Handy, Inhaltsbreite ≤ 56px): Nummer + Kürzel, der Name steht im Detailfeld */
+/* Kleine Kacheln (Handy, Inhaltsbreite ≤ 56px): Nummer + Kürzel, der Name steht im Detailfeld.
+   Der Kurzname bleibt für Screenreader im Namen der Kachel (visuell versteckt statt
+   display: none) – so braucht die Kachel keinen doppelten vollen Namen (Fix-Runde 3). */
 @container (max-width: 56px) {
   .tileSymbol {
     justify-self: center;
@@ -166,14 +168,14 @@
   }
 
   .tileName {
-    display: none;
-  }
-}
-
-/* Mit sichtbarem Kurznamen: der gleiche volle Name nicht noch einmal vorlesen (A114) */
-@container (min-width: 57px) {
-  .tileFull[data-same] {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
@@ -283,9 +285,19 @@
   font-weight: var(--font-weight-semibold);
   line-height: 1.15;
   letter-spacing: var(--yb-heading-tracking);
-  text-wrap: balance;
+  /* pretty statt balance (Fix-Runde 3): balance trennte lange Komposita an der Wortmitte
+     („Automatisie-rungstechnik“); so bricht der Browser so spät wie möglich
+     („Automatisierungs-technik“) */
+  text-wrap: pretty;
   overflow-wrap: break-word;
   hyphens: auto;
+}
+
+/* Englische Begriffe (lang="en", auch auf EN-Seiten): nur an Leerzeichen und Bindestrichen
+   umbrechen – balance + automatische Trennung ergab mobil „Conditio-nal Access“ (Fix-Runde 3).
+   Deutsche Komposita („Automatisierungstechnik“) trennt der Browser weiter nach Wörterbuch. */
+.detailName:lang(en) {
+  hyphens: manual;
 }
 
 .detailCategory {

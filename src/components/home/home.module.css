@@ -114,6 +114,13 @@
   object-position: bottom center;
   user-select: none;
   -webkit-user-drag: none;
+  /* Weicher Auslauf statt harter Unterkante (Fix-Runde 3): Der Freisteller endet an den
+     Oberschenkeln mit einer leicht unscharfen Kante (4px Alpha-Saum). Sie schwebte am Desktop
+     ~12px über der Pillenleiste und mobil mitten über der Rolle – wie ein Aufkleber. Jetzt
+     läuft die Person im unteren Fünftel ins Papier aus (hell und dunkel gleich, die Maske
+     nimmt nur Deckkraft). Nur das Bild, nicht der Layer: Parallaxe/Drift bleiben unberührt. */
+  -webkit-mask-image: linear-gradient(to bottom, black 78%, rgb(0 0 0 / 0.55) 89%, transparent 99%);
+  mask-image: linear-gradient(to bottom, black 78%, rgb(0 0 0 / 0.55) 89%, transparent 99%);
 }
 
 .heroText {
@@ -258,12 +265,22 @@
   justify-content: center;
   padding: var(--spacing-3) var(--spacing-4);
   pointer-events: none;
-  /* Papier blendet nach unten aus: Inhalt scrollt nicht hart sichtbar hinter der Leiste durch */
-  background: linear-gradient(
-    to bottom,
-    var(--color-background-body) 55%,
-    color-mix(in srgb, var(--color-background-body) 0%, transparent)
-  );
+  /* Ruhiges Papier-Band vom Header bis unter die Pillen (Fix-Runde 3): Vorher blendete das
+     Papier schon ab 55 % aus – angeschnittene Textzeilen schienen links und rechts der Leiste
+     durch. Jetzt deckt es die ganze Leiste; erst darunter läuft es kurz aus (::after) – nur
+     8px, so viel wie der Zusatz in scroll-padding-top (globals.css): Sprungziele und Fokus
+     landen nie im Verlauf. */
+  background-color: var(--color-background-body);
+}
+
+.sectionNav::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  height: var(--spacing-2);
+  background: linear-gradient(to bottom, var(--color-background-body), transparent);
+  pointer-events: none;
 }
 
 .sectionNavBar {
@@ -290,12 +307,16 @@
   white-space: nowrap;
 }
 
+/* Polster mit gleich großem negativem Rand (Fix-Runde 3): Der Scroller (overflow-x) beschneidet
+   auch senkrecht – vom Fokusring der Pillen blieben sonst nur zwei Klammern. 4px Polster =
+   Innenabstand der Leiste; Ring 2px Abstand + 2px Breite passt genau hinein (konzentrisch). */
 .sectionNavList {
   display: flex;
   gap: var(--spacing-1);
   min-width: 0;
-  margin: 0;
-  padding: 0;
+  margin: calc(-1 * var(--spacing-1));
+  padding: var(--spacing-1);
+  scroll-padding-inline: var(--spacing-1);
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
@@ -337,8 +358,8 @@
 
 .sectionNavLink:focus-visible {
   outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
-  /* innerhalb der Leiste (overflow-x: auto würde einen äußeren Ring abschneiden) */
-  outline-offset: 0;
+  /* im Polster des Scrollers (siehe .sectionNavList) – nicht der Standard-Abstand von 3px */
+  outline-offset: var(--spacing-0-5);
 }
 
 .sectionNavLink[aria-current='true'] {
@@ -482,6 +503,10 @@
 @media (forced-colors: active) {
   .sectionNav {
     background: Canvas;
+  }
+
+  .sectionNav::after {
+    display: none;
   }
 
   .sectionNavBar {

@@ -22,8 +22,6 @@ export const TRANSLATION_MAP: Record<string, string> = {
   'demo-ci-cd-sideprojects': 'demo-ci-cd-sideprojects-en',
   'demo-ci-cd-sideprojects-en': 'demo-ci-cd-sideprojects',
   // Echte Ghost-Inhalte
-  'beispielprojekt-me-website': 'sample-project-me-website',
-  'sample-project-me-website': 'beispielprojekt-me-website',
   'hallo-welt-warum-diese-website': 'hello-world-why-this-website',
   'hello-world-why-this-website': 'hallo-welt-warum-diese-website',
 };

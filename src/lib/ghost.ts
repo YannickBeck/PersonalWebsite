@@ -1,6 +1,7 @@
 import GhostContentAPI from '@tryghost/content-api';
 import type { GhostAPI } from '@tryghost/content-api';
 import type { Lang } from '@/i18n/dictionaries';
+import { isGhostSampleProject } from '@/lib/ghost-samples';
 
 const LANG_TAG: Record<Lang, string> = {
   de: 'hash-lang-de',
@@ -47,7 +48,10 @@ function timeout<T>(p: Promise<T>, ms = 10000): Promise<T> {
   ]);
 }
 
-/** Projekte einer Sprache (Tag project + Sprach-Tag). [] bei Fehler (Build-Resilienz). */
+/**
+ * Projekte einer Sprache (Tag project + Sprach-Tag), ohne Ghost-Testprojekte (ghost-samples.ts,
+ * Fix-Runde 3). [] bei Fehler (Build-Resilienz).
+ */
 export async function getProjects(lang: Lang): Promise<GhostItem[]> {
   try {
     const posts = (await timeout(
@@ -59,7 +63,7 @@ export async function getProjects(lang: Lang): Promise<GhostItem[]> {
         order: 'published_at DESC',
       }),
     )) as unknown as GhostItem[];
-    return posts.filter((p) => langOk(p, lang));
+    return posts.filter((p) => langOk(p, lang) && !isGhostSampleProject(p.slug, lang));
   } catch {
     return [];
   }
@@ -96,6 +100,15 @@ export async function getBySlug(
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Blogbeitrag per Slug: wie getBySlug, aber ohne Beiträge mit Tag „project“ (Fix-Runde 3) –
+ * vorher rendete /blog/<projekt-slug> auch Projekte, darunter das Ghost-Testprojekt.
+ */
+export async function getPostBySlug(slug: string, lang: Lang): Promise<GhostItem | undefined> {
+  const post = await getBySlug(slug, lang);
+  return post && !(post.tags ?? []).some((t) => t.slug === 'project') ? post : undefined;
 }
 
 export async function getProjectSlugs(lang: Lang): Promise<string[]> {

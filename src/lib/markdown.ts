@@ -26,8 +26,8 @@ import {
 import { IMPRINT, LEGAL_OPEN, PRIVACY, type LegalDoc } from '@/content/legal';
 import { formatPeriod } from '@/lib/period';
 import { KNOWN_ROUTES, NOINDEX_ROUTES, isUnlisted } from '@/lib/routes';
-import { getBySlug, getPosts, getProjectSlugs } from '@/lib/ghost';
-import { projectFullTitle } from '@/content/profile-view';
+import { getBySlug, getPostBySlug, getPosts, getProjectSlugs } from '@/lib/ghost';
+import { projectFullTitle, stationPlace } from '@/content/profile-view';
 import { sentenceList } from '@/lib/period';
 import { CONTACT_FORM_ENABLED, contactPageLede } from '@/lib/contact-flag';
 
@@ -52,7 +52,8 @@ function careerMd(lang: Lang, detailed: boolean): string {
   const dict = getDictionary(lang);
   const out: string[] = [`## ${dict.cvStationsTitle}`, ''];
   for (const s of STATIONS) {
-    out.push(`- **${s.role[lang]}**, ${s.org}${s.place ? `, ${s.place[lang]}` : ''} (${formatPeriod(s.start, s.end, lang)})`);
+    const place = stationPlace(s, lang);
+    out.push(`- **${s.role[lang]}**, ${s.org}${place ? `, ${place}` : ''} (${formatPeriod(s.start, s.end, lang)})`);
     if (detailed) {
       if (s.summary) {
         out.push(`  ${s.summary[lang]}`);
@@ -317,7 +318,7 @@ async function markdownForPath(pathname: string): Promise<MarkdownResult | null>
     return { lang, body: `# ${dict.pages.blog.title}\n\n${list.join('\n')}\n` };
   }
   if (segs[0] === 'blog' && segs.length === 2) {
-    const post = await getBySlug(segs[1], lang);
+    const post = await getPostBySlug(segs[1], lang);
     return post ? { lang, body: ghostMd(post, bare, lang) } : null;
   }
   if (bare === '/impressum' || bare === '/datenschutz') {

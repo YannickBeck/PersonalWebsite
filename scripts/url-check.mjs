@@ -31,11 +31,17 @@ cases.push(
   ['/projekte/bachelorarbeit', 200],
   ['/en/projekte/orbitalis', 200],
   ['/en/projekte/bachelor-thesis', 200],
-  ['/projekte/beispielprojekt-me-website', 200],
-  ['/en/projekte/sample-project-me-website', 200],
   ['/blog/hallo-welt-warum-diese-website', 200],
   ['/en/blog/hello-world-why-this-website', 200],
   ['/en/blog/coming-soon', 200],
+);
+// Ghost-Testprojekt mit Entwicklernotiz (Fix-Runde 3, src/lib/ghost-samples.ts) → Übersicht,
+// auch unter /blog (der Blog rendert keine Beiträge mit Tag „project“)
+cases.push(
+  ['/projekte/beispielprojekt-me-website', 308, '/projekte'],
+  ['/en/projekte/sample-project-me-website', 308, '/en/projekte'],
+  ['/blog/beispielprojekt-me-website', 308, '/projekte'],
+  ['/en/blog/sample-project-me-website', 308, '/en/projekte'],
 );
 // Alte Demo-Projekte (live 2d636c6) → Übersicht
 for (const s of ['demo-projekt-webseite', 'demo-projekt-cms-migration', 'demo-projekt-deploy-pipeline']) {

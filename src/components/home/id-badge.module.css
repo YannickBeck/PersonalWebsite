@@ -227,7 +227,7 @@
 }
 
 .stations,
-.languages {
+.facts {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -260,17 +260,19 @@
   line-height: 1.3;
 }
 
-.languages {
+/* Zertifikate (Fix-Runde 3, vorher Sprachen): Aussteller fett, Kurzname sekundär */
+.facts {
   gap: var(--spacing-1);
   font-size: 0.875rem;
   line-height: 1.35;
+  hyphens: manual;
 }
 
-.languageName {
+.factName {
   font-weight: var(--font-weight-semibold);
 }
 
-.languageLevel {
+.factNote {
   color: var(--color-text-secondary);
 }
 

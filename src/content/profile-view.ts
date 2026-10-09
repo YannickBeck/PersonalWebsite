@@ -14,14 +14,25 @@ import {
   SKILL_LOGOS,
   STATIONS,
   type Evidence,
+  type L,
   type Project,
   type ProjectId,
   type Quelle,
   type Skill,
   type SkillCategory,
   type SkillId,
+  type Station,
 } from '@/content/profile';
 import { formatYears } from '@/lib/period';
+
+/**
+ * Ort einer Station nur, wenn er nicht schon im Namen des Arbeitgebers steht („Bechtle
+ * Mannheim · Mannheim“ → „Bechtle Mannheim“, Fix-Runde 3).
+ */
+export function stationPlace(station: Station, lang: Lang): string | null {
+  const place = station.place?.[lang];
+  return place && !station.org.includes(place) ? place : null;
+}
 
 export function projectHref(project: Project, lang: Lang): string {
   return withLang(`/projekte/${project.slug[lang]}`, lang);
@@ -173,6 +184,15 @@ export interface SkillTileData {
   symbol: string;
   name: string;
   tile: string;
+  /**
+   * Sprache von Name bzw. Kurzname, wenn sie von der Seite abweicht: englische Fachbegriffe auf
+   * deutschen Seiten („Conditional Access“) → 'en' – Aussprache und Silbentrennung (Fix-Runde 3:
+   * mobil stand „Conditio-nal Access“). Erkannt daran, dass DE- und EN-Name gleich lauten.
+   */
+  nameLang?: Lang;
+  tileLang?: Lang;
+  /** Kurzname = voller Name (dann kein zweiter, unsichtbarer Name in der Kachel). */
+  same: boolean;
   category: SkillCategory;
   evidence: HomeEvidence[];
   /** Quelle; leer, wenn alle Belege LinkedIn-Profilstellen sind (steht dann schon im Beleg, DES8). */
@@ -202,6 +222,11 @@ function groupProfileEvidence(evidence: Evidence[], lang: Lang): HomeEvidence[] 
   return parts.length ? [{ kind: 'profile', label: parts.join(', ') }, ...out] : out;
 }
 
+/** Englischer Begriff auf einer deutschen Seite? (DE- und EN-Fassung gleich, ohne Groß-/Kleinschreibung) */
+export function englishOnGerman(value: L, lang: Lang): Lang | undefined {
+  return lang === 'de' && value.de.replace(/\u00AD/g, '').toLowerCase() === value.en.replace(/\u00AD/g, '').toLowerCase() ? 'en' : undefined;
+}
+
 export function skillTiles(lang: Lang): SkillTileData[] {
   return orderedSkills().map((s, i) => ({
     id: s.id,
@@ -210,6 +235,9 @@ export function skillTiles(lang: Lang): SkillTileData[] {
     symbol: s.symbol,
     name: s.name[lang],
     tile: (s.tile ?? s.name)[lang],
+    nameLang: englishOnGerman(s.name, lang),
+    tileLang: englishOnGerman(s.tile ?? s.name, lang),
+    same: (s.tile ?? s.name)[lang].replace(/\u00AD/g, '') === s.name[lang],
     category: s.category,
     evidence: groupProfileEvidence(s.evidence, lang),
     source: s.evidence.every((ev) => ev.kind === 'profile') ? '' : sourceName(s.quelle, lang),
