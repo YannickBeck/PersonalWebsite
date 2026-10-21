@@ -1,0 +1,30 @@
+[
+  {
+    "id": "66f7a1c0e4b0a1a2b3c4d501",
+    "slug": "news",
+    "name": "News",
+    "description": null,
+    "visibility": "public"
+  },
+  {
+    "id": "66f7a1c0e4b0a1a2b3c4d502",
+    "slug": "project",
+    "name": "Project",
+    "description": null,
+    "visibility": "public"
+  },
+  {
+    "id": "66f7a1c0e4b0a1a2b3c4d503",
+    "slug": "hash-lang-de",
+    "name": "#lang-de",
+    "description": null,
+    "visibility": "internal"
+  },
+  {
+    "id": "66f7a1c0e4b0a1a2b3c4d504",
+    "slug": "hash-lang-en",
+    "name": "#lang-en",
+    "description": null,
+    "visibility": "internal"
+  }
+]
