@@ -3,6 +3,7 @@ import { SKILL_CATEGORIES } from '@/content/profile';
 import { skillTiles } from '@/content/profile-view';
 import { HomeSection } from './home-section';
 import { SkillTable } from './skill-table';
+import styles from './skills.module.css';
 
 /**
  * 02 Fähigkeiten: Periodensystem aus dem Content-Modell (SKILLS, profile.ts) – quadratische
@@ -12,7 +13,9 @@ import { SkillTable } from './skill-table';
  * Content-Modell im Browser-Bundle).
  *
  * Darunter dieselben Angaben als reine Textliste für Screenreader (ohne Links, damit keine
- * unsichtbaren Tab-Stopps entstehen) – auch für Agenten und ohne JavaScript im HTML.
+ * unsichtbaren Tab-Stopps entstehen) – auch für Agenten im HTML. Ohne JavaScript ist sie
+ * sichtbar (skills.module.css `.textList`): Dann wechselt das Detailfeld nicht, die Liste
+ * enthält alle Kacheln mit Belegen (Feinschliff).
  */
 export function SkillsSection({ id, number, lang }: { id: string; number: string; lang: Lang }) {
   const dict = getDictionary(lang);
@@ -44,7 +47,7 @@ export function SkillsSection({ id, number, lang }: { id: string; number: string
           kinds: h.evidenceKinds,
         }}
       />
-      <div className="yb-sr-only">
+      <div className={styles.textList}>
         <h3>{h.skillsListTitle}</h3>
         {categories.map((c) => (
           <div key={c.id}>

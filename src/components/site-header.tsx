@@ -14,11 +14,12 @@ import { MobileNav } from '@astryxdesign/core/MobileNav';
 import { SideNavItem } from '@astryxdesign/core/SideNav';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { BrandMark } from '@/components/brand-mark';
-import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
+import { withLang, type Lang } from '@/i18n/lang';
+import type { HeaderLabels } from '@/i18n/chrome';
 import { useRouteLang } from '@/i18n/route-lang';
-import { counterpartPath, isUnlisted } from '@/lib/routes';
+import { counterpartPath } from '@/lib/routes';
 import { navTransitionTypes } from '@/lib/transitions';
-import { markNavigationStart } from '@/components/route-transition';
+import { markNavigationStart, rememberScroll } from '@/components/route-transition';
 import styles from './site-header.module.css';
 
 /**
@@ -54,13 +55,15 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function SiteHeader() {
+/**
+ * Kopfzeile. Texte kommen vom Server (labels, src/i18n/chrome.ts) – kein Dictionary im
+ * Client-Bundle (Feinschliff). Nicht gelistete Bereiche (routes.ts UNLISTED_ROUTES, z. B. /blog
+ * bis zu eigenen Beiträgen) fehlen in labels.nav; ihre URLs bleiben erreichbar.
+ */
+export function SiteHeader({ labels: dict }: { labels: HeaderLabels }) {
   const pathname = usePathname();
   const lang = useRouteLang();
-  const dict = getDictionary(lang);
-  // Nicht gelistete Bereiche (routes.ts UNLISTED_ROUTES, z. B. /blog bis zu eigenen Beiträgen)
-  // stehen nicht in der Navigation; ihre URLs bleiben erreichbar.
-  const navItems = dict.nav.filter((item) => !isUnlisted(item.href));
+  const navItems = dict.nav;
   // Drawer gilt nur für den Pfad, auf dem er geöffnet wurde: Navigation schließt ihn
   // ohne Effekt (kein setState im Effekt, react-hooks/set-state-in-effect).
   const [menuPath, setMenuPath] = useState<string | null>(null);
@@ -83,6 +86,9 @@ export function SiteHeader() {
     }
     window.setTimeout(() => {
       markNavigationStart();
+      // Position der alten Seite für Browser-Zurück merken – wie TransitionLink (REG1: der
+      // Drawer verhindert den Standard-Klick, TransitionLink merkte sie deshalb nie)
+      rememberScroll();
       router.push(href, { transitionTypes: navTransitionTypes(pathname, href) });
     }, drawerCloseMs());
   };
@@ -118,9 +124,11 @@ export function SiteHeader() {
               aria-label={dict.switcherName}
               href={langHref}
             />
-            <ThemeToggle lang={lang} />
+            <ThemeToggle labels={dict.theme} />
+            {/* Ohne JavaScript öffnet sich das Menü nicht – dann fehlt der Button, die Seiten
+                stehen im Footer (yb-js-only, globals.css) */}
             <IconButton
-              className={styles.mobileOnly}
+              className={`${styles.mobileOnly} yb-js-only`}
               variant="ghost"
               label={dict.menuOpen}
               icon={<Icon icon="menu" />}
@@ -138,9 +146,12 @@ export function SiteHeader() {
         onOpenChange={setMenuOpen}
         side="end"
         header={
-          <Text type="label" weight="semibold">
-            {dict.menuTitle}
-          </Text>
+          // paddingInline wie die Zeilen darunter: Titel, Links und Einstellungen auf einer Kante
+          <HStack paddingInline={2}>
+            <Text type="label" weight="semibold">
+              {dict.menuTitle}
+            </Text>
+          </HStack>
         }
       >
         <VStack gap={4}>
@@ -161,7 +172,7 @@ export function SiteHeader() {
             <Text type="label" color="secondary">
               {dict.colorSchemeLabel}
             </Text>
-            <ThemeToggle lang={lang} />
+            <ThemeToggle labels={dict.theme} />
           </HStack>
           <HStack gap={2} vAlign="center" justify="between" paddingInline={2}>
             <Text type="label" color="secondary">

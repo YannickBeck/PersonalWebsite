@@ -64,6 +64,11 @@ function focusable(el: HTMLElement): boolean {
   return !el.closest('[inert]');
 }
 
+/** Bedienelement eines Ziels: ganze Abschnitte selbst, sonst [data-jump-focus] darin. */
+function focusTarget(target: HTMLElement): HTMLElement {
+  return target.matches('[data-jump-focus], section') ? target : (target.querySelector<HTMLElement>('[data-jump-focus]') ?? target);
+}
+
 /** Akkordeon-Eintrag, dessen Öffnen React noch nicht übernommen hat (A111). */
 function pending(target: HTMLElement): boolean {
   return target.dataset.open === 'false';
@@ -89,8 +94,7 @@ function jump(id: string) {
     const target = document.getElementById(id) ?? el;
     // Ganze Abschnitte (Aktionen des Einstiegs) bekommen den Fokus selbst wie bei der
     // Abschnittsnavigation; sonst das Bedienelement des Ziels
-    const focusEl =
-      target.matches('[data-jump-focus], section') ? target : (target.querySelector<HTMLElement>('[data-jump-focus]') ?? target);
+    const focusEl = focusTarget(target);
     // Commit steht aus (Filter-Wechsel: noch inert; Akkordeon: noch zu) – weiter warten
     if ((!focusable(focusEl) || pending(target)) && performance.now() - start < COMMIT_WAIT_MS) {
       window.requestAnimationFrame(run);
@@ -115,13 +119,25 @@ function atAnchorPosition(target: HTMLElement): boolean {
   return Math.abs(target.getBoundingClientRect().top - (pad + margin)) <= 4;
 }
 
+/** Liegt der Fokus nirgends (body)? Dann darf ein Sprungziel ihn bekommen. */
+function focusIsFree(): boolean {
+  const active = document.activeElement;
+  return active === null || active === document.body || active === document.documentElement;
+}
+
 /**
  * Nach dem Anker-Scroll des Browsers nachführen (Laden, hashchange):
  * - Kacheln (data-jump-scroll): Raster in Sicht, wenn die Kachel an der Ankerposition steht;
  * - Ziele, die das Öffnen verschoben hat: zurück an die Ankerposition, wenn sie vorher dort
  *   standen (anchorY = Scrollposition davor) und seither niemand gescrollt hat.
+ * - Fokus (Feinschliff, REG3): Kam die Startseite per Client-Navigation mit Anker (Chip einer
+ *   Projektseite → /#skill-rag) und steht das Ziel dort, wohin der Anker führt, bekommt sein
+ *   Bedienelement den Fokus – wie beim Sprung innerhalb der Seite. Vorher blieb er auf body
+ *   (der Link der alten Seite war weg, Next fokussierte die Kachel nicht). Nur, solange der
+ *   Fokus nirgends liegt; nach Browser-Zurück an eine andere Stelle nicht (Ziel nicht an der
+ *   Ankerposition) und beim ersten Laden nicht (kein Fokusring ohne Eingabe).
  */
-function alignHashTarget(id: string, anchorY: number | null, release: () => void) {
+function alignHashTarget(id: string, anchorY: number | null, release: () => void, focus = false) {
   const start = performance.now();
   const align = () => {
     const target = document.getElementById(id);
@@ -141,6 +157,10 @@ function alignHashTarget(id: string, anchorY: number | null, release: () => void
       scrollEl.scrollIntoView({ block: 'start', behavior: 'auto' });
     } else if (moved) {
       target.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+    const focusEl = focusTarget(target);
+    if (focus && (atAnchor || moved) && focusIsFree() && focusable(focusEl)) {
+      focusEl.focus({ preventScroll: true });
     }
     release();
   };
@@ -183,7 +203,10 @@ export function HomeJump() {
       event.stopPropagation();
       jump(id);
     };
-    const fromHash = () => {
+    // Client-Navigation auf die Startseite? RouteTransition setzt data-yb-nav im Layout-Effekt,
+    // also vor diesem Effekt; beim ersten Laden des Dokuments fehlt es.
+    const viaClient = document.documentElement.hasAttribute('data-yb-nav');
+    const fromHash = (event?: Event) => {
       const id = decodeURIComponent(window.location.hash.slice(1));
       const before = id ? document.getElementById(id) : null;
       if (!before) {
@@ -193,7 +216,7 @@ export function HomeJump() {
       const anchorY = atAnchorPosition(before) ? window.scrollY : null;
       const release = holdTransitions();
       if (prepare(id)) {
-        alignHashTarget(id, anchorY, release);
+        alignHashTarget(id, anchorY, release, viaClient && !event);
       } else {
         release();
       }

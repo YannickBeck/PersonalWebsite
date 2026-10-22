@@ -1,22 +1,7 @@
-export type Lang = 'de' | 'en';
+import type { Lang } from './lang';
 
-export const LANGS: Lang[] = ['de', 'en'];
-export const DEFAULT_LANG: Lang = 'de';
-
-export function langFromPath(pathname: string): Lang {
-  return pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'de';
-}
-
-/** Pfad in die andere Sprache spiegeln: /projekte <-> /en/projekte */
-export function mirrorPath(pathname: string, lang: Lang): string {
-  const rest = langFromPath(pathname) === 'en' ? pathname.replace(/^\/en(\/|$)/, '/') : pathname;
-  const clean = rest === '' ? '/' : rest;
-  return lang === 'en' ? (clean === '/' ? '/en' : `/en${clean}`) : clean;
-}
-
-export function withLang(href: string, lang: Lang): string {
-  return lang === 'en' ? (href === '/' ? '/en' : `/en${href}`) : href;
-}
+// Sprache und Pfade (ohne Texte) stehen in lang.ts – Client-Komponenten importieren von dort
+export { LANGS, DEFAULT_LANG, langFromPath, mirrorPath, withLang, type Lang } from './lang';
 
 /**
  * UI-Texte (DE + EN). Inhalte über Yannick stehen NICHT hier, sondern im Content-Modell
@@ -64,7 +49,7 @@ const de = {
     factInterests: 'Interessen',
     badgeLabel: 'Ausweiskarte',
     badgeFlip: 'Karte umdrehen',
-    badgeHint: 'Ziehen oder Tippen dreht die Karte, ← und → schwenken sie.',
+    badgeHint: 'Klicken, Tippen oder Ziehen dreht die Karte, ← und → schwenken sie.',
     badgeStations: 'Stationen',
     badgeCerts: 'Zertifikate',
     skillsTitle: 'Woher mein Wissen *kommt*.',
@@ -75,7 +60,7 @@ const de = {
     skillsFilterLabel: 'Fähigkeiten nach Bereich filtern',
     skillsFilterAll: 'Alle',
     skillsTableLabel: 'Fähigkeiten',
-    skillsHint: 'Tippe eine Kachel an oder wähle sie mit den Pfeiltasten. Im Detailfeld stehen die Belege.',
+    skillsHint: 'Wähle eine Kachel aus, auch mit den Pfeiltasten. Im Detailfeld stehen die Belege.',
     skillsSource: 'Quelle',
     skillsListTitle: 'Alle Fähigkeiten als Liste',
     skillsLicense: 'Lizenz',
@@ -121,6 +106,8 @@ const de = {
   footerTagline: 'IT Consultant · Microsoft Cloud & AI · Modern Workplace',
   footerBuiltWith: 'Gebaut mit Next.js, Astryx und Ghost.',
   footerGroups: { pages: 'Seiten', contact: 'Kontakt', legal: 'Rechtliches' },
+  // Link auf /kontakt in der Footer-Gruppe „Kontakt“ – wie die H1 der Seite, nicht noch einmal „Kontakt“
+  footerContactLink: 'Schreib mir',
   previewNoticeLine: 'Vorschau: Offene Angaben sind gestrichelt markiert.',
   demoToken: 'Demo',
   kindProject: 'Projekt',
@@ -334,7 +321,7 @@ const en: Dictionary = {
     factInterests: 'Interests',
     badgeLabel: 'ID card',
     badgeFlip: 'Flip the card',
-    badgeHint: 'Drag or tap to flip the card; ← and → tilt it.',
+    badgeHint: 'Click, tap or drag to flip the card; ← and → tilt it.',
     badgeStations: 'Positions',
     badgeCerts: 'Certifications',
     skillsTitle: 'Where my know-how *comes from*.',
@@ -343,7 +330,7 @@ const en: Dictionary = {
     skillsFilterLabel: 'Filter skills by area',
     skillsFilterAll: 'All',
     skillsTableLabel: 'Skills',
-    skillsHint: 'Tap a tile or pick one with the arrow keys. The detail panel shows the evidence.',
+    skillsHint: 'Select a tile, or use the arrow keys. The detail panel shows the evidence.',
     skillsSource: 'Source',
     skillsListTitle: 'All skills as a list',
     skillsLicense: 'Licence',
@@ -382,6 +369,7 @@ const en: Dictionary = {
   footerTagline: 'IT Consultant · Microsoft Cloud & AI · Modern Workplace',
   footerBuiltWith: 'Built with Next.js, Astryx and Ghost.',
   footerGroups: { pages: 'Pages', contact: 'Contact', legal: 'Legal' },
+  footerContactLink: 'Get in touch',
   previewNoticeLine: 'Preview: open items are marked with a dashed outline.',
   demoToken: 'Demo',
   kindProject: 'Project',

@@ -70,13 +70,13 @@ Bekannt und hingenommen (Fix-Runde 1):
   `support`). Die Leistungspakete sind bewusst entfallen; die Seite hat jetzt die Anker `cloud`,
   `identity`, `ai`, `consulting`. Nur `#consulting` trifft zufällig, die übrigen öffnen die Seite
   oben (200). Alias-Anker nur, falls alte Links von außen bekannt werden.
-- **Unbekannte Blog-Slugs (FUN1):** `/blog/<unbekannt>` und `/en/blog/<unknown>` liefern Status
-  404, aber als leere `__next_error__`-Hülle (ohne JS kein Text, Titel „Yannick Beck“); mit JS
-  rendert der Client die gerahmte 404. Ursache: `notFound()` im On-Demand-Pfad (`dynamicParams`
-  muss für neue Ghost-Beiträge `true` bleiben). Der Live-Stand `2d636c6` verhält sich gleich.
-  Agenten bekommen die Markdown-404. Projekt-Slugs sind davon nicht betroffen
-  (`dynamicParams = false` → statische globale 404).
-- **Server-Log bei unbekannten Projekt-Slugs (FUN2):** Jeder Aufruf von `/projekte/<unbekannt>`
+- **Unbekannte Blog-Slugs (FUN1, seit dem Feinschliff behoben):** `/blog/<unbekannt>` und
+  `/en/blog/<unknown>` liefern die statische globale 404 (Status 404, `no-store`, Text und CSS
+  auch ohne JavaScript) wie unbekannte Projekt-Slugs. `src/proxy.ts` prüft den Slug gegen die
+  Ghost-Liste; neue Beiträge erscheinen weiter ohne Neubau (spätestens nach 10 s). Vorher (auch
+  live, `2d636c6`): leere `__next_error__`-Hülle. Details: `docs/blog-404.md`. Agenten bekommen
+  weiter die Markdown-404.
+- **Server-Log bei unbekannten Projekt- und Blog-Slugs (FUN2):** Jeder Aufruf von `/projekte/<unbekannt>` (seit dem Feinschliff auch `/blog/<unbekannt>`)
   schreibt `Error: Internal: NoFallbackError` samt Stacktrace ins Log (Next 16.3.6 mit
   `dynamicParams = false`); die Antwort selbst ist korrekt (404, globale 404). Log-Alarme
   darauf nicht anschlagen lassen (Filter auf `NoFallbackError`).

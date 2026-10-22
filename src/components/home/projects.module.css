@@ -118,6 +118,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.triggerText {
+  min-width: 0;
+}
+
 .trigger[aria-disabled='true'] {
   cursor: default;
 }
@@ -353,6 +357,25 @@
   .item[data-open='false'] .head,
   .item[data-open='false'] .panelInner {
     opacity: 0;
+  }
+
+  /* Geschlossen ist der Kopf-Button nur so breit wie der Streifen (Feinschliff): Vorher war er so
+     breit wie der unsichtbare Inhalt (--open-w) und ragte bei 1440px von x 1208 bis 2132 aus dem
+     Bild – VoiceOver-Cursor, Lupe und Sprachsteuerungs-Overlays zeigten dorthin. Er bleibt in
+     der Titelzeile (Höhe wie offen) und rückt an die Kante des Streifens; der Titel darin behält
+     die Breite des Kopfs (.triggerText) und bricht deshalb gleich um – Kopf, Inhalt und
+     Reihenhöhe bleiben gleich, nichts springt. Der Text ragt unsichtbar (Kopf opacity 0) über den
+     Button hinaus. Trefferfläche bleibt ::after über dem ganzen Streifen. Eine Box über die volle
+     Streifenhöhe war höher als der Bildschirm unter den Leisten: Chrome zentrierte sie beim
+     Fokus, ihr oberes Ende lag unter der Abschnittsnavigation (Gate, 1024 × 768). */
+  .item[data-open='false'] .trigger {
+    width: var(--strip);
+    margin-inline-start: calc(-1 * var(--spacing-8));
+  }
+
+  .item[data-open='false'] .triggerText {
+    flex: none;
+    width: calc(var(--open-w) - 2 * var(--spacing-8));
   }
 
   .strip {

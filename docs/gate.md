@@ -12,6 +12,10 @@ liegt seit 2026-10-22 im Repo. Vorher lagen Gate, Mock und Tests in einem Arbeit
 | `scripts/gate/serve.sh` | Standalone-Server einer Variante starten, stoppen, prüfen |
 | `scripts/gate/shoot.mjs` | Screenshot-Gate: Seiten × Breiten × hell/dunkel, Metriken, Agenten-Prüfungen |
 | `scripts/gate/home-test.mjs` | Regressionstests der Startseiten-Interaktionen |
+| `scripts/gate/perf.mjs` | Gedrosselter Mobil-Lauf (Gate-Schritt 5b): LCP mit Element, CLS, übertragenes JS |
+| `scripts/vt-probe.mjs` | View Transitions je Navigation (Typen, Morph, Taktung, Fokus nach dem Fähigkeits-Sprung) |
+| `scripts/backscroll.mjs` | Browser-Zurück/-Vorwärts: Scroll-Position, auch mit Anker und unter Reduced Motion |
+| `scripts/jssize.mjs` | JS-/CSS-Größen je Seite (gzip), mit und ohne `noModule`-Polyfill |
 
 Alle Skripte lesen nur. Sie schicken kein Formular ab und brauchen keine echten Schlüssel.
 
@@ -40,6 +44,10 @@ scripts/gate/serve.sh start "$TMPDIR/yb-gate/gaps" 3352
 node scripts/gate/shoot.mjs http://127.0.0.1:3351 "$TMPDIR/yb-gate/out/prod" --label=prod
 node scripts/gate/shoot.mjs http://127.0.0.1:3352 "$TMPDIR/yb-gate/out/gaps" --label=gaps
 node scripts/gate/home-test.mjs http://127.0.0.1:3351 "$TMPDIR/yb-gate/out/prod"
+node scripts/vt-probe.mjs http://127.0.0.1:3351 "$TMPDIR/yb-gate/out/vt.json"            # dazu --reduce, --width=390
+node scripts/backscroll.mjs http://127.0.0.1:3351 "$TMPDIR/yb-gate/out/backscroll.json"
+node scripts/gate/perf.mjs http://127.0.0.1:3351 "$TMPDIR/yb-gate/out/perf"             # nur bei Bedarf, ~1 min
+node scripts/jssize.mjs "$TMPDIR/yb-gate/prod/standalone" prod > "$TMPDIR/yb-gate/out/jssize.json"
 scripts/gate/serve.sh stop 3351; scripts/gate/serve.sh stop 3352
 ```
 
@@ -131,8 +139,10 @@ Vorsicht: `stop 2368` beendet den Ghost-Mock.
 Seitenliste: `PUBLIC_ROUTES` und `NOINDEX_ROUTES` aus `src/lib/routes.ts`, je DE und `/en`.
 Detailseiten kommen aus den Links von `/projekte`, `/en/projekte`, `/blog` und `/en/blog`, ohne
 `demo-`-Slugs, damit Produktion und Vorschau dieselbe Liste haben. Dazu die 404-Proben
-`/gibt-es-nicht-404`, `/en/gibt-es-nicht-404` (beide global) und `/projekte/unbekannt-404` (im
-Segment). Mit dem heutigen Stand sind das 34 Seiten. Breiten 390/768/1024/1440/1920 (Höhen
+`/gibt-es-nicht-404`, `/en/gibt-es-nicht-404` (Pfad ohne Route), `/projekte/unbekannt-404`
+(`dynamicParams = false`) sowie `/blog/unbekannt-404` und `/en/blog/unbekannt-404` (Proxy,
+`docs/blog-404.md`). Alle fünf liefern die statische globale 404. Mit dem heutigen Stand sind das
+36 Seiten. Breiten 390/768/1024/1440/1920 (Höhen
 844/1024/768/900/1080), `--quick` nur 390 und 1440, jeweils hell und dunkel, ohne
 Touch-Emulation.
 
@@ -168,6 +178,9 @@ Einmal je Basis-URL laufen die Agenten-Prüfungen per HTTP:
 - Sitemap und llms.txt ohne Testprojekt, alle Sitemap-Ziele 200 und indexierbar
 - `noindex` auf den nicht gelisteten Seiten
 - `robots.txt` mit Sitemap-Zeile
+- 404-Proben im Server-HTML: Status 404, keine `__next_error__`-Hülle, `lang` gesetzt, H1 mit
+  Text, alle Stylesheets abrufbar, kein langes `s-maxage` (Feinschliff)
+- 404-Proben im Browser ohne JavaScript (390 px): H1 sichtbar, Stylesheets angewendet
 
 Die globale 404 ist ein statisches HTML mit `lang="de"`. Unter `/en` setzt ihr Boot-Script `lang`
 vor dem ersten Paint. Deshalb prüft der Browser-Lauf `lang` für alle Seiten, das Server-HTML nur
@@ -205,6 +218,11 @@ Jeder Test lädt die Startseite neu (1440 px, falls nicht anders angegeben). Gep
 - **Band der Abschnittsnavigation:** Klicks aufs leere Papier (auch im Seitenrand) treffen das
   Band, keine verdeckte Kachel wird gewählt, kein Seitenüberlauf (A113).
 - **Reduced Motion:** 0 laufende Animationen nach Laden, Filter, Akkordeon, Werdegang und Karte.
+- **Feinschliff:** geschlossener Kopf-Button des Akkordeons bei 1440 und 1024 px nur so breit wie
+  der Streifen (vorher bis x 2132 bei 1440 px); Fähigkeits-Chip einer Projektseite → `/#skill-rag`
+  per Client-Navigation: Kachel gewählt, fokussiert, im Bild (REG3); ohne JavaScript (1440/390 px):
+  Theme-Schalter, Menü-Button, Filter-Pillen und „Karte umdrehen“ fehlen, die Textliste aller
+  Kacheln ist sichtbar. Diese zehn Läufe schlagen auf `52febac` alle fehl.
 
 Die Anzahl der Kacheln (35) prüft der Test nicht, sie hängt am Content-Modell.
 
@@ -252,6 +270,72 @@ Vorher-Aufnahme der Live-Seite (Stand `2d636c6`) mit
 - 40 Überschriften-Sprünge H1 → H3 auf den Listen.
 - Agenten-Prüfungen 3/18: `lang` nur per Script, kein JSON-LD, kein `og:image`, kein `llms.txt`,
   keine Markdown-Weiche, Testprojekt erreichbar.
+
+## vt-probe.mjs
+
+`node scripts/vt-probe.mjs <baseUrl> [out.json] [--reduce] [--width=1440]`
+
+Instrumentiert `document.startViewTransition` und prüft 13 Schritte gegen die Erwartung:
+Header → `/projekte` (nav-forward), Projektzeile → `/projekte/orbitalis` (Morph des Covers),
+„Weiteres Projekt“ → Bachelorarbeit (nav-lateral; die Detailseite hat kein Cover, also kein Morph)
+und zurück → Orbitalis (Morph), Zurück-Link → `/projekte` (Rück-Morph), Header → `/cv`
+(nav-lateral), Marke → `/` (nav-back), Browser-Zurück/-Vorwärts, Fähigkeits-Chip → `/#skill-rag`
+(Fokus auf der Kachel), `/blog` → Beitrag (Morph), Sprachwechsel (Dokumentwechsel ohne VT,
+`lang="en"`), Theme (Reveal). Unter `--reduce`: keine Pseudo-Animation länger als 0 ms, kein
+Theme-Reveal, Browser-Zurück/-Vorwärts mit Typ `nav-none`. Schmal laufen die Header-Ziele über den
+Drawer; Morph-Paare erwartet das Skript erst ab 1024 px (React bildet ein Paar nur, wenn beide
+Flächen im Bild liegen). Exit 1 bei einer Abweichung oder einem Konsolenfehler.
+
+## backscroll.mjs
+
+`node scripts/backscroll.mjs <baseUrl> [out.json] [--reduce-only|--motion-only]`
+
+Neun Szenarien je Modus (no-preference und reduce): Startseite bei y=0 und y=1500, nach einer
+Pille der Abschnittsnavigation (Anker `/#projekte` per replaceState) mit und ohne anschließendes
+Scrollen an den Anfang, `/projekte` bei y=600, mobil über den Drawer (390 px, Touch), auch EN.
+Weg per Header-Link bzw. Drawer, dort auf 300 scrollen, Zurück, Vorwärts, Zurück. Erwartet: die
+verlassene Position ±2 px, vorwärts 300. Klicks per Koordinaten.
+
+Vorher (`52febac`): 13/18. Mit Anker und danach gescrolltem Anfang landete Zurück am Abschnitt
+(Drawer: 3605 statt 0, reduce 2551 statt 0; REG1). Nachher 18/18.
+
+## perf.mjs (Gate-Schritt 5b)
+
+`node scripts/gate/perf.mjs <baseUrl> [outDir] [--runs=8] [--pages=/,/en] [--profile=slow4g|lighthouse]`
+
+Je Lauf ein frischer Kontext, 390×844 @3x, Touch, Cache aus. Profil `slow4g` = Chrome-DevTools-
+Voreinstellung „Slow 4G“ (562,5 ms, 1,44 Mbit/s herunter, 675 kbit/s hoch) plus 4× CPU;
+`lighthouse` = 150 ms, 1,6/0,75 Mbit/s, 4× CPU (so maß die Abschluss-Jury). Gemessen: FCP, LCP mit
+Element und Bild-URL, CLS mit verschiebenden Elementen, übertragenes JavaScript (CDP), geladene
+`noModule`-Skripte. Bericht, keine Abnahme: Exit 1 nur bei Ladefehlern.
+
+## jssize.mjs
+
+`node scripts/jssize.mjs <ordner mit .next> [label]` – auch für eine Standalone-Kopie aus
+`build.sh` (`<out>/standalone`). Je Seite `jsGz` (alle referenzierten Skripte, wie in den
+früheren Berichten) und `jsGzModule` (ohne `<script noModule>`). Nexts Polyfill-Chunk
+(core-js, 39,4 KB gz) steht in jeder Seite als `noModule` und wird von den Zielbrowsern nie
+geladen (perf.mjs: 0 geladen). `jsGzModule` ist deshalb die Zahl, die ein Besucher überträgt.
+
+## Referenzwerte Feinschliff (2026-10-22)
+
+Gleiche Werkzeuge, Arbeitsstand vor dem Commit „Redesign: Feinschliff“, gegen den Ghost-Mock:
+
+| Build | Läufe | Abnahme-Metriken | Agenten | Kleine Fokusziele @390 | Rechtstext-Lücken |
+| --- | --- | --- | --- | --- | --- |
+| prod | 360 (36 Seiten) | alle 0 | 20/20 | 10 | Impressum 3, Datenschutz 5 (DE und EN) |
+| gaps | 360 | alle 0 | 20/20 | 66 | wie prod |
+| form | 360 | alle 0 | 20/20 | 10 | Impressum 3, Datenschutz 8 |
+
+- home-test 52/52 in allen drei Builds (42 bisherige + 10 neue).
+- vt-probe 13/13 bei 1440 und 390 px, jeweils auch mit `--reduce`; backscroll 18/18.
+- perf.mjs (slow4g, 16 Läufe je Stand, `/`): LCP-Median 2538 ms vorher, 2540 ms nachher (Porträt,
+  CLS 0 in 16/16 je Stand); FCP-Median 2040 bzw. 2038 ms (zweigipflig, ~1,92 oder ~2,15 s); JS
+  übertragen 266,9 → 259,3 KB.
+- url-check 74/74 (Produktion, Vorschau, Formular), link-check 0 Befunde, contact-api-test 23/23.
+- axe-core 4.13 (40 Läufe: `/`, `/en`, `/cv`, `/projekte`, `/projekte/orbitalis`, `/kontakt`,
+  `/content-status`, beide Blog-404, globale 404; 1440/390; hell/dunkel): nur die dokumentierten
+  Ausnahmen (Namenszug, „404“).
 
 ## Grenzen
 

@@ -13,19 +13,30 @@ import { Gap } from '@/components/gap';
 import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import { CERTIFICATIONS, EDUCATION, FOCUS_LIST, LANGUAGES, LINKEDIN_URL, PERSON, STATIONS, projectById } from '@/content/profile';
 import { labelChips, projectHref, stationPlace } from '@/content/profile-view';
-import { formatPeriod, formatYears, sentenceList } from '@/lib/period';
+import { periodParts, sentenceList } from '@/lib/period';
 import styles from './cv-content.module.css';
 
 /**
  * Lebenslauf aus dem Content-Modell (LinkedIn-Export), Redesign B4: Kopf mit dem Namen in der
  * Display-Schrift (wie der Namenszug der Startseite, aber in Tinte), darunter nummerierte
- * Abschnitte wie auf der Startseite. Linke Spalte je Eintrag: Jahre in der Display-Schrift plus
- * genauer Zeitraum (Stationen, Ausbildung) bzw. Aussteller (Zertifikate) bzw. Sprache.
+ * Abschnitte wie auf der Startseite. Linke Spalte je Eintrag: Zeitraum mit Monaten in der
+ * Display-Schrift (Stationen, Ausbildung; Feinschliff: vorher standen Jahre und Zeitraum doppelt
+ * da, „2026 – HEUTE“ über „Okt. 2026 – heute“) bzw. Aussteller (Zertifikate) bzw. Sprache.
  *
  * Druckbar (globals.css + cv-content.module.css @media print): Header, Footer und Bedienelemente
  * fallen weg, helles Schema, Einträge brechen nicht über Seiten. Anker je Eintrag
  * (#bechtle-studium …).
  */
+/** Zeitraum in der Display-Schrift; bricht nur nach dem Strich um („OKT. 2023 –“ / „OKT. 2026“). */
+function Period({ start, end, lang }: { start: string; end: string | null; lang: Lang }) {
+  const [from, to] = periodParts(start, end, lang);
+  return (
+    <span className={`${styles.years} yb-display`}>
+      <span className={styles.nowrap}>{from}</span> <span className={styles.nowrap}>{to}</span>
+    </span>
+  );
+}
+
 export function CvContent({ lang }: { lang: Lang }) {
   const dict = getDictionary(lang);
   const page = dict.pages.cv;
@@ -47,7 +58,7 @@ export function CvContent({ lang }: { lang: Lang }) {
               </Link>
             </Text>
             <HStack gap={2} wrap="wrap" className="print-hide">
-              <PrintButton lang={lang} />
+              <PrintButton label={dict.printButton} />
               <Button
                 label={dict.home.aboutLinkedIn}
                 aria-label={dict.linkedinExternal}
@@ -67,10 +78,7 @@ export function CvContent({ lang }: { lang: Lang }) {
           {STATIONS.map((s) => (
             <li key={s.id} id={s.id} className={styles.entry}>
               <div className={styles.when}>
-                <span className={`${styles.years} yb-display`}>{formatYears(s.start, s.end, lang)}</span>
-                <Text type="supporting" color="secondary">
-                  {formatPeriod(s.start, s.end, lang)}
-                </Text>
+                <Period start={s.start} end={s.end} lang={lang} />
               </div>
               <VStack gap={3}>
                 <VStack gap={0.5}>
@@ -124,10 +132,7 @@ export function CvContent({ lang }: { lang: Lang }) {
           {EDUCATION.map((e) => (
             <li key={e.id} id={e.id} className={styles.entry}>
               <div className={styles.when}>
-                <span className={`${styles.years} yb-display`}>{formatYears(e.start, e.end, lang)}</span>
-                <Text type="supporting" color="secondary">
-                  {formatPeriod(e.start, e.end, lang)}
-                </Text>
+                <Period start={e.start} end={e.end} lang={lang} />
               </div>
               <VStack gap={0.5}>
                 <Heading level={3} className={styles.role}>

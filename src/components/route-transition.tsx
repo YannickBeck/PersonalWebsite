@@ -3,7 +3,7 @@
 import { ViewTransition, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { armMorph } from '@/components/morph';
-import { INTERCEPT_POPSTATE, NAV_BACK, NAV_FORWARD, PAGE_TRANSITION, morphKeyFor } from '@/lib/transitions';
+import { INTERCEPT_POPSTATE, NAV_BACK, NAV_FORWARD, NAV_NONE, PAGE_TRANSITION, morphKeyFor } from '@/lib/transitions';
 import { suppressTransitions } from '@/lib/instant';
 
 type NavigationLike = { currentEntry?: { index: number; key: string } | null };
@@ -82,11 +82,13 @@ let pendingRestore: number | null = null;
  * stopImmediatePropagation unterdrückt Nexts eigenen popstate-Handler. Getestet mit Next
  * TESTED_NEXT (src/lib/transitions.ts); nach jedem Next-Upgrade scripts/vt-probe.mjs und
  * scripts/backscroll.mjs laufen lassen (AGENTS.md). Abschalten ohne Codeumbau:
- * INTERCEPT_POPSTATE = false → Nexts Standard (harter Schnitt, korrekte Position).
- * Nicht abgefangen (Nexts Standardverhalten bleibt): ohne Navigation API oder View
- * Transitions, bei Reduced Motion, bei fremden History-Einträgen (kein __NA, Next lädt neu),
- * bei reinen Anker-Wechseln auf derselben Seite, bei unbekannter Ziel-Position und wenn der
- * Browser selbst schon animiert (hasUAVisualTransition, z. B. Wischgeste).
+ * INTERCEPT_POPSTATE = false → Nexts Standard (harter Schnitt).
+ * Ohne Animation, aber abgefangen (Typ nav-none, Feinschliff REG1): ohne View Transitions, bei
+ * Reduced Motion und wenn der Browser selbst schon animiert (hasUAVisualTransition, z. B.
+ * Wischgeste) – vorher übernahm dort Next, und mit Anker in der URL landete Zurück am Abschnitt.
+ * Nicht abgefangen (Nexts Standardverhalten bleibt): ohne Navigation API, bei fremden
+ * History-Einträgen (kein __NA, Next lädt neu), bei reinen Anker-Wechseln auf derselben Seite
+ * und bei unbekannter Ziel-Position.
  */
 export function RouteTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -131,20 +133,26 @@ export function RouteTransition({ children }: { children: ReactNode }) {
         router.replace(`${to}${search}${hash}`, { scroll: true });
         return;
       }
-      const skip =
-        !INTERCEPT_POPSTATE ||
-        to === currentPath.current ||
-        typeof document.startViewTransition !== 'function' ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-        (event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition === true ||
-        !isNextEntry;
+      const skip = !INTERCEPT_POPSTATE || to === currentPath.current || !isNextEntry;
       if (skip || entry === null || previous === null || target === undefined) {
         return;
       }
       event.stopImmediatePropagation();
       markNavigationStart();
-      const type = entry.index > previous.index ? NAV_FORWARD : NAV_BACK;
-      armMorph(morphKeyFor(currentPath.current, to));
+      // Ohne Animation, aber auf demselben Weg (Feinschliff, REG1): unter Reduced Motion, ohne
+      // View Transitions und wenn der Browser selbst schon animiert (Wischgeste). Vorher übernahm
+      // dort Next – mit Anker in der URL (/#projekte aus der Abschnittsnavigation) scrollte Chrome
+      // dann zum Abschnitt statt an die verlassene Stelle: Es sucht den Anker nach popstate beim
+      // nächsten Layout, Nexts Wiederherstellung stand da schon im DOM (gemessen 2551 statt 0 px).
+      // Hier kommt die neue Seite erst einen Frame später – der Anker fehlt dann noch.
+      const animate =
+        typeof document.startViewTransition === 'function' &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+        (event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition !== true;
+      const type = !animate ? NAV_NONE : entry.index > previous.index ? NAV_FORWARD : NAV_BACK;
+      if (animate) {
+        armMorph(morphKeyFor(currentPath.current, to));
+      }
       pendingRestore = target;
       const leaving = window.scrollY;
       // Nächster Frame (vor dem Malen): Der Browser hat inzwischen seine eigene Scroll-

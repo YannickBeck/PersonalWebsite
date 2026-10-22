@@ -113,6 +113,16 @@
   cursor: grabbing;
 }
 
+/* Ohne JavaScript lässt sich die Karte nicht drehen oder ziehen (Feinschliff) */
+@media (scripting: none) {
+  .card,
+  .card:active {
+    cursor: auto;
+    user-select: auto;
+    -webkit-user-select: auto;
+  }
+}
+
 .face {
   position: relative;
   grid-area: 1 / 1;

@@ -9,6 +9,7 @@
  *   nav-back     zurück nach oben (Detail → Liste, Zurück-Link)
  *   nav-lateral  gleiche Ebene (Projekte ↔ Blog, DE ↔ EN)
  *   filter       Filter-Tabs auf /projekte und /blog: nur das Raster blendet über
+ *   nav-none     Browser-Zurück/-Vorwärts ohne Animation (route-transition.tsx, REG1)
  *   theme        Theme-Wechsel (document.startViewTransition, kein React-Übergang)
  */
 /**
@@ -26,6 +27,8 @@ export const NAV_FORWARD = 'nav-forward';
 export const NAV_BACK = 'nav-back';
 export const NAV_LATERAL = 'nav-lateral';
 export const FILTER = 'filter';
+/** Browser-Zurück/-Vorwärts ohne Animation (Reduced Motion, ohne VT-Support, Wischgeste – REG1). */
+export const NAV_NONE = 'nav-none';
 
 type ClassMap = Record<'default' | (string & {}), string>;
 
@@ -38,14 +41,15 @@ export const PAGE_TRANSITION: ClassMap = {
   [NAV_BACK]: 'yb-nav-back',
   [NAV_LATERAL]: 'yb-nav-fade',
   [FILTER]: 'none',
+  [NAV_NONE]: 'none',
   default: 'yb-nav-fade',
 };
 
 /** Karten-Cover ↔ Detail-Cover: morpht bei jeder Seiten-Navigation, nie beim Filtern. */
-export const MORPH_SHARE: ClassMap = { [FILTER]: 'none', default: 'yb-morph' };
+export const MORPH_SHARE: ClassMap = { [FILTER]: 'none', [NAV_NONE]: 'none', default: 'yb-morph' };
 
 /** Kategorie-Marke im Cover: eigenes Paar über dem Cover (MOT5, motion.css §2c). */
-export const MORPH_TAG_SHARE: ClassMap = { [FILTER]: 'none', default: 'yb-morph-tag' };
+export const MORPH_TAG_SHARE: ClassMap = { [FILTER]: 'none', [NAV_NONE]: 'none', default: 'yb-morph-tag' };
 
 /** Filter-Raster: Paar (gleicher Name, neuer key) blendet nur beim Typ „filter“ über. */
 export const FILTER_SHARE: ClassMap = { [FILTER]: 'yb-filter', default: 'none' };

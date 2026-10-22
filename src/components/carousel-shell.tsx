@@ -7,7 +7,6 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { IconButton } from '@astryxdesign/core/IconButton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { SectionHeader } from '@/components/section-header';
-import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import styles from './carousel-row.module.css';
 
 type Edges = { overflow: boolean; prev: boolean; next: boolean };
@@ -36,17 +35,17 @@ function itemStart(scroller: HTMLElement, item: Element): number {
  */
 export function CarouselShell({
   title,
-  lang,
+  labels,
   action,
   children,
 }: {
   title: string;
-  lang: Lang;
+  /** Beschriftung der Pfeile (vom Server, kein Dictionary im Client-Bundle) */
+  labels: { prev: string; next: string };
   /** Weiterführung (z. B. „Alle Projekte“) vor den Pfeilen; mobil dann in eigener Zeile. */
   action?: ReactNode;
   children: ReactNode;
 }) {
-  const dict = getDictionary(lang);
   const root = useRef<HTMLDivElement>(null);
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -122,7 +121,7 @@ export function CarouselShell({
             <IconButton
               ref={prevRef}
               variant="secondary"
-              label={dict.carouselPrev}
+              label={labels.prev}
               icon={<Icon icon="chevronLeft" />}
               isDisabled={!edges.prev}
               onClick={() => step(-1)}
@@ -134,7 +133,7 @@ export function CarouselShell({
             <IconButton
               ref={nextRef}
               variant="secondary"
-              label={dict.carouselNext}
+              label={labels.next}
               icon={<Icon icon="chevronRight" />}
               isDisabled={!edges.next}
               onClick={() => step(1)}

@@ -27,7 +27,9 @@ Zwei Quellen, klar getrennt:
 - **Koenig-Cards:** Bild (auch breit/voll), Galerie, Callout, Bookmark, Toggle haben
   Basisstyles (`src/components/ghost-content.module.css`).
 - **Veröffentlichen** löst per Webhook (`site.changed` → `/api/revalidate`)
-  die Aktualisierung aus (zusätzlich ISR alle 60 s auf Listen).
+  die Aktualisierung aus (zusätzlich ISR alle 60 s auf Listen). Ein neuer Beitrag ist unter
+  `/blog/<slug>` spätestens nach 10 s erreichbar, ein gelöschter liefert spätestens nach 60 s die
+  404 (`src/proxy.ts`, `docs/blog-404.md`) – ohne Neubau.
 
 ## 2. Code (`/root/me-website`, GitHub `YannickBeck/PersonalWebsite`)
 
@@ -39,7 +41,7 @@ Zwei Quellen, klar getrennt:
   nur im Vorschau-Build (`NEXT_PUBLIC_SHOW_GAPS=1`, docs/environment.md) als gestrichelter
   „OFFEN: …“-Platzhalter; in Produktion fehlen sie ganz. Sobald eine Angabe da ist: Wert in
   profile.ts eintragen (`status: 'belegt'`), Lücke aus GAPS löschen.
-- **Erfolge (Startseite 05):** `ACHIEVEMENTS` in profile.ts – leer = Abschnitt und Navigationspunkt
+- **Erfolge (Startseite, Abschnitt Erfolge – Nummer 05, solange es Einträge gibt):** `ACHIEVEMENTS` in profile.ts – leer = Abschnitt und Navigationspunkt
   fehlen; mit Einträgen erscheinen beide automatisch als Laufband (Titel kurz, `detail` optional,
   jeweils mit Quelle).
 - **Fähigkeiten (Periodensystem, Startseite 02):** `SKILLS` in profile.ts – Kürzel (`symbol`,

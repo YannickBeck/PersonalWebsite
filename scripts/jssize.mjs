@@ -1,5 +1,10 @@
 // JS/CSS-Größen (gzip -9 und brotli) eines Next-Builds: gesamt + je prerenderter Seite.
-// Nutzung: node jssize.mjs <projektdir> [label]
+// Nutzung: node jssize.mjs <projektdir> [label]   (projektdir = Ordner mit .next, auch eine
+// Standalone-Kopie aus scripts/gate/build.sh: <out>/standalone)
+// Je Seite: jsGz = alle referenzierten Skripte (wie bis zur Abschluss-Fix-Runde berichtet),
+// jsGzModule = ohne <script noModule> – das lädt ein moderner Browser tatsächlich. Nexts
+// Polyfill-Chunk (core-js, ~38 KB gz) steht als noModule in jeder Seite, wird von den
+// browserslist-Zielen aber nie geladen (Feinschliff: vorher in jsGz mitgezählt).
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -42,14 +47,24 @@ for (const f of htmlFiles) {
   const html = fs.readFileSync(f, 'utf8');
   const route = '/' + path.relative(path.join(next, 'server', 'app'), f).replace(/\.html$/, '').replace(/(^|\/)index$/, '');
   const js = new Set([...html.matchAll(/(?:src|href)="(\/_next\/static\/[^"?]+\.js)(?:\?[^"]*)?"/g)].map((m) => m[1]));
+  const noModule = new Set(
+    [...html.matchAll(/<script\b[^>]*>/g)]
+      .map((m) => m[0])
+      .filter((tag) => /\bnoModule\b/i.test(tag))
+      .map((tag) => /src="([^"?]+)/.exec(tag)?.[1])
+      .filter(Boolean),
+  );
   const css = new Set([...html.matchAll(/href="(\/_next\/static\/[^"?]+\.css)(?:\?[^"]*)?"/g)].map((m) => m[1]));
   let jsGz = 0;
+  let jsGzModule = 0;
   let cssGz = 0;
   const missing = [];
   for (const u of js) {
     const s = sizeOf.get(u);
-    if (s) jsGz += s.gz;
-    else missing.push(u);
+    if (s) {
+      jsGz += s.gz;
+      if (!noModule.has(u)) jsGzModule += s.gz;
+    } else missing.push(u);
     union.add(u);
   }
   for (const u of css) {
@@ -57,7 +72,7 @@ for (const f of htmlFiles) {
     if (s) cssGz += s.gz;
     unionCss.add(u);
   }
-  pages[route] = { jsFiles: js.size, jsGz, cssGz, missing: missing.length };
+  pages[route] = { jsFiles: js.size, jsGz, jsGzModule, noModule: noModule.size, cssGz, missing: missing.length };
 }
 let unionGz = 0;
 for (const u of union) unionGz += sizeOf.get(u)?.gz ?? 0;

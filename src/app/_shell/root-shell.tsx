@@ -13,7 +13,8 @@ import { Layout, LayoutContent, LayoutFooter, LayoutHeader } from '@astryxdesign
 import { THEME_BOOT } from '@/theme/theme-boot';
 import { InlineScript } from '@/components/inline-script';
 import { SHOW_GAPS } from '@/lib/gaps';
-import type { Lang } from '@/i18n/dictionaries';
+import { getDictionary, type Lang } from '@/i18n/dictionaries';
+import { footerData, headerLabels, previewNoticeLabels } from '@/i18n/chrome';
 import { FONT_VARIABLES } from './fonts';
 import frame from '../frame.module.css';
 
@@ -59,7 +60,7 @@ export function RootShell({ lang, children }: { lang: Lang; children: ReactNode 
       </head>
       <body>
         <Providers lang={lang}>
-          <SkipLink />
+          <SkipLink label={getDictionary(lang).skipToContent} />
           <div className="print-area">
             <Layout
               height="auto"
@@ -69,18 +70,18 @@ export function RootShell({ lang, children }: { lang: Lang; children: ReactNode 
                   {SHOW_GAPS ? (
                     <LayoutHeader padding={2} className={`${frame.notice} yb-vt-notice print-hide`}>
                       <HStack paddingInline={2}>
-                        <PreviewNotice />
+                        <PreviewNotice labels={previewNoticeLabels(lang)} />
                       </HStack>
                     </LayoutHeader>
                   ) : null}
                   <LayoutHeader hasDivider padding={0} className={`${frame.header} yb-vt-header print-hide`}>
-                    <SiteHeader />
+                    <SiteHeader labels={headerLabels(lang)} />
                   </LayoutHeader>
                 </>
               }
               footer={
                 <LayoutFooter hasDivider className="yb-vt-footer print-hide">
-                  <SiteFooter />
+                  <SiteFooter data={footerData(lang)} />
                 </LayoutFooter>
               }
             >

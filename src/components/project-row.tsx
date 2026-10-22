@@ -1,7 +1,7 @@
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
-import { ProjectVisual } from '@/components/project-visual';
+import { ProjectVisual, visualShowsTitle } from '@/components/project-visual';
 import { MorphSource } from '@/components/morph';
 import { TransitionLink } from '@/components/transition-link';
 import { ChipList, PlainChip, SkillChipLink } from '@/components/skill-chip';
@@ -48,8 +48,10 @@ export function ProjectRow({
         <Heading level={headingLevel} id={titleId} textWrap="balance" className={styles.title}>
           {project.title[lang]}
         </Heading>
+        {/* Steht der volle Titel schon im Titelblatt daneben (Bachelorarbeit), die Kurzfassung wie
+            im Akkordeon statt des Teasers, der mit demselben Titel beginnt (Feinschliff) */}
         <Text as="p" textWrap="pretty" className={styles.teaser}>
-          {project.teaser[lang]}
+          {(visualShowsTitle(project) ? (project.brief.summary ?? project.teaser) : project.teaser)[lang]}
         </Text>
         <Text type="supporting" color="secondary" as="p" id={`${titleId}-skills`} className={styles.chipsLabel}>
           {dict.home.projectsSkills}

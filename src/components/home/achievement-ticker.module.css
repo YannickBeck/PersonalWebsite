@@ -1,7 +1,7 @@
 /*
- * 05 Erfolge – Laufband (achievement-ticker.tsx). Bewegung: motion.css §9 (nur no-preference
- * und ab 768px). Ohne Bewegung (reduce, schmal) ist es eine statische Liste ohne Kopie und
- * ohne Schalter.
+ * 05 Erfolge – Laufband (achievement-ticker.tsx). Bewegung: motion.css §9 (nur no-preference,
+ * ab 768px und mit JavaScript). Ohne Bewegung (reduce, schmal, ohne JavaScript) ist es eine
+ * statische Liste ohne Kopie und ohne Schalter.
  */
 .ticker {
   display: flex;
@@ -54,14 +54,14 @@
   display: none;
 }
 
-@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) and (scripting: enabled) {
   .controls {
     display: flex;
   }
 }
 
 /* Ohne Bewegung: eine Liste, umbrechend; schmal: untereinander */
-@media (prefers-reduced-motion: reduce), (max-width: 767px) {
+@media (prefers-reduced-motion: reduce), (max-width: 767px), (scripting: none) {
   .viewport {
     -webkit-mask-image: none;
     mask-image: none;

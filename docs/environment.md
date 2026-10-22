@@ -5,7 +5,7 @@ lokal in `.env.local` – nie ins Repository.
 
 | Variable | Wo wirkt sie | Pflicht | Beschreibung |
 | --- | --- | --- | --- |
-| `GHOST_URL` | Build + Laufzeit (ISR) | für Blog | Basis-URL des Ghost-CMS. Ohne Wert bleiben Blog-Listen leer (Build läuft trotzdem). |
+| `GHOST_URL` | Build + Laufzeit (ISR, Proxy) | für Blog | Basis-URL des Ghost-CMS. Ohne Wert bleiben Blog-Listen leer (Build läuft trotzdem). Zur Laufzeit liest auch `src/proxy.ts` damit die Slug-Liste (unbekannte Blog-Slugs → statische 404, `docs/blog-404.md`); ohne Wert lässt der Proxy alles durch. |
 | `GHOST_CONTENT_KEY` | Build + Laufzeit | für Blog | Content-API-Key (nur lesend). |
 | `REVALIDATE_SECRET` | Laufzeit | für Webhook | Geheimnis für `/api/revalidate` (Ghost-Webhook `site.changed`). |
 | `NEXT_PUBLIC_SHOW_GAPS` | **Build** | nein | `1` = Vorschau-Build: offene Angaben aus `src/content/profile.ts` erscheinen als gestrichelte „OFFEN: …“-Platzhalter, dazu Vorschau-Hinweiszeile, `/content-status` im Footer (mit „Benötigt“ und den Quellen), Formular-Zustandsvorschau und Demo-Artikel. Leer = Produktion: offene Angaben fehlen vollständig; `/content-status` bleibt erreichbar, zeigt aber nur Bezeichnung und Fundstelle je Lücke. Wird beim Build in den Code eingesetzt – Umschalten erfordert einen neuen Build. |

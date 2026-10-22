@@ -8,6 +8,7 @@ import {
   ABOUT,
   CERTIFICATIONS,
   EDUCATION,
+  GAPS,
   FOCUS_AREAS,
   FOCUS_LIST,
   INTERESTS,
@@ -30,6 +31,8 @@ import { getBySlug, getPostBySlug, getPosts, getProjectSlugs } from '@/lib/ghost
 import { projectFullTitle, stationPlace } from '@/content/profile-view';
 import { sentenceList } from '@/lib/period';
 import { CONTACT_FORM_ENABLED, contactPageLede } from '@/lib/contact-flag';
+import { SHOW_GAPS } from '@/lib/gaps';
+import { STATUS_SOURCES } from '@/content/status-sources';
 
 export const SITE = 'https://yannick-beck.de';
 
@@ -250,6 +253,27 @@ function pointerMarkdown(path: string, lang: Lang): string | null {
   return `# ${page.title}\n\n${lede}${extra}\n\n${lang === 'de' ? 'HTML-Fassung' : 'HTML version'}: ${abs(withLang(path, lang))}\n`;
 }
 
+/**
+ * /content-status wie die HTML-Seite (Feinschliff): je Lücke Bezeichnung und Fundstelle; „Benötigt“
+ * und die Quellen nur im Vorschau-Build (Arbeitsanweisungen an Yannick, TEX2).
+ */
+function contentStatusMarkdown(lang: Lang): string {
+  const dict = getDictionary(lang);
+  const rows = GAPS.map((g, i) => {
+    // Unterpunkte so weit eingerückt wie der Text des Listenpunkts („10. “ = 4 Zeichen)
+    const pad = ' '.repeat(String(i + 1).length + 2);
+    const lines = [`${i + 1}. **${g.label[lang]}**`, `${pad}- ${dict.statusColWhere}: ${g.where[lang]}`];
+    if (SHOW_GAPS) {
+      lines.push(`${pad}- ${dict.statusColFormat}: ${g.need[lang]}`);
+    }
+    return lines.join('\n');
+  });
+  const sources = SHOW_GAPS
+    ? `\n## ${dict.statusSources}\n\n${STATUS_SOURCES[lang].map((s) => `- **${s.name}:** ${s.text}`).join('\n')}\n`
+    : '';
+  return `# ${dict.statusTitle}\n\n${dict.statusLede}\n\n${rows.join('\n')}\n${sources}`;
+}
+
 export function notFoundMarkdown(path: string, lang: Lang): string {
   return lang === 'de'
     ? `# 404 – Seite nicht gefunden\n\nUnter \`${path}\` gibt es auf yannick-beck.de keine Seite.\n\n- Startseite: ${SITE}/\n- Sitemap: ${SITE}/sitemap.xml\n- Überblick für Agenten: ${SITE}/llms.txt\n`
@@ -333,8 +357,7 @@ async function markdownForPath(pathname: string): Promise<MarkdownResult | null>
     return { lang, body: newsletterMarkdown(lang) };
   }
   if (bare === '/content-status') {
-    const dict = getDictionary(lang);
-    return { lang, body: `# ${dict.statusTitle}\n\n${dict.statusLede}\n\n${abs(withLang(bare, lang))}\n` };
+    return { lang, body: contentStatusMarkdown(lang) };
   }
   if (KNOWN_ROUTES.has(bare)) {
     const body = pointerMarkdown(bare, lang);

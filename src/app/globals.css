@@ -128,6 +128,19 @@ html:has(.yb-section-nav) .yb-vt-header {
 }
 
 /*
+ * Bedienelemente, die nur mit JavaScript etwas tun (Feinschliff): Theme-Schalter, Menü-Button,
+ * Filter-Pillen und Hinweis des Periodensystems, „Karte umdrehen“. Ohne JavaScript fehlen sie
+ * statt tot dazustehen. Media-Query statt Klasse aus einem Script: Sie gilt vor dem ersten
+ * Paint und ändert sich bei der Hydration nicht (kein Flackern, kein CLS). `scripting` können
+ * alle Browser der browserslist-Ziele (Chrome 120, Firefox 113, Safari 17).
+ */
+@media (scripting: none) {
+  .yb-js-only {
+    display: none !important;
+  }
+}
+
+/*
  * Sticky-Footer (L9): Layout height="auto" braucht einen Elternteil mit definierter Höhe.
  * Das gestreckte Grid-Item gibt Layout diese Höhe; Layouts minHeight 100% und die Mitte
  * mit flex 1 schieben den Footer auf kurzen Seiten an den unteren Rand.

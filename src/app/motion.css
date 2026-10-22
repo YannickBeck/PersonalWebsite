@@ -693,8 +693,9 @@ html[data-yb-instant] *::details-content {
 }
 
 /* ---------- 9. Laufband Erfolge (Startseite 05, achievement-ticker.tsx) ----------
-   Liste + Kopie, verschoben um −50 % → nahtlos. Nur no-preference und ab 768px (schmal und
-   unter reduce ist es eine statische Liste). Hält über dem Band (Hover) und mit dem
+   Liste + Kopie, verschoben um −50 % → nahtlos. Nur no-preference, ab 768px und mit
+   JavaScript (schmal, unter reduce und ohne JavaScript – dort hält der Schalter nichts an,
+   Feinschliff – ist es eine statische Liste). Hält über dem Band (Hover) und mit dem
    Schalter (WCAG 2.2.2) – der Schalter selbst liegt außerhalb der Hover-Fläche. */
 @keyframes yb-ticker {
   to {
@@ -702,7 +703,7 @@ html[data-yb-instant] *::details-content {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) and (scripting: enabled) {
   .yb-ticker-track {
     animation: yb-ticker var(--yb-ticker-duration, 40s) linear infinite;
   }

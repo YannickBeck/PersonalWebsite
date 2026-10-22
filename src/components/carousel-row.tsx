@@ -3,7 +3,7 @@ import { Section } from '@astryxdesign/core/Section';
 import { AspectRatio } from '@astryxdesign/core/AspectRatio';
 import { ContentCard, type ContentCardData } from '@/components/content-card';
 import { CarouselShell } from '@/components/carousel-shell';
-import type { Lang } from '@/i18n/dictionaries';
+import { getDictionary, type Lang } from '@/i18n/dictionaries';
 import type { ReactNode } from 'react';
 import styles from './carousel-row.module.css';
 
@@ -12,6 +12,11 @@ import styles from './carousel-row.module.css';
  * Auto-Rotation, mobil wischbar, unter Reduced Motion springt es statt zu gleiten (Astryx
  * selbst). Vor/Zurück als eigene Pfeile im Abschnittskopf (CarouselShell, A112/MOT7).
  */
+
+function arrowLabels(lang: Lang) {
+  const dict = getDictionary(lang);
+  return { prev: dict.carouselPrev, next: dict.carouselNext };
+}
 
 /** Kartenreihe als Karussell: Related auf Detailseiten und Teaser der Startseite (VIS9). */
 export function CardCarousel({
@@ -30,7 +35,7 @@ export function CardCarousel({
   }
   return (
     <Section>
-      <CarouselShell title={title} lang={lang} action={action}>
+      <CarouselShell title={title} labels={arrowLabels(lang)} action={action}>
         {items.map((p) => (
           <ContentCard key={p.slug} item={p} lang={lang} reveal={false} className={styles.card} />
         ))}
@@ -59,7 +64,7 @@ export function GalleryCarousel({
   }
   return (
     <Section>
-      <CarouselShell title={title} lang={lang}>
+      <CarouselShell title={title} labels={arrowLabels(lang)}>
         {images.map((g) => (
           <AspectRatio key={g.src} ratio={16 / 10} className={styles.image}>
             <Image src={g.src} alt={g.alt} fill loading="lazy" sizes="(max-width: 768px) 84vw, 680px" />

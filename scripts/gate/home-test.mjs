@@ -23,6 +23,11 @@
  * - Laden mit #project-bachelorarbeit (768) bzw. #career-bechtle-junior (1440/390): Ziel offen
  *   und im Bild (A111/A112); holdPosition am Seitenanfang hält ein späteres Scrollen nicht zurück
  * - Band der Abschnittsnavigation nimmt Klicks selbst an, keine verdeckte Kachel (A113)
+ * - Akkordeon ab 900px: geschlossener Kopf-Button ist genau der Streifen, nicht breiter (Feinschliff)
+ * - Fähigkeits-Chip einer Projektseite → /#skill-rag per Client-Navigation: Fokus auf der Kachel
+ *   (REG3)
+ * - Ohne JavaScript: Theme-Schalter, Menü, Filter-Pillen und „Karte umdrehen“ fehlen, die Textliste
+ *   der Fähigkeiten ist sichtbar (Feinschliff)
  * - Reduced Motion: 0 laufende Animationen nach Laden, Filter, Akkordeon, Werdegang, Karte
  *
  * Exit-Code 1 bei einem Fehlschlag; Ergebnis als JSON in [outDir]/home-test.json.
@@ -556,6 +561,33 @@ test('Akkordeon @1440: nebeneinander, Reihenhöhe fest beim Wechsel', ['de'], as
   return { rowH: s1[0].rowH };
 });
 
+for (const width of [1440, 1024]) {
+  test(`Akkordeon @${width}: geschlossener Kopf-Button ist genau der Streifen (Feinschliff)`, ['de', 'en'], async (lang) => {
+    const { page, ctx } = await open(lang, { width });
+    const boxes = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll('[data-acc-trigger]')].map((b) => {
+          const r = b.getBoundingClientRect();
+          const li = b.closest('li').getBoundingClientRect();
+          return { open: b.getAttribute('aria-expanded'), left: Math.round(r.left), right: Math.round(r.right), liLeft: Math.round(li.left), liRight: Math.round(li.right), vw: innerWidth };
+        }),
+      );
+    const before = await boxes();
+    const s0 = await accState(page);
+    await clickHead(page, s0[1].id);
+    await page.waitForTimeout(900);
+    const after = await boxes();
+    await ctx.close();
+    for (const set of [before, after]) {
+      for (const b of set.filter((x) => x.open === 'false')) {
+        assert(b.left >= b.liLeft - 1 && b.right <= b.liRight + 1, 'Button-Box im Streifen', b);
+        assert(b.right <= b.vw, 'Button-Box im Bild', b);
+      }
+    }
+    return { closedBefore: before.filter((x) => x.open === 'false'), closedAfter: after.filter((x) => x.open === 'false') };
+  });
+}
+
 for (const width of [768, 390]) {
   test(`Akkordeon @${width}: gestapelt, gewählter Kopf bleibt stehen (holdPosition, A111)`, ['de', 'en'], async (lang) => {
     const { page, ctx } = await open(lang, { width });
@@ -719,6 +751,66 @@ for (const width of [1440, 390]) {
 }
 
 // ---- Reduced Motion -----------------------------------------------------------------------------
+
+// ---- Seitenübergreifender Sprung und ohne JavaScript (Feinschliff) ------------------------------
+
+test('Fähigkeits-Chip einer Projektseite → /#skill-rag per Client-Navigation: Kachel gewählt und fokussiert (REG3)', ['de', 'en'], async (lang) => {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light' });
+  const page = await ctx.newPage();
+  const start = lang === 'en' ? '/en/projekte/orbitalis' : '/projekte/orbitalis';
+  await page.goto(`${BASE}${start}`, { waitUntil: 'load' });
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    const a = document.querySelector('main a[href$="#skill-rag"]');
+    a.scrollIntoView({ block: 'center', behavior: 'instant' });
+    a.focus();
+  });
+  await page.keyboard.press('Enter');
+  await page.waitForURL((u) => u.hash === '#skill-rag', { timeout: 5000 });
+  await page.waitForTimeout(1500);
+  const r = await page.evaluate(() => {
+    const t = document.getElementById('skill-rag');
+    const rect = t.getBoundingClientRect();
+    return { active: document.activeElement?.id ?? null, selected: t.getAttribute('aria-selected'), top: Math.round(rect.top), bottom: Math.round(rect.bottom), vh: innerHeight };
+  });
+  await ctx.close();
+  assert(r.selected === 'true', 'Kachel gewählt', r);
+  assert(r.active === 'skill-rag', 'Fokus auf der Kachel', r);
+  assert(r.top >= 0 && r.bottom <= r.vh, 'Kachel im Bild', r);
+  return r;
+});
+
+for (const width of [1440, 390]) {
+  test(`Ohne JavaScript @${width}: wirkungslose Bedienelemente fehlen, Textliste der Fähigkeiten sichtbar`, ['de', 'en'], async (lang) => {
+    const ctx = await browser.newContext({ viewport: { width, height: width <= 400 ? 844 : 900 }, javaScriptEnabled: false, colorScheme: 'light' });
+    const page = await ctx.newPage();
+    await page.goto(`${BASE}${HOME[lang]}`, { waitUntil: 'load' });
+    const r = await page.evaluate(() => {
+      const shown = (el) => {
+        if (!el) return false;
+        const b = el.getBoundingClientRect();
+        return b.width > 2 && b.height > 2 && getComputedStyle(el).display !== 'none';
+      };
+      const all = (sel) => [...document.querySelectorAll(sel)];
+      const list = all('[role="tablist"]')[0]?.closest('section')?.querySelector('h3:not([class*="detail"])');
+      return {
+        theme: all('header button').filter((b) => /Farbschema|colour scheme/.test(b.getAttribute('aria-label') ?? '')).filter(shown).length,
+        menu: all('header button[aria-haspopup="dialog"]').filter(shown).length,
+        pills: all('button.yb-skill-pill').filter(shown).length,
+        flip: all('button[aria-keyshortcuts]').filter(shown).length,
+        listVisible: shown(list),
+        listItems: list ? list.parentElement.querySelectorAll('li').length : 0,
+        tiles: all('[role="tab"][data-skill]').length,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    await ctx.close();
+    assert(r.theme === 0 && r.menu === 0 && r.pills === 0 && r.flip === 0, 'Bedienelemente ohne Wirkung fehlen', r);
+    assert(r.listVisible && r.listItems === r.tiles && r.tiles > 0, 'Textliste sichtbar, alle Kacheln', r);
+    assert(r.overflow <= 0, 'kein Überlauf', r);
+    return r;
+  });
+}
 
 test('Reduce: 0 laufende Animationen nach Laden, Filter, Akkordeon, Werdegang, Karte', ['de', 'en'], async (lang) => {
   const { page, ctx } = await open(lang, { reduce: true });

@@ -5,6 +5,7 @@ import { ArticleDetail } from '@/components/article-detail';
 import { getPostBySlug, getPostSlugs } from '@/lib/ghost';
 import { demoArticleBySlug, demoArticlesByLang } from '@/content/demo-articles';
 import { SHOW_GAPS } from '@/lib/gaps';
+import { getDictionary } from '@/i18n/dictionaries';
 
 export async function generateStaticParams() {
   const ghost = await getPostSlugs('de');
@@ -30,7 +31,9 @@ async function metaFor(slug: string): Promise<Metadata> {
   }
   const post = await getPostBySlug(slug, 'de');
   if (!post) {
-    return {};
+    // Unbekannter Slug: Den fängt src/proxy.ts ab (statische globale 404). Hierher kommt er nur,
+    // wenn der Proxy Ghost nicht erreicht – dann gilt wenigstens der 404-Titel.
+    return { title: getDictionary('de').notFoundTitle, robots: { index: false } };
   }
   const canonical = pageMeta({
     type: 'article',

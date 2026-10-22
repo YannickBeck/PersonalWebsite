@@ -177,7 +177,9 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
 
   return (
     <div className={styles.skills}>
-      <div role="group" aria-label={labels.filter} className={styles.filters}>
+      {/* Filter und Hinweis tun nur mit JavaScript etwas – ohne fehlen sie (yb-js-only), die
+          Textliste darunter wird sichtbar (skills-section.tsx) */}
+      <div role="group" aria-label={labels.filter} className={`${styles.filters} yb-js-only`}>
         <button type="button" className={`${styles.pill} yb-skill-pill`} aria-pressed={filter === null} onClick={() => chooseFilter(null)}>
           {labels.all}
         </button>
@@ -322,7 +324,7 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
         </div>
       </div>
 
-      <p id={hintId} className={styles.hint}>
+      <p id={hintId} className={`${styles.hint} yb-js-only`}>
         {labels.hint}
       </p>
     </div>

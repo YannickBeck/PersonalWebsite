@@ -6,7 +6,7 @@ import type { ComponentProps, MouseEvent } from 'react';
 import { armMorph } from '@/components/morph';
 import { markNavigationStart, rememberScroll } from '@/components/route-transition';
 import { isInternalPath, morphKeyFor, navTransitionTypes } from '@/lib/transitions';
-import { langFromPath } from '@/i18n/dictionaries';
+import { langFromPath } from '@/i18n/lang';
 import { useRouteLang } from '@/i18n/route-lang';
 
 type TransitionLinkProps = ComponentProps<typeof NextLink> & { to?: string };

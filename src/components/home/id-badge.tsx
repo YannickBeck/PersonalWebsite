@@ -384,7 +384,9 @@ export function IdBadge({ data }: { data: IdBadgeData }) {
           </div>
         </div>
       </div>
-      <div className={styles.controls}>
+      {/* Umdrehen geht nur mit JavaScript – ohne fehlen Button und Hinweis (yb-js-only); die
+          Rückseite steht inhaltlich auch im Werdegang */}
+      <div className={`${styles.controls} yb-js-only`}>
         <Button
           label={data.labels.flip}
           variant="secondary"

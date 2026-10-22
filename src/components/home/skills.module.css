@@ -473,3 +473,63 @@
     border: var(--border-width) solid CanvasText;
   }
 }
+
+/* ---------- Textliste aller Fähigkeiten (skills-section.tsx) ----------
+   Mit JavaScript nur für Screenreader (wie .yb-sr-only). Ohne JavaScript sichtbar: Dann wählt
+   keine Kachel ein anderes Detailfeld, die Liste trägt alle Kacheln mit ihren Belegen
+   (Feinschliff). Filter und Hinweis fehlen dann (yb-js-only, globals.css). */
+.textList {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (scripting: none) {
+  .textList {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .textList h3 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.3;
+  }
+
+  .textList h4 {
+    margin: 0 0 var(--spacing-1);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+  }
+
+  .textList ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin: 0;
+    padding-inline-start: 1.1em;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+  }
+
+  /* Kacheln wählen ohne JavaScript nichts aus */
+  .tile {
+    cursor: default;
+  }
+}

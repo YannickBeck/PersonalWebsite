@@ -29,7 +29,8 @@ export interface AccordionItem {
  * Muster: Akkordeon (WAI-ARIA APG) mit genau einem offenen Eintrag. Jeder Eintrag hat EINEN
  * Kopf-Button in einer H3 (aria-expanded, aria-controls). Der offene lässt sich nicht
  * zuklappen (aria-disabled), damit immer ein Projekt sichtbar ist. Geschlossen ist derselbe
- * Button der schmale Streifen mit senkrechtem Titel (Trefferfläche = ganzer Streifen); der
+ * Button der schmale Streifen mit senkrechtem Titel (ab 900px ist seine Box nur so breit wie der
+ * Streifen, Feinschliff; Trefferfläche der ganze Streifen bzw. schmaler die ganze Karte); der
  * Fokus bleibt beim Öffnen auf ihm. ←/→ (und ↑/↓) wechseln zwischen den Köpfen, Pos1/Ende.
  * Der Inhalt des geschlossenen Eintrags ist `inert`. Ohne JavaScript lässt sich nichts
  * aufklappen: Ein <noscript>-Link über dem geschlossenen Eintrag führt dann zur Detailseite
@@ -71,12 +72,14 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
     [items],
   );
 
-  // Lage des Kopfs vor dem Commit festhalten (Klick, Enter, Leertaste, Tippen)
+  // Lage des Eintrags vor dem Commit festhalten (Klick, Enter, Leertaste, Tippen). Der Eintrag,
+  // nicht der Button: Nebeneinander ist der geschlossene Button der Streifen und rückt beim
+  // Öffnen in den Kopf – das darf nicht als Verschiebung gelten.
   const select = (event: MouseEvent<HTMLButtonElement>, id: string) => {
     if (id === open) {
       return;
     }
-    holdPosition(event.currentTarget);
+    holdPosition(event.currentTarget.closest('li') ?? event.currentTarget);
     setOpen(id);
   };
 
@@ -135,7 +138,9 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
                       onClick={(event) => select(event, it.id)}
                     >
                       <span className="yb-sr-only">{namePrefix(it)}</span>
-                      {it.title}
+                      {/* eigener Span: geschlossen ≥ 900px behält der Titel die Kopfbreite, der
+                          Button nur die des Streifens (projects.module.css) */}
+                      <span className={styles.triggerText}>{it.title}</span>
                       <span className={styles.chevron} aria-hidden="true" />
                     </button>
                   </h3>

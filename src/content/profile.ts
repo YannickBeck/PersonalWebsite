@@ -199,7 +199,8 @@ export const GAPS: GapEntry[] = [
   {
     id: 'achievements',
     label: { de: 'Belegbare Erfolge (Abschnitt „Erfolge“)', en: 'Verifiable achievements (section “Achievements”)' },
-    where: { de: 'Startseite, Abschnitt 05', en: 'Homepage, section 05' },
+    // Ohne feste Nummer: In Produktion fehlt der Abschnitt, 05 ist dort Kontakt (Feinschliff)
+    where: { de: 'Startseite, Abschnitt Erfolge', en: 'Homepage, section Achievements' },
     need: {
       de: 'Je Eintrag: kurze Aussage + Quelle (z. B. Abschluss, Auszeichnung, Kennzahl mit Beleg)',
       en: 'Per entry: short statement + source (e.g. degree, award, metric with evidence)',

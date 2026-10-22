@@ -24,7 +24,7 @@
  *
  * Seitenliste: PUBLIC_ROUTES + NOINDEX_ROUTES aus src/lib/routes.ts (DE und /en), Detailseiten
  * aus den Links von /projekte, /en/projekte, /blog, /en/blog (ohne „demo-“-Slugs, sonst hätte der
- * Vorschau-Build eine andere Liste), 404-Proben DE (global und im Segment) und EN.
+ * Vorschau-Build eine andere Liste), 404-Proben (global DE/EN, Projekt- und Blog-Slug DE/EN).
  *
  * Optionen:
  *   --quick              nur 390 und 1440 px
@@ -159,7 +159,15 @@ async function sitemapPaths() {
   }
 }
 
-const NOT_FOUND = ['/gibt-es-nicht-404', '/en/gibt-es-nicht-404', '/projekte/unbekannt-404'];
+// 404-Proben: global (Pfad ohne Route), Projekt-Slug (dynamicParams = false) und Blog-Slug
+// (src/proxy.ts → globale 404, docs/blog-404.md) – alle liefern die statische globale 404.
+const NOT_FOUND = [
+  '/gibt-es-nicht-404',
+  '/en/gibt-es-nicht-404',
+  '/projekte/unbekannt-404',
+  '/blog/unbekannt-404',
+  '/en/blog/unbekannt-404',
+];
 
 async function pageList(routes) {
   let pages;
@@ -685,7 +693,92 @@ async function agentChecks(pages, routes) {
   // robots.txt
   const robotsTxt = await fetchText(`${BASE}/robots.txt`);
   add('/robots.txt mit Sitemap-Zeile', robotsTxt.status === 200 && /^sitemap:/im.test(robotsTxt.text), `${robotsTxt.status}`);
+
+  // 404-Proben im Server-HTML (Feinschliff): Status 404, echtes Dokument statt der leeren
+  // __next_error__-Hülle eines Laufzeit-notFound(), lang gesetzt, H1 mit Text, Stylesheets
+  // abrufbar, nicht im Cache abgelegt. lang je Sprache prüft der Browser-Lauf (Boot-Script der
+  // globalen 404), den Inhalt ohne JavaScript noJsChecks().
+  const bad404 = [];
+  for (const p of NOT_FOUND) {
+    const r = htmlOf.get(p) ?? (await fetchText(`${BASE}${p}`));
+    const problems = [];
+    if (r.status !== 404) {
+      problems.push(`Status ${r.status}`);
+    }
+    if (/<html[^>]*id="__next_error__"/.test(r.text)) {
+      problems.push('__next_error__-Hülle');
+    }
+    if (!/<html[^>]*\slang="[a-z]{2}"/.test(r.text)) {
+      problems.push('ohne lang');
+    }
+    const h1 = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(r.text)?.[1]?.replace(/<[^>]+>/g, '').trim() ?? '';
+    if (!h1) {
+      problems.push('ohne H1-Text');
+    }
+    const css = [...r.text.matchAll(/<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g)].map((m) => m[1]);
+    if (!css.length) {
+      problems.push('ohne Stylesheet');
+    }
+    for (const href of css) {
+      const c = await fetch(new URL(href, BASE), { signal: AbortSignal.timeout(20000) }).catch(() => null);
+      if (!c || c.status !== 200 || !/text\/css/.test(c.headers.get('content-type') ?? '')) {
+        problems.push(`CSS ${href}: ${c?.status ?? 'Fehler'}`);
+      }
+    }
+    if (/s-maxage=\d{4,}/.test(r.headers?.get?.('cache-control') ?? '')) {
+      problems.push(`Cache-Control ${r.headers.get('cache-control')}`);
+    }
+    if (problems.length) {
+      bad404.push(`${p}: ${problems.join(', ')}`);
+    }
+  }
+  add('404-Proben: Status 404, lang, H1, CSS im Server-HTML', bad404.length === 0, bad404.length ? bad404 : NOT_FOUND.join(' '));
   return checks;
+}
+
+/**
+ * 404-Proben ohne JavaScript im Browser (Feinschliff): H1 sichtbar und mit Text, Stylesheets
+ * geladen und angewendet (Schrift der Seite statt Browser-Standard).
+ */
+async function noJsChecks(browser) {
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const bad = [];
+  for (const p of NOT_FOUND) {
+    const page = await context.newPage();
+    try {
+      const resp = await page.goto(`${BASE}${p}`, { waitUntil: 'load', timeout: 30000 });
+      const info = await page.evaluate(() => {
+        const h1 = document.querySelector('h1');
+        const box = h1?.getBoundingClientRect();
+        return {
+          h1: (h1?.innerText ?? '').trim(),
+          visible: Boolean(box && box.width > 0 && box.height > 0),
+          sheets: document.styleSheets.length,
+          font: getComputedStyle(document.body).fontFamily,
+          lang: document.documentElement.lang,
+        };
+      });
+      const problems = [];
+      if (resp?.status() !== 404) {
+        problems.push(`Status ${resp?.status()}`);
+      }
+      if (!info.h1 || !info.visible) {
+        problems.push(`H1 ${info.visible ? 'leer' : 'unsichtbar'}`);
+      }
+      if (!info.sheets || /^(times|serif|"?Times New Roman"?)/i.test(info.font)) {
+        problems.push(`CSS nicht angewendet (${info.sheets} Stylesheets, Schrift ${info.font})`);
+      }
+      if (problems.length) {
+        bad.push(`${p}: ${problems.join(', ')}`);
+      }
+    } catch (e) {
+      bad.push(`${p}: ${String(e).slice(0, 120)}`);
+    } finally {
+      await page.close();
+    }
+  }
+  await context.close();
+  return [{ name: '404-Proben ohne JavaScript: H1 sichtbar, CSS angewendet', ok: bad.length === 0, detail: bad.length ? bad : `${NOT_FOUND.length} Pfade` }];
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -720,10 +813,11 @@ await Promise.all(
     }
   }),
 );
+const noJs = flag('no-agent') ? [] : await noJsChecks(browser);
 await browser.close();
 results.sort((a, b) => pages.indexOf(a.path) - pages.indexOf(b.path) || a.width - b.width || a.scheme.localeCompare(b.scheme));
 
-const agent = flag('no-agent') ? [] : await agentChecks(pages, routes);
+const agent = flag('no-agent') ? [] : [...(await agentChecks(pages, routes)), ...noJs];
 
 // ---------------------------------------------------------------------------------------------
 // Auswertung

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { GHOST_SAMPLE_PROJECTS } from "./src/lib/ghost-samples";
+import { MARKDOWN_ACCEPT } from "./src/lib/markdown-accept";
 
 /**
  * Alte Demo-Adressen des Live-Stands 2d636c6 (Inhalte eines anderen Agenten, im Redesign
@@ -79,7 +80,7 @@ const nextConfig: NextConfig = {
             {
               type: "header",
               key: "accept",
-              value: "(?!.*text/markdown\\s*;\\s*q\\s*=\\s*0(?:\\.0{0,3})?\\s*(?:[,;]|$)).*text/markdown.*",
+              value: MARKDOWN_ACCEPT,
             },
           ],
           destination: "/api/md/:path",

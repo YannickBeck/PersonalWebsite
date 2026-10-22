@@ -22,9 +22,14 @@ function keepCompounds(text: string): string {
  * bzw. voller Titel). `decorative` (Projektzeile auf /projekte, dort steht alles im Text und die
  * Fläche ist ein Maus-Link) blendet ihn für Screenreader aus.
  */
+/** Zeigt die Grafik den vollen Titel (Titelblatt der Bachelorarbeit)? Dann wiederholt der Text daneben ihn nicht. */
+export function visualShowsTitle(project: Project): boolean {
+  return project.id !== 'orbitalis';
+}
+
 export function ProjectVisual({ project, lang, decorative = false }: { project: Project; lang: Lang; decorative?: boolean }) {
   const hidden = decorative ? true : undefined;
-  if (project.id === 'orbitalis') {
+  if (!visualShowsTitle(project)) {
     const labels = getDictionary(lang).projectVisual;
     return (
       <figure className={styles.visual} data-kind="flow" aria-hidden={hidden}>

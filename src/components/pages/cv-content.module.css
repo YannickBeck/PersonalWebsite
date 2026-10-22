@@ -51,6 +51,10 @@
   color: var(--color-text-primary);
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 .role {
   font-size: var(--font-size-lg);
   line-height: 1.25;

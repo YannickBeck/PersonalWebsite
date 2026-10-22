@@ -3,7 +3,7 @@
 import type { MouseEvent } from 'react';
 import { IconButton } from '@astryxdesign/core/IconButton';
 import { useThemeMode } from '@/app/providers';
-import { getDictionary, type Lang } from '@/i18n/dictionaries';
+import type { ThemeLabels } from '@/i18n/chrome';
 import styles from './theme-toggle.module.css';
 
 /**
@@ -37,15 +37,14 @@ function SunMoonIcon() {
 }
 
 /** Zwei-Zustand-Umschalter hell ↔ dunkel (E2). Ohne gespeicherte Wahl gilt das System-Schema. */
-export function ThemeToggle({ lang }: { lang: Lang }) {
-  const dict = getDictionary(lang);
+export function ThemeToggle({ labels }: { labels: ThemeLabels }) {
   const { resolvedMode, toggleMode } = useThemeMode();
   const label =
     resolvedMode === 'dark'
-      ? dict.themeToLight
+      ? labels.toLight
       : resolvedMode === 'light'
-        ? dict.themeToDark
-        : dict.themeToggle;
+        ? labels.toDark
+        : labels.toggle;
   // Kreis-Reveal startet in der Mitte des Schalters (auch bei Tastatur-Auslösung).
   const onClick = (event: MouseEvent<HTMLElement>) => {
     const r = event.currentTarget.getBoundingClientRect();
@@ -53,11 +52,12 @@ export function ThemeToggle({ lang }: { lang: Lang }) {
   };
   return (
     <IconButton
+      className="yb-js-only"
       variant="ghost"
       label={label}
       // Tooltip ergänzt statt zu wiederholen (A123): sonst käme das Label zusätzlich als
       // aria-describedby doppelt an
-      tooltip={dict.colorSchemeLabel}
+      tooltip={labels.scheme}
       icon={<SunMoonIcon />}
       onClick={onClick}
     />
