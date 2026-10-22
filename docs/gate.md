@@ -166,7 +166,7 @@ Je Lauf, in dieser Reihenfolge:
    - klein: unter 24 × 24 px, Links im Fließtext ausgenommen. Das ist nur ein Hinweis.
 5. Konsolen- und Seitenfehler. Die 404-Meldung einer 404-Seite für ihre eigene URL zählt nicht.
 
-Einmal je Basis-URL laufen die Agenten-Prüfungen per HTTP:
+Einmal je Basis-URL laufen die Agenten-Prüfungen, per HTTP bzw. (die letzten zwei) im Browser:
 
 - `lang` im Server-HTML der 200-Seiten
 - JSON-LD Person und WebSite auf `/` und `/en`
@@ -181,6 +181,10 @@ Einmal je Basis-URL laufen die Agenten-Prüfungen per HTTP:
 - 404-Proben im Server-HTML: Status 404, keine `__next_error__`-Hülle, `lang` gesetzt, H1 mit
   Text, alle Stylesheets abrufbar, kein langes `s-maxage` (Feinschliff)
 - 404-Proben im Browser ohne JavaScript (390 px): H1 sichtbar, Stylesheets angewendet
+- Titel der Bachelorarbeit im Barrierefreiheitsbaum von `<main>` auf allen Projektseiten
+  (`/projekte`, Detailseiten mit „Weiteres Projekt“, DE und EN; 1440 px, Playwright
+  `ariaSnapshot`). Das Titelblatt ist in der Projektzeile `aria-hidden`, der Ersatzsatz steht
+  `yb-sr-only` in der Zeile (Feinschliff-Nachbesserung GES1). Titel aus `THESIS` in profile.ts.
 
 Die globale 404 ist ein statisches HTML mit `lang="de"`. Unter `/en` setzt ihr Boot-Script `lang`
 vor dem ersten Paint. Deshalb prüft der Browser-Lauf `lang` für alle Seiten, das Server-HTML nur
@@ -336,6 +340,24 @@ Gleiche Werkzeuge, Arbeitsstand vor dem Commit „Redesign: Feinschliff“, gege
 - axe-core 4.13 (40 Läufe: `/`, `/en`, `/cv`, `/projekte`, `/projekte/orbitalis`, `/kontakt`,
   `/content-status`, beide Blog-404, globale 404; 1440/390; hell/dunkel): nur die dokumentierten
   Ausnahmen (Namenszug, „404“).
+
+## Referenzwerte Feinschliff-Nachbesserungen (2026-10-23)
+
+Nur GES1 (Titel der Bachelorarbeit für Screenreader in der Projektzeile), gleiche Werkzeuge:
+
+| Build | Läufe | Abnahme-Metriken | Agenten | Kleine Fokusziele @390 | Rechtstext-Lücken |
+| --- | --- | --- | --- | --- | --- |
+| prod | 360 (36 Seiten) | alle 0 | 21/21 | 10 | Impressum 3, Datenschutz 5 (DE und EN) |
+| gaps | 360 | alle 0 | 21/21 | 66 | wie prod |
+| form | 360 | alle 0 | 21/21 | 10 | Impressum 3, Datenschutz 8 |
+
+- Neue Agenten-Prüfung „Titel der Bachelorarbeit im Barrierefreiheitsbaum“ (6 Projektseiten): auf
+  dem Stand vor der Korrektur 4 von 6 Seiten ohne Titel (`/projekte`, `/en/projekte`,
+  `/projekte/orbitalis`, `/en/projekte/orbitalis`), nachher 6/6.
+- home-test 52/52 in allen drei Builds, url-check 74/74 (Produktion, Vorschau, Formular),
+  link-check 0 Befunde, contact-api-test 23/23.
+- Projektzeilen auf `/projekte` und in „Weiteres Projekt“ (DE/EN, 390/1440 px, hell/dunkel,
+  24 Aufnahmen) pixelgleich mit dem Stand davor, Höhen von Zeile und Satz unverändert.
 
 ## Grenzen
 

@@ -216,7 +216,7 @@ const de = {
   blogTitle: 'Was ich *aufschreibe*.',
   blogRss: 'RSS-Feed',
   otherProjectTitle: 'Weiteres Projekt',
-  projectVisual: { flow: 'So läuft es ab' },
+  projectVisual: { flow: 'So läuft es ab', thesisTitle: 'Titel der Arbeit' },
   /** Text vor und nach dem Projekt-Link „Orbitalis“ (TEX17: Technik statt „meine Werkzeuge“). */
   usesFromProjects: ['Bis dahin steht hier die Technik aus dem Projekt ', ':'] as [string, string],
   contactLinkedInTitle: 'LinkedIn',
@@ -477,7 +477,7 @@ const en: Dictionary = {
   blogTitle: 'What I *write*.',
   blogRss: 'RSS feed',
   otherProjectTitle: 'Another project',
-  projectVisual: { flow: 'How it works' },
+  projectVisual: { flow: 'How it works', thesisTitle: 'Thesis title' },
   usesFromProjects: ['Until then, here is the technology from the ', ' project:'],
   contactLinkedInTitle: 'LinkedIn',
   contactLinkedInText: 'Send me a short message there or connect with me.',

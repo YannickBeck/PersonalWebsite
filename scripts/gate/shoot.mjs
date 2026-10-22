@@ -20,7 +20,8 @@
  * - Screenshots: erster Bildschirm (PNG) und ganze Seite (JPEG), Einstiegs-/Reveal-Animationen
  *   und Übergänge sind dafür neutralisiert (erst nach der CLS-Messung)
  * Dazu einmal je Basis-URL die Agenten-Prüfungen per HTTP (lang, JSON-LD, og:*, llms.txt,
- * Markdown-Weiche, 308 des Ghost-Testprojekts, Sitemap/llms.txt ohne Testprojekt, noindex).
+ * Markdown-Weiche, 308 des Ghost-Testprojekts, Sitemap/llms.txt ohne Testprojekt, noindex) und
+ * im Browser (404-Proben ohne JavaScript, Titel der Bachelorarbeit im Barrierefreiheitsbaum).
  *
  * Seitenliste: PUBLIC_ROUTES + NOINDEX_ROUTES aus src/lib/routes.ts (DE und /en), Detailseiten
  * aus den Links von /projekte, /en/projekte, /blog, /en/blog (ohne „demo-“-Slugs, sonst hätte der
@@ -781,6 +782,49 @@ async function noJsChecks(browser) {
   return [{ name: '404-Proben ohne JavaScript: H1 sichtbar, CSS angewendet', ok: bad.length === 0, detail: bad.length ? bad : `${NOT_FOUND.length} Pfade` }];
 }
 
+/** Voller Titel der Bachelorarbeit (THESIS.title in src/content/profile.ts), je Sprache. */
+function thesisTitleFromRepo() {
+  const src = fs.readFileSync(path.join(REPO, 'src', 'content', 'profile.ts'), 'utf8');
+  const m = /export const THESIS[^=]*=\s*\{\s*title:\s*\{\s*de:\s*'([^']+)',\s*en:\s*'([^']+)'/.exec(src);
+  return m ? { de: m[1], en: m[2] } : null;
+}
+
+/**
+ * Bildinhalt im Barrierefreiheitsbaum (Feinschliff-Nachbesserung GES1): Auf jeder Projektseite
+ * (Übersicht, Detailseiten mit „Weiteres Projekt“) muss der volle Titel der Bachelorarbeit im
+ * Baum von <main> stehen. Das Titelblatt ist in der Projektzeile aria-hidden (Maus-Link); fehlt
+ * der Ersatztext, hört ein Screenreader nur den Kurztitel. 1440 px, mit JavaScript.
+ */
+async function a11yTextChecks(browser) {
+  const title = thesisTitleFromRepo();
+  const targets = pages.filter((p) => /^(\/en)?\/projekte(\/|$)/.test(p) && expectedStatus(p) === 200);
+  if (!targets.length) {
+    return []; // --pages ohne Projektseiten
+  }
+  if (!title) {
+    return [{ name: 'Titel der Bachelorarbeit im Barrierefreiheitsbaum der Projektseiten', ok: false, detail: 'THESIS.title nicht gefunden' }];
+  }
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const bad = [];
+  for (const p of targets) {
+    const page = await context.newPage();
+    try {
+      await page.goto(`${BASE}${p}`, { waitUntil: 'load', timeout: 30000 });
+      const snap = (await page.locator('main').ariaSnapshot()).replace(/\u2060/g, '').toLowerCase();
+      const want = (p.startsWith('/en/') ? title.en : title.de).toLowerCase();
+      if (!snap.includes(want)) {
+        bad.push(`${p}: Titel fehlt`);
+      }
+    } catch (e) {
+      bad.push(`${p}: ${String(e).slice(0, 120)}`);
+    } finally {
+      await page.close();
+    }
+  }
+  await context.close();
+  return [{ name: 'Titel der Bachelorarbeit im Barrierefreiheitsbaum der Projektseiten', ok: bad.length === 0, detail: bad.length ? bad : `${targets.length} Seiten` }];
+}
+
 // ---------------------------------------------------------------------------------------------
 // Ablauf
 
@@ -813,7 +857,7 @@ await Promise.all(
     }
   }),
 );
-const noJs = flag('no-agent') ? [] : await noJsChecks(browser);
+const noJs = flag('no-agent') ? [] : [...(await noJsChecks(browser)), ...(await a11yTextChecks(browser))];
 await browser.close();
 results.sort((a, b) => pages.indexOf(a.path) - pages.indexOf(b.path) || a.width - b.width || a.scheme.localeCompare(b.scheme));
 

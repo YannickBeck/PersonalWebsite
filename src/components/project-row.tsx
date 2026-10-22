@@ -1,7 +1,7 @@
 import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
-import { ProjectVisual, visualShowsTitle } from '@/components/project-visual';
+import { ProjectVisual, visualTitleText } from '@/components/project-visual';
 import { MorphSource } from '@/components/morph';
 import { TransitionLink } from '@/components/transition-link';
 import { ChipList, PlainChip, SkillChipLink } from '@/components/skill-chip';
@@ -16,7 +16,8 @@ import styles from './project-row.module.css';
  * Fähigkeiten als Kacheln (Sprung ins Periodensystem), Aktionen; rechts die Projekt-Grafik
  * (project-visual.tsx: Ablauf bzw. Titelblatt, Morph-Quelle zur Detailseite). Sie ist
  * zusätzlich ein Link für die Maus (aria-hidden, nicht fokussierbar) – Tastatur und
- * Screenreader nutzen „Details ansehen“. Pfeile nur an externen Links (↗, DES13).
+ * Screenreader nutzen „Details ansehen“; der volle Titel aus dem Titelblatt steht für sie im
+ * Satz (`visualTitleText`, GES1). Pfeile nur an externen Links (↗, DES13).
  */
 export function ProjectRow({
   project,
@@ -36,6 +37,7 @@ export function ProjectRow({
   const source = project.links.find((l) => l.kind === 'source');
   const period = project.period.status === 'belegt' ? project.period.value[lang] : null;
   const home = withLang('/', lang);
+  const visualTitle = visualTitleText(project, lang);
   return (
     <article className={styles.row} aria-labelledby={titleId}>
       <div className={styles.text}>
@@ -49,9 +51,12 @@ export function ProjectRow({
           {project.title[lang]}
         </Heading>
         {/* Steht der volle Titel schon im Titelblatt daneben (Bachelorarbeit), die Kurzfassung wie
-            im Akkordeon statt des Teasers, der mit demselben Titel beginnt (Feinschliff) */}
+            im Akkordeon statt des Teasers, der mit demselben Titel beginnt (Feinschliff). Das
+            Titelblatt steckt hier im Maus-Link (aria-hidden) – den Titel deshalb für Screenreader
+            vor die Kurzfassung (GES1); absolut positioniert, am Satzbild ändert sich nichts */}
         <Text as="p" textWrap="pretty" className={styles.teaser}>
-          {(visualShowsTitle(project) ? (project.brief.summary ?? project.teaser) : project.teaser)[lang]}
+          {visualTitle ? <span className="yb-sr-only">{`${visualTitle} `}</span> : null}
+          {(visualTitle ? (project.brief.summary ?? project.teaser) : project.teaser)[lang]}
         </Text>
         <Text type="supporting" color="secondary" as="p" id={`${titleId}-skills`} className={styles.chipsLabel}>
           {dict.home.projectsSkills}
