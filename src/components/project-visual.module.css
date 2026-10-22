@@ -127,7 +127,12 @@
   font-size: clamp(var(--font-size-lg), 1.1rem + 0.9vw, var(--font-size-2xl));
   line-height: 1.22;
   text-wrap: pretty;
-  hyphens: auto;
+  /* Keine automatische Silbentrennung im Display-Zitat (Abschluss-Fixes GES2: „KI-Mo-dells“,
+     „Presa-les-Prozess“, drei Trennstriche in Folge). Die längsten Wörter passen ab 320px in
+     die Spalte; nur falls nicht, bricht ein Wort um, statt überzustehen. Komposita mit
+     Bindestrich hält ein Wortverbinder zusammen (project-visual.tsx). */
+  hyphens: manual;
+  overflow-wrap: break-word;
 }
 
 .school {

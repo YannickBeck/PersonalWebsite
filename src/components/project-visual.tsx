@@ -2,6 +2,11 @@ import { EDUCATION, ORBITALIS_FLOW, THESIS, type Lang, type Project } from '@/co
 import { getDictionary } from '@/i18n/dictionaries';
 import styles from './project-visual.module.css';
 
+/** Wortverbinder (U+2060, unsichtbar) nach dem Bindestrich: „KI-Modells“ bricht nicht am Strich. */
+function keepCompounds(text: string): string {
+  return text.replace(/(\S)-(?=\S)/g, '$1-\u2060');
+}
+
 /**
  * Bildfläche der zwei Projekte (Fix-Runde 1, DES1) – statt des generativen Covers (Raster,
  * Ringe, violetter Lichtpunkt, Code-Motiv ohne Bezug; Anti-Slop „Background Grid“, „blurred
@@ -46,9 +51,12 @@ export function ProjectVisual({ project, lang, decorative = false }: { project: 
     <div className={styles.visual} data-kind="title" aria-hidden={hidden}>
       <p className={styles.kicker}>{degree.degree[lang]}</p>
       {/* EIN Textknoten, linksbündig ohne balance: Die Serif lädt ohne Preload nach – so bleibt
-          der Anfang des Titels beim Schriftwechsel stehen (kein Layout-Shift, Gate Fix-Runde 1) */}
+          der Anfang des Titels beim Schriftwechsel stehen (kein Layout-Shift, Gate Fix-Runde 1;
+          ein <span> um „KI-Modells“ ergab CLS 0,00007 auf /projekte bei 1920px, Abschluss-
+          Fixes). Komposita mit Bindestrich bleiben per Wortverbinder zusammen (GES2: kein
+          Zeilenende „KI-“) */}
       <p className={styles.thesisTitle} lang={lang}>
-        {`${q[0]}${THESIS.title[lang]}${q[1]}`}
+        {`${q[0]}${keepCompounds(THESIS.title[lang])}${q[1]}`}
       </p>
       <p className={styles.school}>{degree.school[lang]}</p>
     </div>

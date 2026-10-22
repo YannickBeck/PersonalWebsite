@@ -33,6 +33,17 @@ html:has(.yb-section-nav) {
   );
 }
 
+/* Startseite (Abschluss-Fixes GES1): Header und Band der Abschnittsnavigation sind EINE
+   deckende Papierfläche. Vorher blieb der Header halbtransparent mit Unschärfe über dem
+   deckenden Band – zweifarbige Kante, verwischte Inhalte im Header (über dem Werdegang wichen
+   17–46 % der Header-Pixel vom Papier ab, im Ruhezustand 3–9 % für Marke und Links; danach
+   wie im Ruhezustand). Unterseiten behalten den Glas-Header (frame.module.css). */
+html:has(.yb-section-nav) .yb-vt-header {
+  background-color: var(--color-background-body);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 /* Geringe Höhe (200 % Zoom, Handy quer): Die Leiste klebt nicht (home.module.css, A120) –
    dann verdeckt nur der Header etwas. */
 @media (max-height: 500px) {

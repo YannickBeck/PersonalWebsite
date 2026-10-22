@@ -20,6 +20,9 @@
  *   Reihenhöhe, gestapelt bei 768px (640–899px Container), holdPosition: der gewählte Kopf
  *   bleibt stehen (A111), „Zum Projekt“ aus dem Werdegang landet im Bild (A111)
  * - Werdegang: exklusive <details>, Tastatur, geöffnete Station bleibt stehen (A112)
+ * - Laden mit #project-bachelorarbeit (768) bzw. #career-bechtle-junior (1440/390): Ziel offen
+ *   und im Bild (A111/A112); holdPosition am Seitenanfang hält ein späteres Scrollen nicht zurück
+ * - Band der Abschnittsnavigation nimmt Klicks selbst an, keine verdeckte Kachel (A113)
  * - Reduced Motion: 0 laufende Animationen nach Laden, Filter, Akkordeon, Werdegang, Karte
  *
  * Exit-Code 1 bei einem Fehlschlag; Ergebnis als JSON in [outDir]/home-test.json.
@@ -595,6 +598,82 @@ test('Akkordeon @768: „Zum Projekt“ aus dem Werdegang landet im Bild (A111)'
   assert(st.top >= bars - 1 && st.bottom <= st.vh, 'Kopf im Bild, nicht unter den Leisten', { ...st, bars });
   return { ...st, bars };
 });
+
+test('Akkordeon @768: holdPosition am Seitenanfang hält ein späteres Scrollen nicht zurück', ['de'], async (lang) => {
+  // Öffnen bei scrollY 0: Der Ausgleich nach oben ist nicht ausführbar. Vorher versuchte es jeder
+  // Frame erneut und holte ein Scrollen in der Haltezeit wieder zurück (576–1055px).
+  const { page, ctx } = await open(lang, { width: 768 });
+  const st = await page.evaluate(async () => {
+    const btn = document.querySelector('#project-bachelorarbeit [data-acc-trigger]');
+    btn.click();
+    await new Promise((r) => setTimeout(r, 300));
+    window.scrollTo({ top: btn.getBoundingClientRect().top + scrollY - 200, behavior: 'instant' });
+    const placed = Math.round(btn.getBoundingClientRect().top);
+    await new Promise((r) => setTimeout(r, 1300));
+    return { placed, after: Math.round(btn.getBoundingClientRect().top) };
+  });
+  await ctx.close();
+  assert(Math.abs(st.after - st.placed) <= 2, 'Kopf bleibt, wohin gescrollt wurde (±2 px)', st);
+  return st;
+});
+
+for (const [hash, width] of [
+  ['#project-bachelorarbeit', 768],
+  ['#career-bechtle-junior', 1440],
+  ['#career-bechtle-junior', 390],
+]) {
+  test(`Laden mit ${hash} @${width}: Ziel offen, nicht unter den Leisten, im Bild (A111/A112)`, ['de'], async (lang) => {
+    const { page, ctx } = await open(lang, { width, hash });
+    await page.waitForTimeout(400);
+    const st = await page.evaluate((h) => {
+      const el = document.querySelector(h);
+      const f = el.querySelector('[data-acc-trigger]') ?? el.querySelector('summary');
+      const r = f.getBoundingClientRect();
+      return { open: el.dataset.open ?? String(el.open), top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight };
+    }, hash);
+    const bars = await barsBottom(page);
+    await ctx.close();
+    assert(st.open === 'true', 'Ziel offen', st);
+    assert(st.top >= bars - 1 && st.bottom <= st.vh, 'im Bild, nicht unter den Leisten', { ...st, bars });
+    return { ...st, bars };
+  });
+}
+
+// ---- Band der Abschnittsnavigation --------------------------------------------------------------
+
+for (const width of [1440, 390]) {
+  test(`Band @${width}: Klick aufs leere Papier wählt keine verdeckte Kachel (A113)`, ['de'], async (lang) => {
+    const { page, ctx } = await open(lang, { width });
+    await page.evaluate(() => {
+      const t = document.querySelector('[role="tablist"]');
+      window.scrollTo({ top: t.getBoundingClientRect().top + scrollY + 40, behavior: 'instant' });
+    });
+    await page.waitForTimeout(300);
+    const pts = await page.evaluate(() => {
+      const n = document.querySelector('.yb-section-nav').getBoundingClientRect();
+      const l = document.querySelector('.yb-section-nav ul').getBoundingClientRect();
+      const midY = Math.round((n.top + n.bottom) / 2);
+      const out = [[Math.round((l.left + l.right) / 2), Math.round(n.top) + 3], [Math.round((l.left + l.right) / 2), Math.round(n.bottom) - 3], [4, midY], [innerWidth - 4, midY]];
+      if (l.left - n.left >= 10) out.push([Math.round((n.left + l.left) / 2), midY]);
+      return out;
+    });
+    const hits = [];
+    for (const [x, y] of pts) {
+      const before = await page.evaluate(() => document.querySelector('[role="tab"][aria-selected="true"]')?.dataset.skill ?? null);
+      const inNav = await page.evaluate(([px, py]) => !!document.elementFromPoint(px, py)?.closest('.yb-section-nav'), [x, y]);
+      await page.mouse.click(x, y);
+      await page.waitForTimeout(200);
+      const after = await page.evaluate(() => document.querySelector('[role="tab"][aria-selected="true"]')?.dataset.skill ?? null);
+      hits.push({ x, y, inNav, changed: before !== after });
+    }
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    await ctx.close();
+    assert(hits.every((h) => h.inNav), 'Band nimmt den Klick an (auch im Seitenrand)', hits);
+    assert(hits.every((h) => !h.changed), 'keine Kachel gewählt', hits);
+    assert(overflow === 0, 'kein Seitenüberlauf durch das Band', overflow);
+    return hits.length;
+  });
+}
 
 // ---- Werdegang ----------------------------------------------------------------------------------
 

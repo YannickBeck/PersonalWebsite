@@ -48,7 +48,7 @@ Formular-Build gegen den Resend-Mock (die `CONTACT_*`-Werte sind Testwerte, sieh
 
 ```sh
 node scripts/resend-mock.mjs 3362 &
-CONTACT_RESEND_API_KEY=re_test_fake CONTACT_TO=inbox@example.test \
+CONTACT_RESEND_API_KEY=re_test_fake_0000000000 CONTACT_TO=inbox@example.test \
 CONTACT_FROM='Website <kontakt@example.test>' CONTACT_RESEND_BASE_URL=http://127.0.0.1:3362 \
   scripts/gate/serve.sh start "$TMPDIR/yb-gate/form" 3353
 node scripts/gate/shoot.mjs http://127.0.0.1:3353 "$TMPDIR/yb-gate/out/form" --label=form
@@ -199,6 +199,11 @@ Jeder Test lädt die Startseite neu (1440 px, falls nicht anders angegeben). Gep
   bleibt stehen (holdPosition, A111); „Zum Projekt“ aus dem Werdegang landet im Bild (A111).
 - **Werdegang:** exklusive `<details>`, Enter; eine Station unter der offenen bleibt beim Öffnen
   stehen (A112).
+- **Laden mit Anker:** `#project-bachelorarbeit` bei 768 px, `#career-bechtle-junior` bei 1440
+  und 390 px: Ziel offen, im Bild und nicht unter den Leisten (A111/A112). holdPosition am
+  Seitenanfang hält ein späteres Scrollen nicht zurück.
+- **Band der Abschnittsnavigation:** Klicks aufs leere Papier (auch im Seitenrand) treffen das
+  Band, keine verdeckte Kachel wird gewählt, kein Seitenüberlauf (A113).
 - **Reduced Motion:** 0 laufende Animationen nach Laden, Filter, Akkordeon, Werdegang und Karte.
 
 Die Anzahl der Kacheln (35) prüft der Test nicht, sie hängt am Content-Modell.
@@ -212,7 +217,7 @@ einem git worktree gegen den Ghost-Mock. Das Formular lief gegen `scripts/resend
 | --- | --- | --- | --- | --- | --- |
 | prod | 340 (34 Seiten) | alle 0 | 18/18 | 10 | Impressum 3, Datenschutz 5 (DE und EN) |
 | gaps | 340 | alle 0 | 18/18 | 66 | wie prod |
-| form | 340 | alle 0 | 18/18 | 10 | wie prod |
+| form | 340 | alle 0 | 18/18 | 10 | Impressum 3, Datenschutz 8 (mit Abschnitt Kontaktformular) |
 | prod `--quick` | 136 | alle 0 | 18/18 | 10 | wie prod |
 
 Der Bericht zu Fix-Runde 3 nennt dieselben Nullwerte. Abweichungen:
@@ -223,8 +228,8 @@ Der Bericht zu Fix-Runde 3 nennt dieselben Nullwerte. Abweichungen:
   1 × 1 px großen Links der ClickableCard (A125) auf den nicht gelisteten Blog-Seiten. Die
   Stichprobe geht jetzt bis 60 Tab-Schritte weit und erreicht dadurch mehr Demo-Karten.
 
-`home-test.mjs` auf `527c746`: 27/36. Die 9 Fehlschläge sind genau die Befunde, die die noch nicht
-committeten Abschluss-Fixes beheben:
+`home-test.mjs` (36 Läufe) auf `527c746`: 27/36. Die 9 Fehlschläge sind genau die Befunde, die die
+Abschluss-Fixes beheben:
 
 - A111: holdPosition bei 768 und 390 px, gemessen −598 bis −1053 px; „Zum Projekt“ landet bei
   −403 px.
@@ -232,6 +237,12 @@ committeten Abschluss-Fixes beheben:
 - A114: „05 Contact“ bei 390 px um 60 px abgeschnitten.
 
 Eine Kopie des Arbeitsverzeichnisses mit diesen Fixes besteht 36/36.
+
+Stand „Redesign: Abschluss-Fixes“ (gleicher Tag, gleiche Werkzeuge): Gate in Produktion, Vorschau
+und Formular je 340 Läufe, alle Abnahme-Metriken 0, Agenten 18/18, kleine Fokusziele @390
+10 / 66 / 10, Rechtstext-Lücken wie oben. `home-test.mjs` 42/42 in allen drei Builds; die sechs
+dabei neuen Tests (Laden mit verschobenen Ankern, holdPosition am Seitenanfang, Band A113)
+schlagen auf `527c746` alle fehl.
 
 Vorher-Aufnahme der Live-Seite (Stand `2d636c6`) mit
 `node scripts/gate/shoot.mjs https://yannick-beck.de <out> --sitemap --no-fail --concurrency=2`:

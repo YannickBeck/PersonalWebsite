@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import { holdPosition } from '@/lib/hold-position';
 import { onJump } from './home-jump';
 import styles from './projects.module.css';
 
@@ -38,6 +39,11 @@ export interface AccordionItem {
  * voller Breite gesetzt, der geschlossene Eintrag beschneidet nur – die Höhe der Reihe ist
  * damit die des längeren Projekts und ändert sich beim Wechsel nicht. Schmaler: Akkordeon
  * untereinander. Übergänge: motion.css §7 (nur no-preference).
+ *
+ * Untereinander klappt beim Öffnen des zweiten Projekts das erste darüber zu. Der gewählte Kopf
+ * bleibt dabei an seiner Stelle im Bildschirm (holdPosition, Abschluss-Fixes A111) – vorher
+ * rückte er samt Fokus um die Höhe des zugeklappten Inhalts nach oben, unter die Leisten oder
+ * aus dem Bild. Nebeneinander bewegt sich nichts, der Ausgleich ist dann 0.
  */
 /**
  * Unsichtbarer Anfang des Button-Namens (WCAG 2.5.3, Fix-Runde 3): Der geschlossene Streifen
@@ -64,6 +70,15 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
       }),
     [items],
   );
+
+  // Lage des Kopfs vor dem Commit festhalten (Klick, Enter, Leertaste, Tippen)
+  const select = (event: MouseEvent<HTMLButtonElement>, id: string) => {
+    if (id === open) {
+      return;
+    }
+    holdPosition(event.currentTarget);
+    setOpen(id);
+  };
 
   const onKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
     const buttons = Array.from(listRef.current?.querySelectorAll<HTMLButtonElement>('[data-acc-trigger]') ?? []);
@@ -117,7 +132,7 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
                       aria-disabled={isOpen || undefined}
                       data-acc-trigger=""
                       data-jump-focus=""
-                      onClick={() => setOpen(it.id)}
+                      onClick={(event) => select(event, it.id)}
                     >
                       <span className="yb-sr-only">{namePrefix(it)}</span>
                       {it.title}

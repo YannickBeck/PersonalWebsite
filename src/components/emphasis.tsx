@@ -1,10 +1,10 @@
 import { Fragment, type ReactNode } from 'react';
 
-/** Satzzeichen direkt nach dem Akzent-Wort (z. B. „*untersucht*.“). */
+/** Satzzeichen direkt nach dem Akzent-Wort (z. B. „*RAG*.“). */
 const TRAILING_PUNCT = /^[.,!?:;…]+/;
 
 /**
- * Überschrift mit Akzent-Wort: „Gebaut und *untersucht*.“ → das Wort in Sternchen erscheint in
+ * Überschrift mit Akzent-Wort: „Zwei Projekte rund um *RAG*.“ → das Wort in Sternchen erscheint in
  * der feinen Kursiv-Serif (Klasse .yb-serif, globals.css). Der Text bleibt für Screenreader
  * und Suchmaschinen unverändert (nur ein <em>). Server- und Client-tauglich.
  *

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type MouseEvent } from 'react';
 import styles from './home.module.css';
 
 export interface SectionNavItem {
@@ -21,7 +21,10 @@ export interface SectionNavItem {
  * - Klick: sanftes Scrollen nur bei prefers-reduced-motion: no-preference, Fokus auf die
  *   Abschnittsüberschrift (Tastatur/Screenreader landen im Abschnitt), URL per replaceState –
  *   kein History-Eintrag ohne Next-State (FUN2, route-transition.tsx).
- * - Tastatur: Tab wie gewohnt; zusätzlich ←/→ sowie Pos1/Ende zwischen den Pillen.
+ * - Tastatur: Tab wie gewohnt; zusätzlich ←/→ sowie Pos1/Ende zwischen den Pillen. Die
+ *   fokussierte Pille rückt waagerecht ganz in den Scroller, samt Fokusring (Abschluss-Fixes
+ *   A114: Chrome scrollte den Scroller beim Fokus nicht – bei 390px blieb von „04 Werdegang“
+ *   bzw. „05 Contact“ nur ein Bogen des Rings sichtbar). Nur der Scroller, nie die Seite.
  * - Ab 768px steht „Auf dieser Seite“ vor den Pillen (DES14): Header und Leiste nennen teils
  *   dieselben Begriffe („Über mich“, „Projekte“, „Kontakt“), führen aber oben auf Unterseiten
  *   und hier zu Abschnitten. Für Screenreader sagt das aria-label der Navigation dasselbe.
@@ -131,6 +134,23 @@ export function SectionNav({ items, label, hint }: { items: SectionNavItem[]; la
     setActive(id);
   };
 
+  // Fokussierte Pille samt Ring (Polster = scroll-padding-inline) waagerecht in Sicht (A114)
+  const onFocus = (event: FocusEvent<HTMLUListElement>) => {
+    const list = listRef.current;
+    const link = event.target;
+    if (!list || !(link instanceof HTMLAnchorElement) || list.scrollWidth <= list.clientWidth) {
+      return;
+    }
+    const pad = parseFloat(getComputedStyle(list).scrollPaddingInlineStart) || 0;
+    const box = list.getBoundingClientRect();
+    const r = link.getBoundingClientRect();
+    const dx = r.right + pad > box.right ? r.right + pad - box.right : r.left - pad < box.left ? r.left - pad - box.left : 0;
+    if (dx !== 0) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      list.scrollBy({ left: dx, behavior: reduce ? 'auto' : 'smooth' });
+    }
+  };
+
   const onKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
     const links = Array.from(listRef.current?.querySelectorAll<HTMLAnchorElement>('a') ?? []);
     const index = links.indexOf(document.activeElement as HTMLAnchorElement);
@@ -159,7 +179,7 @@ export function SectionNav({ items, label, hint }: { items: SectionNavItem[]; la
         <span className={styles.sectionNavHint} aria-hidden="true">
           {hint}
         </span>
-        <ul ref={listRef} className={styles.sectionNavList} onKeyDown={onKeyDown}>
+        <ul ref={listRef} className={styles.sectionNavList} onKeyDown={onKeyDown} onFocus={onFocus}>
           {items.map((item) => (
             <li key={item.id}>
               <a

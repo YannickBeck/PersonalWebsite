@@ -4,6 +4,7 @@ import { CERTIFICATIONS, EDUCATION, STATIONS, type Station } from '@/content/pro
 import { anchor, stationPlace } from '@/content/profile-view';
 import { formatPeriod, formatYears } from '@/lib/period';
 import { Gap } from '@/components/gap';
+import { CareerHold } from './career-hold';
 import { HomeSection } from './home-section';
 import styles from './career.module.css';
 
@@ -24,7 +25,8 @@ const OPEN_BY_DEFAULT: Station['id'] = 'bechtle-studium';
  * sie exklusiv: Der gewählte Eintrag wird zum dunklen Balken mit Zeitraum, Ort, Stichpunkten
  * aus LinkedIn und ggf. der Bachelorarbeit (Sprung ins Projekt-Akkordeon). Ausbildung und
  * Zertifikate haben nichts aufzuklappen und stehen als ruhige Zeilen da. Sprungziele
- * #career-<id> (aus dem Periodensystem) öffnen den Eintrag (home-jump.tsx).
+ * #career-<id> (aus dem Periodensystem) öffnen den Eintrag (home-jump.tsx). Öffnet man eine
+ * Station unter dem offenen Studium, bleibt sie an ihrer Stelle im Bildschirm (CareerHold, A112).
  * Höhen-Übergang über ::details-content: motion.css §8 (nur mit Support und no-preference).
  */
 export function CareerSection({ id, number, lang }: { id: string; number: string; lang: Lang }) {
@@ -114,6 +116,7 @@ export function CareerSection({ id, number, lang }: { id: string; number: string
               ),
             )}
           </ol>
+          <CareerHold />
         </div>
 
         <div className={styles.group}>

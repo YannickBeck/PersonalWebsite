@@ -15,7 +15,7 @@ export const PAGE_TOP = styles.top;
  * Abschnittsnummern), darunter die H1 mit Akzent-Wort (`*Wort*` → Kursiv-Serif) und die Lede.
  *
  * size:
- *  - 'xl'      ausdrucksstarke Überschrift (Startseiten-Format, z. B. „Gebaut und *untersucht*.“)
+ *  - 'xl'      ausdrucksstarke Überschrift (Startseiten-Format, z. B. „Zwei Projekte rund um *RAG*.“)
  *  - 'lg'      lange Titel (Projekt- und Artikelseiten, Rechtstexte)
  *  - 'display' Name in der Display-Schrift (Lebenslauf): Versalien, Tinte, druckt gut
  * eyebrow: Zurück-Link über der Kennung; meta: Zeile(n) unter der Lede (Datum, Links, Lücken).

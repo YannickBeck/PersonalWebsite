@@ -148,7 +148,7 @@ export const GAPS: GapEntry[] = [
     where: { de: 'Englische Seiten (Werdegang, CV)', en: 'English pages (career, CV)' },
     need: {
       de: 'LinkedIn nennt nur „Elektrotechniker – Automatisierung“. Die englischen Seiten zeigen „Electrical technician – automation“ (eigene Übersetzung, Rolle statt Fachgebiet) – bitte bestätigen oder die eigene Bezeichnung nennen.',
-      en: 'LinkedIn only gives “Elektrotechniker – Automatisierung”. The English pages show “Electrical technician – automation” (own translation, a role rather than a field) – please confirm or provide your preferred title.',
+      en: 'LinkedIn only gives “Elektrotechniker – Automatisierung”. The English pages show “Electrical technician – automation” (own translation, a role rather than a field) – Yannick confirms it or names the title he prefers.',
     },
   },
   {
@@ -180,8 +180,8 @@ export const GAPS: GapEntry[] = [
     },
     where: { de: 'Projekte, /projekte/orbitalis', en: 'Projects, /en/projekte/orbitalis' },
     need: {
-      de: 'Ein Satz zum Rahmen der Abgabe. Einzel- oder Teamarbeit, und welche Teile stammen von dir? Die Commits im Vollrepo stammen von einem anderen Account; bis zur Klärung heißt der Abschnitt „Was im Projekt neu gebaut wurde“ statt „Mein Beitrag“.',
-      en: 'One sentence on the submission context. Solo or team work, and which parts are yours? The commits in the full repository come from another account; until this is clarified, the section is called “What the project added” instead of “My contribution”.',
+      de: 'Ein Satz zum Rahmen der Abgabe (Modul bzw. Hochschule), ob Einzel- oder Teamarbeit und welche Teile von Yannick stammen. Bis dahin heißt der Abschnitt „Was im Projekt neu gebaut wurde“.',
+      en: 'One sentence on the submission context (course or university), whether it was solo or team work and which parts are Yannick’s. Until then the section is called “What the project added”.',
     },
   },
   {

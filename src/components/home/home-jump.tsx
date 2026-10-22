@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { suppressTransitions } from '@/lib/instant';
+import { holdTransitions } from '@/lib/instant';
 
 /**
  * Sprünge innerhalb der Startseite (Fähigkeit ↔ Projekt ↔ Werdegang).
@@ -10,21 +10,27 @@ import { suppressTransitions } from '@/lib/instant';
  * aus Server-Komponenten – ohne JS springt der Browser zum Anker. Mit JS:
  * 1. Ereignis JUMP_EVENT → Client-Blätter wählen bzw. öffnen ihr Ziel (Kachel, Projekt),
  *    ein <details> am Ziel (Werdegang) wird geöffnet;
- * 2. ohne CSS-Übergänge (suppressTransitions), damit die Höhen sofort stehen; nach dem
- *    Commit (nächster Frame) Scrollen (weich nur bei no-preference) und Fokus auf das
- *    Bedienelement des Ziels ([data-jump-focus]), kurze Markierung über data-yb-jumped;
+ * 2. ohne CSS-Übergänge (holdTransitions, bis gescrollt ist), damit die Höhen sofort stehen;
+ *    nach dem Commit Scrollen (weich nur bei no-preference) und Fokus auf das Bedienelement des
+ *    Ziels ([data-jump-focus]), kurze Markierung über data-yb-jumped;
  * 3. URL per replaceState – kein History-Eintrag ohne Next-State (wie section-nav.tsx, FUN2).
- * Der Fokus wartet, bis das Ziel nicht mehr inert ist (A116): Ein Filter im Periodensystem
- * macht Kacheln inert; hebt der Sprung ihn auf, ist die Kachel erst nach Reacts Commit wieder
- * fokussierbar – ein zu früher focus() ließ den Fokus auf der Marke stehen.
+ * Scrollen und Fokus warten auf Reacts Commit: bis das Ziel nicht mehr inert ist (A116: ein
+ * Filter im Periodensystem macht Kacheln inert, ein zu früher focus() ließ den Fokus auf der
+ * Marke stehen) und bis ein Akkordeon-Eintrag offen ist (Abschluss-Fixes A111: React übernimmt
+ * die Auswahl aus dem Sprung-Ereignis mit normaler Priorität, oft erst nach dem nächsten
+ * Frame – untereinander klappte Orbitalis danach noch zu und schob den Kopf der
+ * Bachelorarbeit bis −860px aus dem Bild).
  * Auch die Aktionen des Einstiegs („Kontakt“, „Projekte“: Anker in .yb-hero-actions) laufen
  * hierüber (A111): Sie setzen den Fokus in den Zielabschnitt, statt nur zu scrollen.
  * Beim Laden mit Anker (z. B. /#skill-rag von einer Projektseite) und bei hashchange wird das
- * Ziel ausgewählt/geöffnet; das Scrollen übernimmt der Browser bzw. Next. Ausnahme (Fix-Runde
- * 3): Ziele mit `data-jump-scroll` (Kacheln des Periodensystems) – der Browser stellte die
- * Kachel oben hin, Kopf und Detailfeld lagen dann über dem Bildschirm. Wie beim Sprung in der
- * Seite rückt das Raster in Sicht, aber nur, solange die Seite noch an der Ankerposition steht
- * (nicht nach wiederhergestellter Scrollposition beim Neuladen oder Zurück).
+ * Ziel ausgewählt/geöffnet; das Scrollen übernimmt der Browser bzw. Next. Nachgeführt wird nur,
+ * solange die Seite noch an der Ankerposition steht (nicht nach wiederhergestellter
+ * Scrollposition beim Neuladen oder Zurück):
+ * - Ziele mit `data-jump-scroll` (Kacheln des Periodensystems, Fix-Runde 3): Der Browser stellte
+ *   die Kachel oben hin, Kopf und Detailfeld lagen über dem Bildschirm – das Raster rückt in Sicht.
+ * - Ziele, die das Öffnen selbst verschiebt (Abschluss-Fixes A111/A112): #project-bachelorarbeit
+ *   (untereinander klappt Orbitalis darüber zu) und #career-… unter dem offenen Studium – sie
+ *   rücken nach dem Commit wieder an die Ankerposition (vorher bis −910px).
  *
  * <HomeJump /> steht in home-content.tsx NACH den Abschnitten: Effekte laufen in Baum-
  * Reihenfolge, die Abschnitte haben ihre Listener dann schon registriert.
@@ -58,26 +64,35 @@ function focusable(el: HTMLElement): boolean {
   return !el.closest('[inert]');
 }
 
+/** Akkordeon-Eintrag, dessen Öffnen React noch nicht übernommen hat (A111). */
+function pending(target: HTMLElement): boolean {
+  return target.dataset.open === 'false';
+}
+
+/** Höchstens so lange auf Reacts Commit warten (danach trotzdem scrollen). */
+const COMMIT_WAIT_MS = 500;
+
 function jump(id: string) {
-  // Ziel öffnet ohne Übergang: Akkordeon/Details stehen im nächsten Frame in ihrer
-  // endgültigen Höhe – sonst zielte das Scrollen auf eine Position, die sich noch verschiebt
-  // (z. B. wenn ein anderer Werdegang-Eintrag darüber zuklappt). Sichtbar ist das Scrollen.
-  suppressTransitions();
+  // Ziel öffnet ohne Übergang: Akkordeon/Details stehen in ihrer endgültigen Höhe, bevor
+  // gescrollt wird – sonst zielte das Scrollen auf eine Position, die sich noch verschiebt
+  // (z. B. wenn ein anderer Werdegang-Eintrag oder Orbitalis darüber zuklappt). Die Sperre
+  // hält bis nach dem Scrollen (nicht nur zwei Frames: Reacts Commit kann später kommen).
+  const release = holdTransitions();
   const el = prepare(id);
   if (!el) {
+    release();
     return;
   }
   window.history.replaceState(window.history.state, '', `#${id}`);
-  let tries = 0;
+  const start = performance.now();
   const run = () => {
     const target = document.getElementById(id) ?? el;
     // Ganze Abschnitte (Aktionen des Einstiegs) bekommen den Fokus selbst wie bei der
     // Abschnittsnavigation; sonst das Bedienelement des Ziels
     const focusEl =
       target.matches('[data-jump-focus], section') ? target : (target.querySelector<HTMLElement>('[data-jump-focus]') ?? target);
-    // Noch inert (Commit des Filter-Wechsels steht aus): einen weiteren Frame warten, höchstens 10
-    if (!focusable(focusEl) && tries < 10) {
-      tries += 1;
+    // Commit steht aus (Filter-Wechsel: noch inert; Akkordeon: noch zu) – weiter warten
+    if ((!focusable(focusEl) || pending(target)) && performance.now() - start < COMMIT_WAIT_MS) {
       window.requestAnimationFrame(run);
       return;
     }
@@ -88,6 +103,7 @@ function jump(id: string) {
     focusEl.focus({ preventScroll: true });
     target.setAttribute('data-yb-jumped', '');
     window.setTimeout(() => target.removeAttribute('data-yb-jumped'), MARK_MS);
+    release();
   };
   window.requestAnimationFrame(run);
 }
@@ -99,21 +115,52 @@ function atAnchorPosition(target: HTMLElement): boolean {
   return Math.abs(target.getBoundingClientRect().top - (pad + margin)) <= 4;
 }
 
-/** Nach dem Anker-Scroll des Browsers: Ziele mit data-jump-scroll auf ihren Rahmen scrollen. */
-function alignHashTarget(id: string) {
+/**
+ * Nach dem Anker-Scroll des Browsers nachführen (Laden, hashchange):
+ * - Kacheln (data-jump-scroll): Raster in Sicht, wenn die Kachel an der Ankerposition steht;
+ * - Ziele, die das Öffnen verschoben hat: zurück an die Ankerposition, wenn sie vorher dort
+ *   standen (anchorY = Scrollposition davor) und seither niemand gescrollt hat.
+ */
+function alignHashTarget(id: string, anchorY: number | null, release: () => void) {
+  const start = performance.now();
   const align = () => {
     const target = document.getElementById(id);
-    const scrollId = target?.dataset.jumpScroll;
-    const scrollEl = scrollId ? document.getElementById(scrollId) : null;
-    if (target && scrollEl && atAnchorPosition(target)) {
-      scrollEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+    if (!target) {
+      release();
+      return;
     }
+    if (pending(target) && performance.now() - start < COMMIT_WAIT_MS) {
+      window.requestAnimationFrame(align);
+      return;
+    }
+    const scrollId = target.dataset.jumpScroll;
+    const scrollEl = scrollId ? document.getElementById(scrollId) : null;
+    const atAnchor = atAnchorPosition(target);
+    const moved = !atAnchor && anchorY !== null && Math.abs(window.scrollY - anchorY) < 1;
+    if (scrollEl && (atAnchor || moved)) {
+      scrollEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+    } else if (moved) {
+      target.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+    release();
   };
-  // zwei Frames: Auswahl (Filter aufheben) ist dann committet
+  // zwei Frames: Auswahl (Filter aufheben, Akkordeon öffnen) ist dann meist committet
   window.requestAnimationFrame(() => window.requestAnimationFrame(align));
   // Chrome scrollt beim Abschluss des Ladens noch einmal zum Anker, wenn niemand gescrollt hat
   if (document.readyState !== 'complete') {
-    window.addEventListener('load', () => window.requestAnimationFrame(align), { once: true });
+    window.addEventListener(
+      'load',
+      () =>
+        window.requestAnimationFrame(() => {
+          const target = document.getElementById(id);
+          const scrollId = target?.dataset.jumpScroll;
+          const scrollEl = scrollId ? document.getElementById(scrollId) : null;
+          if (target && scrollEl && atAnchorPosition(target)) {
+            scrollEl.scrollIntoView({ block: 'start', behavior: 'auto' });
+          }
+        }),
+      { once: true },
+    );
   }
 }
 
@@ -138,8 +185,17 @@ export function HomeJump() {
     };
     const fromHash = () => {
       const id = decodeURIComponent(window.location.hash.slice(1));
-      if (id && prepare(id)) {
-        alignHashTarget(id);
+      const before = id ? document.getElementById(id) : null;
+      if (!before) {
+        return;
+      }
+      // Lage vor dem Öffnen: Stand das Ziel an der Ankerposition, folgt die Seite ihm
+      const anchorY = atAnchorPosition(before) ? window.scrollY : null;
+      const release = holdTransitions();
+      if (prepare(id)) {
+        alignHashTarget(id, anchorY, release);
+      } else {
+        release();
       }
     };
     document.addEventListener('click', onClick, true);

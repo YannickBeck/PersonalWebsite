@@ -80,3 +80,6 @@ Zwei Quellen, klar getrennt:
 
 Seite `/content-status` (DE+EN, `noindex`, im Footer nur im Vorschau-Build): alle Einträge aus
 `GAPS` mit Fundstelle und benötigtem Format, dazu die Quellen der veröffentlichten Angaben.
+Im Produktions-Build (ohne `NEXT_PUBLIC_SHOW_GAPS`) nur Bezeichnung und Fundstelle je Lücke;
+„Benötigt“ und die Quellen sind Arbeitsanweisungen und erscheinen nur in der Vorschau. `need`-Texte
+trotzdem neutral schreiben (Yannick in der dritten Person, keine internen Zweifel).

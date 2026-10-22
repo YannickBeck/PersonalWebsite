@@ -264,19 +264,32 @@
   display: flex;
   justify-content: center;
   padding: var(--spacing-3) var(--spacing-4);
-  pointer-events: none;
   /* Ruhiges Papier-Band vom Header bis unter die Pillen (Fix-Runde 3): Vorher blendete das
      Papier schon ab 55 % aus – angeschnittene Textzeilen schienen links und rechts der Leiste
      durch. Jetzt deckt es die ganze Leiste; erst darunter läuft es kurz aus (::after) – nur
      8px, so viel wie der Zusatz in scroll-padding-top (globals.css): Sprungziele und Fokus
-     landen nie im Verlauf. */
+     landen nie im Verlauf. Zusammen mit dem Header eine deckende Fläche (globals.css, GES1).
+     Abschluss-Fixes A113: Das Band nimmt Klicks selbst an (vorher pointer-events: none – ein
+     Tippen aufs leere Papier wählte die unsichtbare Kachel darunter). Es reicht bis an den
+     Bildschirmrand (::before, auch für Klicks), sonst schienen Ringe und Schatten im Seitenrand
+     neben der Inhaltsspalte durch; LayoutContent beschneidet waagerecht (overflow-x: clip),
+     es entsteht kein Seitenüberlauf. */
+  background-color: var(--color-background-body);
+}
+
+.sectionNav::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: calc(50% - 50vw);
+  z-index: -1;
   background-color: var(--color-background-body);
 }
 
 .sectionNav::after {
   content: '';
   position: absolute;
-  inset-inline: 0;
+  inset-inline: calc(50% - 50vw);
   top: 100%;
   height: var(--spacing-2);
   background: linear-gradient(to bottom, var(--color-background-body), transparent);
@@ -284,7 +297,6 @@
 }
 
 .sectionNavBar {
-  pointer-events: auto;
   display: flex;
   align-items: center;
   max-width: 100%;
@@ -501,7 +513,8 @@
    Der Verlauf hinter der Abschnittsnavigation entfällt dort – sonst schiene Seitentext unter
    den Pillen durch; der aktive Abschnitt bekommt einen Rahmen in Systemfarbe. */
 @media (forced-colors: active) {
-  .sectionNav {
+  .sectionNav,
+  .sectionNav::before {
     background: Canvas;
   }
 

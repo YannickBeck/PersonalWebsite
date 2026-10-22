@@ -154,7 +154,7 @@ darauf; `scripts/contact-api-test.mjs` prüft die API-Fälle:
 
 ```sh
 node scripts/resend-mock.mjs 3362     # Modi: POST /__mode {"mode":"ok"|"fail"|"invalid"|"hang"}
-CONTACT_RESEND_API_KEY=re_test_fake CONTACT_TO=inbox@example.test \
+CONTACT_RESEND_API_KEY=re_test_fake_0000000000 CONTACT_TO=inbox@example.test \
 CONTACT_FROM='Website <kontakt@example.test>' CONTACT_RESEND_BASE_URL=http://127.0.0.1:3362 \
 PORT=3302 HOSTNAME=127.0.0.1 node .next/standalone/server.js
 # für die UI: vorher mit NEXT_PUBLIC_CONTACT_FORM=1 bauen

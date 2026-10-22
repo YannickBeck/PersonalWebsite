@@ -22,7 +22,7 @@ ${INTRO.value.de[0]}
 
 - Du suchst belegte Angaben zu ${PERSON.name}: Rolle, beruflicher Werdegang (Bechtle Mannheim seit 2020, GEBHARDT Fördertechnik 2018–2020), Ausbildung, Zertifikate und Sprachen.
 - Du willst seine fachlichen Schwerpunkte kennen: ${FOCUS_LIST.value.join(', ')}.
-- Du suchst seine Projekte: Orbitalis (lokales KI-Ticketsystem mit RAG) und seine Bachelorarbeit zu KI in der Angebotserstellung im Presales.
+- Du suchst die Projekte auf der Seite: Orbitalis (lokales KI-Ticketsystem mit RAG) und seine Bachelorarbeit zu KI in der Angebotserstellung im Presales.
 - Du willst Kontakt aufnehmen: ${CONTACT_FORM_ENABLED ? 'Kontaktformular oder LinkedIn' : 'LinkedIn (das Kontaktformular folgt noch)'}, keine öffentliche E-Mail-Adresse.
 - Nicht geeignet für: Preise, Verfügbarkeiten, Kundenreferenzen – dazu steht hier nichts.
 

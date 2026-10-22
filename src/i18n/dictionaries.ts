@@ -68,8 +68,9 @@ const de = {
     badgeStations: 'Stationen',
     badgeCerts: 'Zertifikate',
     skillsTitle: 'Woher mein Wissen *kommt*.',
-    // ohne zweites „woher … kommt“ (Titel) – Fix-Runde 3
-    skillsLede: 'Die Kacheln beruhen auf meinem LinkedIn-Profil, meinen Stationen und dem Projekt Orbitalis.',
+    // ohne zweites „woher … kommt“ (Titel) – Fix-Runde 3; „Technik im Projekt“ statt „dem
+    // Projekt“: wer welchen Teil von Orbitalis gebaut hat, ist offen (Abschluss-Fixes TEX1)
+    skillsLede: 'Die Kacheln beruhen auf meinem LinkedIn-Profil und auf der Technik im Projekt Orbitalis.',
     skillsEvidence: 'Belegt durch',
     skillsFilterLabel: 'Fähigkeiten nach Bereich filtern',
     skillsFilterAll: 'Alle',
@@ -79,11 +80,14 @@ const de = {
     skillsListTitle: 'Alle Fähigkeiten als Liste',
     skillsLicense: 'Lizenz',
     evidenceKinds: { station: 'Station', education: 'Ausbildung', cert: 'Zertifikat', project: 'Projekt', profile: 'LinkedIn-Profil' },
-    projectsTitle: 'Gebaut und *untersucht*.',
-    projectsLede: 'Ein lokales KI-Ticketsystem und meine Bachelorarbeit, beide rund um RAG und Generative AI.',
+    // Abschluss-Fixes TEX1: keine Zuschreibung „gebaut“, solange Yannicks Anteil an Orbitalis
+    // offen ist (Lücke orbitalis-context); RAG ist in beiden Projekten belegt. Nach Bestätigung
+    // können „Gebaut und *untersucht*.“ und „Fähigkeiten aus dem Projekt“ zurück.
+    projectsTitle: 'Zwei Projekte rund um *RAG*.',
+    projectsLede: 'Ein lokales KI-Ticketsystem auf Basis von osTicket und meine Bachelorarbeit zur Angebotserstellung im Presales.',
     projectDetails: 'Details ansehen',
     projectsListLabel: 'Projekte',
-    projectsSkills: 'Fähigkeiten aus dem Projekt',
+    projectsSkills: 'Technik & Themen',
     // eigene Formulierung (Fix-Runde 3; vorher die Reel-Überschrift), nach LinkedIn: „Aufbau eines
     // breiten technischen Fundaments als Grundlage für die anschließende Tätigkeit im IT-Consulting“
     careerTitle: 'Erst das Fundament, dann die *Beratung*.',
@@ -190,7 +194,7 @@ const de = {
   newsletterStateConfirm: 'Fast geschafft: Bitte den Link in der Bestätigungs-Mail öffnen. (Vorschau – es wurde keine Mail versendet.)',
   newsletterStateOk: 'Eingabe geprüft – die Anmeldung ist noch nicht freigeschaltet, es wurde nichts übertragen.',
   statusTitle: 'Content-Status',
-  statusLede: 'Was auf der Website noch fehlt, wo es gebraucht wird und in welchem Format.',
+  statusLede: 'Was auf der Website noch fehlt und wo es gebraucht wird.',
   statusColWhere: 'Fundstelle',
   statusColFormat: 'Benötigt',
   statusSources: 'Quellen der veröffentlichten Angaben',
@@ -249,7 +253,7 @@ const de = {
   pages: {
     projekte: {
       title: 'Projekte',
-      lede: 'Ein lokales KI-Ticketsystem und meine Bachelorarbeit, beide rund um RAG und Generative AI.',
+      lede: 'Ein lokales KI-Ticketsystem auf Basis von osTicket und meine Bachelorarbeit zur Angebotserstellung im Presales.',
     },
     blog: {
       title: 'Blog',
@@ -257,7 +261,7 @@ const de = {
     },
     leistungen: {
       title: 'Schwerpunkte',
-      lede: 'Vier Themen aus meinem Profil: Microsoft Cloud und Modern Workplace, Identity & Security, KI und Automatisierung sowie IT-Consulting und Presales. Zu jedem Thema stehen die passenden Fähigkeiten und Projekte.',
+      lede: 'Vier Themen aus meinem Profil: Microsoft Cloud und Modern Workplace, Identity & Security, KI und Automatisierung sowie IT-Consulting und Presales. Zu jedem Thema stehen die passenden Fähigkeiten, bei KI und Consulting auch die Projekte.',
     },
     cv: {
       title: 'Lebenslauf',
@@ -334,7 +338,7 @@ const en: Dictionary = {
     badgeStations: 'Positions',
     badgeCerts: 'Certifications',
     skillsTitle: 'Where my know-how *comes from*.',
-    skillsLede: 'The tiles are based on my LinkedIn profile, my positions and the Orbitalis project.',
+    skillsLede: 'The tiles are based on my LinkedIn profile and on the technology used in the Orbitalis project.',
     skillsEvidence: 'Evidence',
     skillsFilterLabel: 'Filter skills by area',
     skillsFilterAll: 'All',
@@ -344,11 +348,11 @@ const en: Dictionary = {
     skillsListTitle: 'All skills as a list',
     skillsLicense: 'Licence',
     evidenceKinds: { station: 'Position', education: 'Education', cert: 'Certification', project: 'Project', profile: 'LinkedIn profile' },
-    projectsTitle: 'Built and *researched*.',
-    projectsLede: 'A local AI ticket system and my bachelor’s thesis, both centred on RAG and generative AI.',
+    projectsTitle: 'Two projects centred on *RAG*.',
+    projectsLede: 'A local AI ticket system based on osTicket and my bachelor’s thesis on proposal creation in presales.',
     projectDetails: 'View details',
     projectsListLabel: 'Projects',
-    projectsSkills: 'Skills from this project',
+    projectsSkills: 'Technology & topics',
     careerTitle: 'Foundations first, then *consulting*.',
     careerLede: 'From electrical engineering via an IT apprenticeship to IT consultant.',
     careerStations: 'Positions',
@@ -450,7 +454,7 @@ const en: Dictionary = {
   newsletterStateConfirm: 'Almost done: please open the link in the confirmation email. (Preview – no email was sent.)',
   newsletterStateOk: 'Input checked – signup is not enabled yet, nothing was transmitted.',
   statusTitle: 'Content status',
-  statusLede: 'What is still missing on the website, where it is needed and in which format.',
+  statusLede: 'What is still missing on the website and where it is needed.',
   statusColWhere: 'Location',
   statusColFormat: 'Needed',
   statusSources: 'Sources of the published information',
@@ -505,7 +509,7 @@ const en: Dictionary = {
   pages: {
     projekte: {
       title: 'Projects',
-      lede: 'A local AI ticket system and my bachelor’s thesis, both centred on RAG and generative AI.',
+      lede: 'A local AI ticket system based on osTicket and my bachelor’s thesis on proposal creation in presales.',
     },
     blog: {
       title: 'Blog',
@@ -513,7 +517,7 @@ const en: Dictionary = {
     },
     leistungen: {
       title: 'Focus areas',
-      lede: 'Four topics from my profile: Microsoft Cloud and Modern Workplace, identity and security, AI and automation, and IT consulting and presales. Each one lists the related skills and projects.',
+      lede: 'Four topics from my profile: Microsoft Cloud and Modern Workplace, identity and security, AI and automation, and IT consulting and presales. Each one lists the related skills; the AI and consulting topics also link to projects.',
     },
     cv: {
       title: 'CV',
