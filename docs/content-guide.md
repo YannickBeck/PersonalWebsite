@@ -98,11 +98,25 @@ Liegt die Anschrift nicht in Baden-Württemberg, ändert sich auch die Aufsichts
 Abschnitt „Deine Rechte“ (`RIGHTS_BLOCK`, derzeit der Landesbeauftragte für Baden-Württemberg,
 abgeleitet aus dem LinkedIn-Ort Sandhausen).
 
+**Betrieb des Servers, an EINER Stelle:** `LEGAL_HOSTING` in `src/content/legal.ts` (Eintrag
+„Server“ und der Satz zur Weiterleitung im Eintrag „Cloudflare“, DE, EN und Markdown). Hetzner als
+Hoster und ein Cloudflare-Tunnel stammen nur aus einer Workflow-Vorgabe; belegt ist das nirgends
+(Vault-Steckbrief: „Homelab oder externer Server?“ OFFEN), messen lässt es sich hinter Cloudflare
+nicht. Deshalb nennt die Seite beides erst nach Bestätigung durch Yannick (Nachbesserung FAK1).
+
+| Feld | Inhalt | Solange `null` |
+| --- | --- | --- |
+| `host` | Hoster, z. B. das vorbereitete `HETZNER` (Name und Anschrift aus dem Hetzner-Impressum); `false` für einen selbst betriebenen Server (dann keine Zeile zum Auftragsverarbeitungsvertrag) | Überschrift nur „Server“, kein Anbieter, OFFEN „Wer den Server betreibt …“ |
+| `tunnel` | `true`, wenn der Server über einen Cloudflare-Tunnel angebunden ist (Satz nennt dann den Tunnel), `false` sonst | OFFEN „… wie er an Cloudflare angebunden ist“ (mit `host` in einer Zeile) |
+
+Nach der Bestätigung zusätzlich den OFFEN-Punkt im Vault-Steckbrief
+`20-privat/projekte/website-yannick-beck-de.md` mit Datum auflösen.
+
 **Offene Punkte im Datenschutz (Einträge mit `open` in `PRIVACY`):**
 
-- Server (Hetzner): Standort des Rechenzentrums; ob ein Auftragsverarbeitungsvertrag (Art. 28
-  DSGVO) mit Hetzner besteht; ob und wie lange der Server Abrufe protokolliert und auf welcher
-  Rechtsgrundlage.
+- Server: wer ihn betreibt und wie er an Cloudflare angebunden ist (`LEGAL_HOSTING`); Standort;
+  bei einem Hoster, ob ein Auftragsverarbeitungsvertrag (Art. 28 DSGVO) besteht; ob und wie lange
+  der Server Abrufe protokolliert und auf welcher Rechtsgrundlage.
 - Cloudflare: Rechtsgrundlage für die Auslieferung und für die Übermittlung in die USA; ob das
   Data Processing Addendum von Cloudflare abgeschlossen ist.
 - Analyse: Stand vor der Veröffentlichung prüfen (Cloudflare Web Analytics ist vorbereitet, aber aus).
@@ -110,10 +124,9 @@ abgeleitet aus dem LinkedIn-Ort Sandhausen).
   Rechtsgrundlage und Widerrufsweg.
 
 **Belegt und im Text:** Betroffenenrechte (Art. 15, 16, 17, 18, 20, 21, 77 DSGVO, Art. 7 Abs. 3
-nur mit Kontaktformular), Aufsichtsbehörde Baden-Württemberg mit Anschrift, Hetzner als Hoster
-(Angabe des Inhabers) mit Anschrift aus dem Hetzner-Impressum, Cloudflare (Auslieferung, Network
-Error Logging, keine Cookies gemessen, Teilnahme am EU-US Data Privacy Framework), Tunnel
-(Angabe des Inhabers).
+nur mit Kontaktformular), Aufsichtsbehörde Baden-Württemberg mit Anschrift, Coolify
+(Vault-Steckbrief), Cloudflare (Auslieferung, Network Error Logging, keine Cookies gemessen,
+Teilnahme am EU-US Data Privacy Framework). Nicht im Text, bis bestätigt: Hoster und Tunnel.
 
 **Neu messen, wenn sich am Betrieb etwas ändert** (Cloudflare-Einstellungen, Analyse, neuer
 Hoster): Antwort-Header von `https://yannick-beck.de` mit und ohne Browser-User-Agent prüfen

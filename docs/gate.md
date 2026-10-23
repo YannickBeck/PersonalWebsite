@@ -434,6 +434,30 @@ Server-HTML. Gleiche Werkzeuge, gebaut aus dem Arbeitsstand vor dem Commit:
   +39 B, `/cv` +9 B, übrige Seiten ±0. CSS gz +312 B auf `/` und `/en`, +190 B auf den Seiten im
   Rahmen, +33 B auf Beiträgen und `/content-status`.
 
+## Referenzwerte Nachbesserungen Rechtstexte/Feinschliff (2026-10-23)
+
+FAK1: Hoster und Cloudflare-Tunnel stehen nicht mehr als Tatsache im Datenschutz, sondern hängen
+an `LEGAL_HOSTING` (legal.ts); bis zur Bestätigung durch Yannick Überschrift „Server“, kein
+Anbieter, eine OFFEN-Zeile mehr. Gleiche Werkzeuge, gebaut aus dem Arbeitsstand vor dem Commit:
+
+| Build | Läufe | Abnahme-Metriken | Agenten | Kleine Fokusziele @390 | Rechtstext-Lücken |
+| --- | --- | --- | --- | --- | --- |
+| prod | 360 (36 Seiten) | alle 0 | 22/22 | 10 | Impressum 3, Datenschutz 9 (DE und EN) |
+| gaps | 360 | alle 0 | 22/22 | 66 | wie prod |
+| form | 360 | alle 0 | 22/22 | 10 | Impressum 3, Datenschutz 12 |
+
+- Datenschutz vorher 8 bzw. 11: neu „Wer den Server betreibt … und wie er an Cloudflare
+  angebunden ist“; „Standort des Rechenzentrums (… Hetzner-Standort)“ heißt jetzt „Standort des
+  Servers (Land)“, die AVV-Zeile „Bei einem Hoster: …“. Markdown-Fassung gleich (9 bzw. 12).
+- „Hetzner“ und „Tunnel“ kommen in HTML und Markdown von `/datenschutz` und `/en/datenschutz`
+  nicht mehr vor (vorher je 1 × Anbieter mit Anschrift, Überschrift und Tunnel-Satz); auch
+  `/impressum`, `/llms.txt` und `/content-status` nennen sie in Produktion und Formular-Build
+  nicht, nur der Vorschau-Build in „Benötigt“.
+- home-test 57/57 in allen drei Builds, url-check 74/74 (Produktion, Vorschau, Formular),
+  link-check 0 Befunde (128 bzw. 130 interne Ziele), contact-api-test 23/23.
+- Abschnitt „Eingesetzte Dienste“ DE/EN bei 390/1440 px, hell/dunkel: kein Überlauf, eine H1,
+  keine Sprünge, 0 Konsolenfehler; Druck A4 DE und EN weiter je 3 Seiten.
+
 ## Grenzen
 
 - Nur Chromium. WebKit und Firefox bleiben OFFEN (AGENTS.md).

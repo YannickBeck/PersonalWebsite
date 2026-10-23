@@ -5,9 +5,10 @@
  * Regeln
  * - Entwurf, keine Rechtsberatung. Beschrieben wird nur, was die Website technisch tatsächlich
  *   tut (Code in diesem Repo, docs/kontaktformular.md), was am Live-Betrieb gemessen ist oder
- *   was der Inhaber selbst angegeben hat (Quellen unten). Rechenzentrumsstandort,
- *   Auftragsverarbeitungsverträge, Log-Dauer und Rechtsgrundlagen sind nicht belegt und bleiben
- *   OFFEN, bis Yannick sie bestätigt bzw. sie rechtlich geprüft sind.
+ *   was der Inhaber nachprüfbar selbst angegeben hat (Quellen unten). Hoster, Anbindung des
+ *   Servers, Rechenzentrumsstandort, Auftragsverarbeitungsverträge, Log-Dauer und
+ *   Rechtsgrundlagen sind nicht belegt und bleiben OFFEN, bis Yannick sie bestätigt bzw. sie
+ *   rechtlich geprüft sind.
  * - Persönliche Pflichtangaben (Anschrift, E-Mail, verantwortliche Person nach MStV) stehen an
  *   EINER Stelle: LEGAL_PERSON unten. Impressum und Datenschutz (verantwortliche Stelle) lesen
  *   daraus; `null` erzeugt die OFFEN-Zeile. Nachtragen = dort eintragen (docs/content-guide.md).
@@ -29,9 +30,18 @@
  *   https://www.baden-wuerttemberg.datenschutz.de/beschwerde/
  *   Ort Baden-Württemberg: LinkedIn-Export (Sandhausen). Liegt die Anschrift in LEGAL_PERSON in
  *   einem anderen Bundesland, die Behörde dieses Landes eintragen.
- * - Hoster: Angabe des Inhabers (Hetzner, Nutzer-Notiz vom 23.10.2026, nicht messbar, weil die
- *   Website hinter Cloudflare liegt). Name und Anschrift aus dem Impressum von Hetzner:
- *   https://www.hetzner.com/de/legal/legal-notice/
+ * - Hoster und Anbindung an Cloudflare: NICHT belegt (Nachbesserung FAK1). „Hetzner“ und
+ *   „Cloudflare-Tunnel“ stammten nur aus einer Workflow-Vorgabe („Nutzer-Notiz vom 23.10.2026“),
+ *   die weder im Repo noch im Vault steht; messen lässt es sich nicht, die Antworten zeigen nur
+ *   `server: cloudflare`. Der Vault-Steckbrief 20-privat/projekte/website-yannick-beck-de.md
+ *   führt „Homelab oder externer Server?“ als OFFEN; homelab-architektur.md (Skizze 08/2024)
+ *   zeigt Hetzner-Cloud-VMs UND einen lokalen Proxmox-Knoten hinter Cloudflare-Tunnel,
+ *   docs/test-report.md (anderer Agent, 30.09.2026) spricht von „Tunnel-Hosts“ – Indizien, keine
+ *   Bestätigung. Deshalb LEGAL_HOSTING unten: Bis Yannick bestätigt, nennt die Seite weder
+ *   Hoster noch Tunnel und zeigt dafür eine OFFEN-Zeile. Vorbereitet ist HETZNER mit Name und
+ *   Anschrift aus dem Impressum von Hetzner: https://www.hetzner.com/de/legal/legal-notice/
+ * - Coolify: Vault-Steckbrief website-yannick-beck-de.md (Deploy über die Coolify-API, Website
+ *   hinter Cloudflare).
  * - Cloudflare, gemessen per HTTP am 23.10.2026 (curl auf /, /impressum, /datenschutz, /en,
  *   /robots.txt, ein Skript unter /_next/static, eine 404; mit und ohne Browser-User-Agent):
  *   `server: cloudflare`, `cf-ray`, `cf-cache-status` DYNAMIC für Seiten, HIT für Skripte,
@@ -51,7 +61,7 @@
  *   Data Privacy Framework (Teilnehmerliste des US-Handelsministeriums, Cloudflare, Inc., ID 5666,
  *   EU-US: „Active - Re-certification under Review“):
  *   https://www.dataprivacyframework.gov/participant/5666
- *   Tunnel zwischen Cloudflare und Server: Angabe des Inhabers (Nutzer-Notiz), nicht messbar.
+ *   Tunnel zwischen Cloudflare und Server: nicht messbar und nicht belegt (siehe Hoster, LEGAL_HOSTING).
  * - Normen aktuell: § 5 DDG (seit 14.05.2024 statt § 5 TMG), § 18 Abs. 2 MStV (statt § 55
  *   Abs. 2 RStV). Quellen (Sekundärquellen, Gesetzestext auf gesetze-im-internet.de prüfen):
  *   https://recht.dfn.de/wp-content/uploads/2024/05/Informationspflicht-beim-Betrieb-von-Telemediendiensten0524.pdf
@@ -127,6 +137,45 @@ export const LEGAL_PERSON: LegalPerson = {
   mstv: null,
 };
 
+export interface LegalHost {
+  /** Kurzname für Überschrift und OFFEN-Zeilen, z. B. „Hetzner“. */
+  short: string;
+  /** Firma und Anschrift in einer Zeile (Land je Sprache). */
+  line: L;
+}
+
+export interface LegalHosting {
+  /**
+   * Wer den Server betreibt. null = nicht bestätigt (OFFEN-Zeile, kein Name auf der Seite),
+   * false = eigener Server ohne Hoster (keine Zeile zum Auftragsverarbeitungsvertrag), sonst der Hoster.
+   */
+  host: LegalHost | null | false;
+  /** Server über einen Cloudflare-Tunnel angebunden: true/false nach Bestätigung, null = offen. */
+  tunnel: boolean | null;
+}
+
+/**
+ * Vorbereitet, Name und Anschrift aus dem Hetzner-Impressum (Quellen oben). Erst in
+ * LEGAL_HOSTING.host eintragen, wenn Yannick Hetzner als Hoster bestätigt hat (FAK1).
+ */
+export const HETZNER: LegalHost = {
+  short: 'Hetzner',
+  line: {
+    de: 'Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland',
+    en: 'Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Germany',
+  },
+};
+
+/**
+ * Betrieb des Servers – die EINE Stelle zum Nachtragen (docs/content-guide.md, 2a). Nur
+ * eintragen, was Yannick bestätigt hat, z. B. `{ host: HETZNER, tunnel: true }`; danach den
+ * OFFEN-Punkt im Vault-Steckbrief mit Datum auflösen.
+ */
+export const LEGAL_HOSTING: LegalHosting = {
+  host: null,
+  tunnel: null,
+};
+
 /** Fehlende Angaben eines Eintrags als Liste (für HTML und Markdown). */
 export function legalOpenLines(entry: LegalEntry): L[] {
   if (!entry.open) {
@@ -161,6 +210,65 @@ function personEntry(open: { address: L; email?: L }): LegalEntry {
     ...(missing.length ? { open: missing } : {}),
   };
 }
+
+/**
+ * Eintrag „Server“ aus LEGAL_HOSTING (FAK1): Hoster und Tunnel nur, wenn bestätigt; sonst
+ * neutral beschrieben und als OFFEN-Zeile. Coolify und die IP-Weitergabe sind belegt (Quellen oben).
+ */
+function serverEntry(): LegalEntry {
+  const { host, tunnel } = LEGAL_HOSTING;
+  const runs: L = host
+    ? { de: `Diese Website läuft auf einem Server der ${host.line.de}, verwaltet mit Coolify.`, en: `This website runs on a server provided by ${host.line.en}, managed with Coolify.` }
+    : host === false
+      ? { de: 'Diese Website läuft auf einem Server, den ich selbst betreibe, verwaltet mit Coolify.', en: 'This website runs on a server I operate myself, managed with Coolify.' }
+      : { de: 'Diese Website läuft auf einem Server, verwaltet mit Coolify.', en: 'This website runs on a server managed with Coolify.' };
+  const request: L = {
+    de: 'Bei jedem Abruf erhält der Server technisch bedingt deine IP-Adresse, die Cloudflare weiterreicht, und den Zeitpunkt des Abrufs.',
+    en: 'With every request the server receives, for technical reasons, your IP address, passed on by Cloudflare, and the time of the request.',
+  };
+  const open: L[] = [];
+  if (host === null && tunnel === null) {
+    open.push({
+      de: 'Wer den Server betreibt (Hoster mit Anschrift oder eigener Server) und wie er an Cloudflare angebunden ist',
+      en: 'Who operates the server (hosting provider with address, or own server) and how it is connected to Cloudflare',
+    });
+  } else if (host === null) {
+    open.push({ de: 'Wer den Server betreibt (Hoster mit Anschrift oder eigener Server)', en: 'Who operates the server (hosting provider with address, or own server)' });
+  } else if (tunnel === null) {
+    open.push({ de: 'Wie der Server an Cloudflare angebunden ist', en: 'How the server is connected to Cloudflare' });
+  }
+  open.push(
+    host
+      ? { de: `Standort des Rechenzentrums (Land bzw. ${host.short}-Standort)`, en: `Data centre location (country or ${host.short} site)` }
+      : { de: 'Standort des Servers (Land)', en: 'Server location (country)' },
+  );
+  if (host) {
+    open.push({
+      de: `Ob mit ${host.short} ein Auftragsverarbeitungsvertrag (Art. 28 DSGVO) abgeschlossen ist`,
+      en: `Whether a data processing agreement (Art. 28 GDPR) has been concluded with ${host.short}`,
+    });
+  } else if (host === null) {
+    open.push({
+      de: 'Bei einem Hoster: ob mit ihm ein Auftragsverarbeitungsvertrag (Art. 28 DSGVO) abgeschlossen ist',
+      en: 'If a hosting provider is used: whether a data processing agreement (Art. 28 GDPR) has been concluded with it',
+    });
+  }
+  open.push({
+    de: 'Ob und wie lange der Server Abrufe protokolliert (Speicherdauer der Server-Logs) und auf welcher Rechtsgrundlage',
+    en: 'Whether and for how long the server logs requests (retention period of the server logs), and on which legal basis',
+  });
+  return {
+    heading: host ? { de: `Server (${host.short})`, en: `Server (${host.short})` } : { de: 'Server', en: 'Server' },
+    text: { de: [`${runs.de} ${request.de}`], en: [`${runs.en} ${request.en}`] },
+    open,
+  };
+}
+
+/** Halbsatz zur Weiterleitung an den Server – „über einen Cloudflare-Tunnel“ nur nach Bestätigung (FAK1). */
+const TO_SERVER: L =
+  LEGAL_HOSTING.tunnel === true
+    ? { de: 'über einen Cloudflare-Tunnel an den Server weiter', en: 'to the server through a Cloudflare tunnel' }
+    : { de: 'an den Server weiter', en: 'to the server' };
 
 const LINKEDIN_LINK: LegalLink = { label: { de: 'LinkedIn-Profil', en: 'LinkedIn profile' }, href: LINKEDIN_URL, external: true };
 
@@ -434,34 +542,20 @@ export const PRIVACY: LegalDoc = {
       id: 'dienste',
       heading: { de: 'Eingesetzte Dienste (tatsächlicher Stand)', en: 'Services in use (actual state)' },
       entries: [
+        // Hoster und Tunnel aus LEGAL_HOSTING, nur nach Bestätigung (FAK1)
+        serverEntry(),
         {
-          // Hetzner: Angabe des Inhabers; Name und Anschrift aus dem Hetzner-Impressum (Quellen oben)
-          heading: { de: 'Server (Hetzner)', en: 'Server (Hetzner)' },
-          text: {
-            de: ['Diese Website läuft auf einem Server der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland, verwaltet mit Coolify. Bei jedem Abruf erhält der Server technisch bedingt deine IP-Adresse, die Cloudflare weiterreicht, und den Zeitpunkt des Abrufs.'],
-            en: ['This website runs on a server provided by Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Germany, managed with Coolify. With every request the server receives, for technical reasons, your IP address, passed on by Cloudflare, and the time of the request.'],
-          },
-          open: [
-            { de: 'Standort des Rechenzentrums (Land bzw. Hetzner-Standort)', en: 'Data centre location (country or Hetzner site)' },
-            { de: 'Ob mit Hetzner ein Auftragsverarbeitungsvertrag (Art. 28 DSGVO) abgeschlossen ist', en: 'Whether a data processing agreement (Art. 28 GDPR) has been concluded with Hetzner' },
-            {
-              de: 'Ob und wie lange der Server Abrufe protokolliert (Speicherdauer der Server-Logs) und auf welcher Rechtsgrundlage',
-              en: 'Whether and for how long the server logs requests (retention period of the server logs), and on which legal basis',
-            },
-          ],
-        },
-        {
-          // Gemessen am 23.10.2026 (Quellen oben); Tunnel: Angabe des Inhabers
+          // Gemessen am 23.10.2026 (Quellen oben); Tunnel nur nach Bestätigung (LEGAL_HOSTING)
           heading: { de: 'Cloudflare (Auslieferung)', en: 'Cloudflare (delivery)' },
           text: {
             de: [
-              'Alle Abrufe laufen über das Netz der Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA. Cloudflare nimmt die Verbindung deines Browsers an, hält Dateien wie Skripte und Stylesheets im Zwischenspeicher vor und leitet die übrigen Anfragen über einen Cloudflare-Tunnel an den Server weiter. Dabei verarbeitet Cloudflare Verbindungsdaten wie deine IP-Adresse.',
+              `Alle Abrufe laufen über das Netz der Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA. Cloudflare nimmt die Verbindung deines Browsers an, hält Dateien wie Skripte und Stylesheets im Zwischenspeicher vor und leitet die übrigen Anfragen ${TO_SERVER.de}. Dabei verarbeitet Cloudflare Verbindungsdaten wie deine IP-Adresse.`,
               'Über einen Antwort-Header fordert Cloudflare deinen Browser auf, fehlgeschlagene Verbindungen an Cloudflare zu melden (Network Error Logging); erfolgreiche Abrufe werden nicht gemeldet. Nach Angaben von Cloudflare enthalten diese Berichte keine personenbezogenen Daten, und die IP-Adresse des meldenden Browsers wird nur während der Übermittlung im Arbeitsspeicher gehalten.',
               'Cookies hat Cloudflare beim Abruf dieser Website nicht gesetzt (geprüft am 23. Oktober 2026).',
               'Cloudflare, Inc. ist nach dem EU-US Data Privacy Framework zertifiziert (Teilnehmerliste des US-Handelsministeriums, Stand 23. Oktober 2026: aktiv, Rezertifizierung in Prüfung).',
             ],
             en: [
-              'All requests pass through the network of Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA. Cloudflare accepts your browser’s connection, keeps files such as scripts and stylesheets in its cache and forwards the remaining requests to the server through a Cloudflare tunnel. In doing so, Cloudflare processes connection data such as your IP address.',
+              `All requests pass through the network of Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA. Cloudflare accepts your browser’s connection, keeps files such as scripts and stylesheets in its cache and forwards the remaining requests ${TO_SERVER.en}. In doing so, Cloudflare processes connection data such as your IP address.`,
               'Via a response header, Cloudflare asks your browser to report failed connections to Cloudflare (Network Error Logging); successful requests are not reported. According to Cloudflare, these reports contain no personal data, and the reporting browser’s IP address is only kept in memory while the report is being transmitted.',
               'Cloudflare did not set any cookies when this website was accessed (checked on 23 October 2026).',
               'Cloudflare, Inc. is certified under the EU-U.S. Data Privacy Framework (participant list of the U.S. Department of Commerce, as of 23 October 2026: active, re-certification under review).',
