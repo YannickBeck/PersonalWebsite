@@ -18,3 +18,21 @@
 .text {
   line-height: 1.65;
 }
+
+/*
+ * Druck (Rechtstexte 2026-10-23, gemessen per PDF):
+ * - globals.css blendet Banner in <main> beim Druck aus (für den Lebenslauf gedacht). Der Hinweis
+ *   „Keine Rechtsberatung …“ gehört aber auch aufs Papier – diese Regel ist spezifischer.
+ * - Die H3 „Aufsichtsbehörde in Baden-Württemberg“ stand allein am Ende von Seite 2: Überschriften
+ *   bleiben bei ihrem Text.
+ */
+@media print {
+  .doc :global(.astryx-banner-frame) {
+    display: flex !important;
+  }
+
+  .heading,
+  .entry > h3 {
+    break-after: avoid;
+  }
+}

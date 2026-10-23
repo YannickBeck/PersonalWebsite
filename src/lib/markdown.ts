@@ -24,7 +24,7 @@ import {
   skillById,
   type Project,
 } from '@/content/profile';
-import { IMPRINT, LEGAL_OPEN, PRIVACY, type LegalDoc } from '@/content/legal';
+import { IMPRINT, LEGAL_OPEN, PRIVACY, legalHref, legalOpenLines, type LegalDoc } from '@/content/legal';
 import { formatPeriod } from '@/lib/period';
 import { KNOWN_ROUTES, NOINDEX_ROUTES, isUnlisted } from '@/lib/routes';
 import { getBySlug, getPostBySlug, getPosts, getProjectSlugs } from '@/lib/ghost';
@@ -191,14 +191,21 @@ function legalMarkdown(doc: LegalDoc, title: string, lang: Lang): string {
       for (const t of e.text?.[lang] ?? []) {
         out.push(t, '');
       }
+      for (const item of e.list ?? []) {
+        out.push(`- **${item.term[lang]}:** ${item.text[lang]}`);
+      }
+      if (e.list?.length) {
+        out.push('');
+      }
       for (const l of e.links ?? []) {
-        out.push(`- ${l.label[lang]}: ${l.external ? l.href : abs(withLang(l.href, lang))}`);
+        const href = legalHref(l, lang);
+        out.push(`- ${l.label[lang]}: ${l.external ? href : abs(withLang(href, lang))}`);
       }
       if (e.links?.length) {
         out.push('');
       }
-      if (e.open) {
-        out.push(`${LEGAL_OPEN[lang]}: ${e.open[lang]}`, '');
+      for (const o of legalOpenLines(e)) {
+        out.push(`${LEGAL_OPEN[lang]}: ${o[lang]}`, '');
       }
     }
   }

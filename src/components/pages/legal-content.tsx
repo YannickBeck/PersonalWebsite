@@ -5,11 +5,12 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { Link } from '@astryxdesign/core/Link';
 import { Banner } from '@astryxdesign/core/Banner';
+import { List, ListItem } from '@astryxdesign/core/List';
 import { PageHero } from '@/components/page-hero';
 import { Gap } from '@/components/gap';
 import { InlineExternalArrow } from '@/components/icons';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
-import { IMPRINT, LEGAL_OPEN, PRIVACY, type LegalDoc } from '@/content/legal';
+import { IMPRINT, LEGAL_OPEN, PRIVACY, legalHref, legalOpenLines, type LegalDoc } from '@/content/legal';
 import type { GapId } from '@/content/profile';
 import gapStyles from '@/components/gap.module.css';
 import styles from './legal-content.module.css';
@@ -50,7 +51,7 @@ export function LegalContent({ kind, lang }: { kind: 'impressum' | 'datenschutz'
     <>
       <PageHero kicker={dict.legalKicker} title={page.title} lede={page.lede} size="lg" meta={<Gap id={gap} lang={lang} block />} />
       <Section>
-        <VStack gap={10} maxWidth={720}>
+        <VStack gap={10} maxWidth={720} className={styles.doc}>
           <Banner status="note" title={dict.templateNoticeTitle} description={doc.notice[lang]} />
           {doc.blocks.map((block) => (
             <section key={block.id} id={block.id} aria-labelledby={`${block.id}-title`} className={styles.block}>
@@ -59,30 +60,51 @@ export function LegalContent({ kind, lang }: { kind: 'impressum' | 'datenschutz'
               </Heading>
               <VStack gap={5}>
                 {block.entries.map((entry, i) => (
-                  <VStack key={i} gap={2}>
+                  <VStack key={i} gap={2} className={styles.entry}>
                     {entry.heading ? <Heading level={3}>{entry.heading[lang]}</Heading> : null}
                     {entry.text?.[lang].map((p) => (
                       <Text key={p.slice(0, 32)} as="p" textWrap="pretty" className={styles.text}>
                         {p}
                       </Text>
                     ))}
+                    {entry.list ? (
+                      // Betroffenenrechte: Begriff mit Artikel hervorgehoben, Erläuterung im selben Satz
+                      <List listStyle="disc" density="compact">
+                        {entry.list.map((item) => (
+                          <ListItem
+                            key={item.term.de}
+                            label={
+                              <Text textWrap="pretty" className={styles.text}>
+                                <Text weight="semibold" color="inherit">
+                                  {item.term[lang]}:
+                                </Text>{' '}
+                                {item.text[lang]}
+                              </Text>
+                            }
+                          />
+                        ))}
+                      </List>
+                    ) : null}
                     {entry.links ? (
                       <HStack gap={4} wrap="wrap">
-                        {entry.links.map((l) =>
-                          l.external ? (
-                            <Link key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" color="primary" hasUnderline>
+                        {entry.links.map((l) => {
+                          const href = legalHref(l, lang);
+                          return l.external ? (
+                            <Link key={href} href={href} target="_blank" rel="noopener noreferrer" color="primary" hasUnderline>
                               {l.label[lang]}
-                        <InlineExternalArrow />
+                              <InlineExternalArrow />
                             </Link>
                           ) : (
-                            <Link key={l.href} href={withLang(l.href, lang)} color="primary" hasUnderline>
+                            <Link key={href} href={withLang(href, lang)} color="primary" hasUnderline>
                               {l.label[lang]}
                             </Link>
-                          ),
-                        )}
+                          );
+                        })}
                       </HStack>
                     ) : null}
-                    {entry.open ? <LegalOpen text={entry.open[lang]} lang={lang} /> : null}
+                    {legalOpenLines(entry).map((o) => (
+                      <LegalOpen key={o.de} text={o[lang]} lang={lang} />
+                    ))}
                   </VStack>
                 ))}
               </VStack>

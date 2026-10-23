@@ -60,7 +60,7 @@ Zwei Quellen, klar getrennt:
 - **Rechtstexte:** `src/content/legal.ts` (Impressum, Datenschutz; DE+EN, auch für die Markdown-
   Fassung). Fehlende Pflichtangaben stehen als `open` und erscheinen – als einzige Lücken – auch in
   Produktion als „OFFEN: …“. Angabe da → Text eintragen, `open` löschen; vor der Veröffentlichung
-  rechtlich prüfen lassen (Entwurf, keine Rechtsberatung).
+  rechtlich prüfen lassen (Entwurf, keine Rechtsberatung). Was fehlt und wo es hingehört: Abschnitt 2a.
 - **Schwerpunkte (/leistungen):** `FOCUS_AREAS` in profile.ts; „Projekte dazu“ ergibt sich aus
   `PROJECTS[].skills`.
 - **Alte Adressen:** Weiterleitungen und Prüfskripte in `docs/urls.md`.
@@ -77,6 +77,52 @@ Zwei Quellen, klar getrennt:
 - **Brand-Theme:** `src/theme/yb-theme.ts` — nach jeder Änderung
   `pnpm exec astryx theme build src/theme/yb-theme.ts` ausführen (erzeugt `yb.css`/`yb.js`/`yb.d.ts`/`yb.variants.d.ts`, alle committen).
   Farb-, Typo- und Motion-Entscheidungen stehen im Kopfkommentar der Theme-Datei.
+
+## 2a. Rechtstexte: was fehlt und wo es hingehört
+
+Stand 23.10.2026. Alle Einzelquellen (URL, Abrufdatum, Messung) stehen im Kopfkommentar von
+`src/content/legal.ts`.
+
+**Persönliche Angaben, an EINER Stelle:** `LEGAL_PERSON` in `src/content/legal.ts`. Impressum
+(„Angaben gemäß § 5 DDG“, „Kontakt“, „§ 18 Abs. 2 MStV“) und Datenschutz („Verantwortliche
+Stelle“) lesen daraus. Ein eingetragener Wert ersetzt die OFFEN-Zeile auf beiden Seiten, in DE, EN
+und der Markdown-Fassung.
+
+| Feld | Inhalt | Solange `null` |
+| --- | --- | --- |
+| `address` | Ladungsfähige Anschrift, eine Zeile je Eintrag: `['Straße Hausnummer', 'PLZ Ort']` | OFFEN im Impressum und im Datenschutz |
+| `email` | E-Mail-Adresse (§ 5 DDG, Datenschutzanfragen) – steht danach öffentlich, mit „keine öffentliche E-Mail“ abstimmen | OFFEN im Impressum und im Datenschutz |
+| `mstv` | `{ name, address: [...] }` der verantwortlichen Person nach § 18 Abs. 2 MStV; `false`, wenn die rechtliche Prüfung ergibt, dass es nicht nötig ist (Abschnitt entfällt) | OFFEN im Impressum |
+
+Liegt die Anschrift nicht in Baden-Württemberg, ändert sich auch die Aufsichtsbehörde im
+Abschnitt „Deine Rechte“ (`RIGHTS_BLOCK`, derzeit der Landesbeauftragte für Baden-Württemberg,
+abgeleitet aus dem LinkedIn-Ort Sandhausen).
+
+**Offene Punkte im Datenschutz (Einträge mit `open` in `PRIVACY`):**
+
+- Server (Hetzner): Standort des Rechenzentrums; ob ein Auftragsverarbeitungsvertrag (Art. 28
+  DSGVO) mit Hetzner besteht; ob und wie lange der Server Abrufe protokolliert und auf welcher
+  Rechtsgrundlage.
+- Cloudflare: Rechtsgrundlage für die Auslieferung und für die Übermittlung in die USA; ob das
+  Data Processing Addendum von Cloudflare abgeschlossen ist.
+- Analyse: Stand vor der Veröffentlichung prüfen (Cloudflare Web Analytics ist vorbereitet, aber aus).
+- Mit Kontaktformular zusätzlich: Resend (Anbieter, Vertrag, Drittland), Speicherdauer,
+  Rechtsgrundlage und Widerrufsweg.
+
+**Belegt und im Text:** Betroffenenrechte (Art. 15, 16, 17, 18, 20, 21, 77 DSGVO, Art. 7 Abs. 3
+nur mit Kontaktformular), Aufsichtsbehörde Baden-Württemberg mit Anschrift, Hetzner als Hoster
+(Angabe des Inhabers) mit Anschrift aus dem Hetzner-Impressum, Cloudflare (Auslieferung, Network
+Error Logging, keine Cookies gemessen, Teilnahme am EU-US Data Privacy Framework), Tunnel
+(Angabe des Inhabers).
+
+**Neu messen, wenn sich am Betrieb etwas ändert** (Cloudflare-Einstellungen, Analyse, neuer
+Hoster): Antwort-Header von `https://yannick-beck.de` mit und ohne Browser-User-Agent prüfen
+(`server`, `cf-cache-status`, `report-to`/`nel`, `set-cookie`) und die betroffenen Sätze in
+`PRIVACY` anpassen. Bot Fight Mode setzt z. B. das Cookie `__cf_bm`, Challenges setzen
+`cf_clearance` (Cloudflare-Doku, Link in legal.ts).
+
+Prüfen nach einer Änderung: Gate-Zähler `legalOpen` (shoot.mjs) und die Markdown-Fassung
+(`curl -H 'Accept: text/markdown' <host>/datenschutz`).
 
 ## 3. Übersicht aller Lücken
 

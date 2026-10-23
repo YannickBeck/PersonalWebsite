@@ -253,8 +253,8 @@ export const GAPS: GapEntry[] = [
     label: { de: 'Impressumsangaben', en: 'Imprint details' },
     where: { de: '/impressum', en: '/en/impressum' },
     need: {
-      de: 'Ladungsfähige Anschrift und E-Mail-Adresse (§ 5 DDG verlangt eine – mit „keine öffentliche E-Mail“ abstimmen); ob die Angaben nach § 18 Abs. 2 MStV nötig sind; Impressumspflicht rechtlich prüfen. Die Seite zeigt diese Punkte auch in Produktion als „OFFEN“.',
-      en: 'Postal address and email address (§ 5 DDG requires one – reconcile with “no public email”); whether § 18 (2) MStV details are needed; check the imprint obligation legally. The page shows these items as “OPEN” in production too.',
+      de: 'Ladungsfähige Anschrift und E-Mail-Adresse (§ 5 DDG verlangt eine – mit „keine öffentliche E-Mail“ abstimmen); ob die Angaben nach § 18 Abs. 2 MStV nötig sind; Impressumspflicht rechtlich prüfen. Eintragen an einer Stelle: LEGAL_PERSON in src/content/legal.ts (address, email, mstv; mstv: false, falls nicht nötig). Die Seite zeigt diese Punkte auch in Produktion als „OFFEN“.',
+      en: 'Postal address and email address (§ 5 DDG requires one – reconcile with “no public email”); whether § 18 (2) MStV details are needed; check the imprint obligation legally. Entered in one place: LEGAL_PERSON in src/content/legal.ts (address, email, mstv; mstv: false if not needed). The page shows these items as “OPEN” in production too.',
     },
   },
   {
@@ -262,8 +262,8 @@ export const GAPS: GapEntry[] = [
     label: { de: 'Datenschutzerklärung vervollständigen', en: 'Complete the privacy policy' },
     where: { de: '/datenschutz', en: '/en/datenschutz' },
     need: {
-      de: 'Verantwortliche Stelle (Anschrift, E-Mail), Hoster, Serverstandort und Log-Dauer angeben (in keiner Quelle belegt), Cloudflare (Anbieter, Rechtsgrundlage, Drittland), Betroffenenrechte – rechtlich prüfen lassen. Mit freigeschaltetem Kontaktformular kommen Resend (Anbieter, Auftragsverarbeitung, Drittland), Speicherdauer und Rechtsgrundlage des Formulars dazu. Offene Punkte stehen auch in Produktion als „OFFEN“ auf der Seite.',
-      en: 'Controller (address, email), state host, server location and log retention (not documented in any source), Cloudflare (provider, legal basis, third country), data subject rights – have it legally reviewed. Once the contact form is enabled, Resend (provider, data processing agreement, third country), retention periods and the legal basis of the form are added. Open items are shown as “OPEN” on the page in production too.',
+      de: 'Verantwortliche Stelle (Anschrift, E-Mail; LEGAL_PERSON in src/content/legal.ts), Standort des Rechenzentrums, Auftragsverarbeitungsvertrag mit Hetzner und Speicherdauer der Server-Logs (in keiner Quelle belegt), bei Cloudflare Rechtsgrundlage, Übermittlung in die USA und Auftragsverarbeitungsvertrag (DPA), Stand der Analyse vor der Veröffentlichung – rechtlich prüfen lassen. Betroffenenrechte und Aufsichtsbehörde stehen seit 23.10.2026 im Text (Quellen in legal.ts). Mit freigeschaltetem Kontaktformular kommen Resend (Anbieter, Auftragsverarbeitung, Drittland), Speicherdauer und Rechtsgrundlage des Formulars dazu. Offene Punkte stehen auch in Produktion als „OFFEN“ auf der Seite.',
+      en: 'Controller (address, email; LEGAL_PERSON in src/content/legal.ts), data centre location, data processing agreement with Hetzner and server log retention (not documented in any source), for Cloudflare the legal basis, the transfer to the USA and the data processing agreement (DPA), analytics status before publishing – have it legally reviewed. Data subject rights and the supervisory authority have been in the text since 23 Oct 2026 (sources in legal.ts). Once the contact form is enabled, Resend (provider, data processing agreement, third country), retention periods and the legal basis of the form are added. Open items are shown as “OPEN” on the page in production too.',
     },
   },
   {

@@ -359,6 +359,23 @@ Nur GES1 (Titel der Bachelorarbeit für Screenreader in der Projektzeile), gleic
 - Projektzeilen auf `/projekte` und in „Weiteres Projekt“ (DE/EN, 390/1440 px, hell/dunkel,
   24 Aufnahmen) pixelgleich mit dem Stand davor, Höhen von Zeile und Satz unverändert.
 
+## Referenzwerte Rechtstexte (2026-10-23)
+
+Betroffenenrechte, Aufsichtsbehörde, Hetzner und Cloudflare in `src/content/legal.ts`
+(`LEGAL_PERSON` als eine Stelle für die persönlichen Angaben). Gleiche Werkzeuge:
+
+| Build | Läufe | Abnahme-Metriken | Agenten | Kleine Fokusziele @390 | Rechtstext-Lücken |
+| --- | --- | --- | --- | --- | --- |
+| prod `--quick` | 144 (36 Seiten) | alle 0 | 21/21 | 10 | Impressum 3, Datenschutz 8 (DE und EN) |
+
+- Datenschutz vorher 5: „Anschrift und E-Mail“ ist in zwei Zeilen geteilt, Hoster und
+  Cloudflare haben je eigene, genauer benannte Zeilen (Rechenzentrum, AVV Hetzner, Server-Logs;
+  Rechtsgrundlage/USA, DPA Cloudflare), der Platzhalter „Deine Rechte“ ist entfallen.
+- Formular-Build (nur Markdown-Fassung gezählt, gleiche Quelle wie das HTML): Impressum 3,
+  Datenschutz 11; der Punkt „Widerruf einer Einwilligung (Art. 7 Abs. 3)“ erscheint nur dort.
+- link-check: 0 Befunde. Druck (A4, Chromium): Impressum 1 Seite, Datenschutz DE und EN je 3 Seiten,
+  Hinweis „Keine Rechtsberatung“ jetzt auch im Druck, keine Überschrift allein am Seitenende.
+
 ## Grenzen
 
 - Nur Chromium. WebKit und Firefox bleiben OFFEN (AGENTS.md).
