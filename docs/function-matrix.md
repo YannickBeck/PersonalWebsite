@@ -8,8 +8,8 @@
 - Startseite als Scrollseite mit Abschnitten 00–06 und klebender Abschnittsnavigation (aktiver Abschnitt, Tastatur, mobil horizontal)
 - Einstieg: freigestelltes Porträt vor blassem Namenszug, Einblenden beim ersten Laden, Zeiger-Parallaxe (Maus) und Scroll-Drift; unter Reduced Motion statisch
 - Ausweiskarte am Band (Über mich): Ziehen (Maus/Touch), Tippen, Button „Karte umdrehen“, ←/→ schwenken; Pendeln nur ohne Reduced Motion, klingt in < 4 s aus
-- Fähigkeiten als Periodensystem (35 Kacheln aus LinkedIn und Orbitalis, farbig nach Kategorie; seit Fix-Runde 1 ohne „AI Agents“ – laut Profil ein Interesse): Filter-Pillen, Auswahl per Klick/Tippen/Pfeiltasten, Detailfeld mit Kürzel bzw. Logo (nur PHP und FastAPI, Lizenz geprüft: `docs/skill-logos.md`), Kategorie und Belegen mit Sprung zu Werdegang und Projekten; vollständige Textliste für Screenreader
-- Projekte als Akkordeon (nebeneinander mit Streifen, mobil untereinander): Kurzfassung, Fähigkeiten mit Sprung ins Periodensystem, Detailseite und Quellcode-Link (Orbitalis); Projektseiten verlinken ihre Fähigkeiten zurück auf die Startseite
+- Fähigkeiten als Periodensystem (35 Kacheln aus LinkedIn und Orbitalis, farbig nach Kategorie; seit Fix-Runde 1 ohne „AI Agents“ – laut Profil ein Interesse): Filter-Pillen, Auswahl per Klick/Tippen/Pfeiltasten, Detailfeld mit Kürzel bzw. Logo (nur PHP und FastAPI, Lizenz geprüft: `docs/skill-logos.md`), Kategorie und Belegen mit Sprung zu Werdegang und Projekten; vollständige Textliste für Screenreader (ohne JavaScript sichtbar, Raster dann nur Übersicht)
+- Projekte als Akkordeon (nebeneinander mit Streifen, mobil untereinander; ohne JavaScript beide offen untereinander): Kurzfassung, Fähigkeiten mit Sprung ins Periodensystem, Detailseite und Quellcode-Link (Orbitalis); Projektseiten verlinken ihre Fähigkeiten zurück auf die Startseite
 - Werdegang mit aufklappbaren Stationen (native `<details>`, exklusiv, ohne JS bedienbar), Ausbildung und Zertifikate als Liste; Bachelorarbeit springt ins Projekt
 - Laufband „Erfolge“ fertig (Pause-Schalter, Kopie verborgen, statisch bei Reduced Motion und mobil) – erscheint erst mit belegten Einträgen
 - Kontaktformular mit echtem Versand: `POST /api/kontakt` → Resend (fetch), Honeypot, Mindest-Ausfüllzeit, Rate-Limit je IP + global, Einwilligung, ehrliche Zustände (Erfolg, Fehler, „Versand gerade nicht verfügbar“ ohne Konfiguration); Doku `docs/kontaktformular.md`
@@ -20,7 +20,7 @@
 - Detailseiten (Projekte aus dem Content-Modell; Ghost-HTML mit TOC, Code-Kopie, Tabellen, Galerie)
 - Related-Content, Zurück-Links, Redirects alter Ghost-URLs
 - Ghost-Webhook → Revalidate, ISR 60 s, RSS/Sitemap/robots, Canonical/hreflang
-- 404: unbekannte Slugs im Rahmen der Sprache; URLs ohne Route über die statische globale 404 (DE, unter /en vor dem ersten Paint Englisch), Druckansicht CV (ohne Header/Footer/Buttons/Demo-Marken), Skip-Link,
+- 404: unbekannte Slugs im Rahmen der Sprache; URLs ohne Route über die globale 404 (Sprache aus dem Pfad schon im Server-HTML, Proxy-Header unter /en), Druckansicht CV (ohne Header/Footer/Buttons/Demo-Marken), Skip-Link,
   reduzierte Bewegung, Sticky-Footer auf kurzen Seiten
 - Formulare als echtes `<form>` mit `autocomplete`, Enter sendet; deutsche
   Astryx-Beschriftungen über `InternationalizationProvider`

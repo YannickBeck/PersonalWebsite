@@ -51,7 +51,8 @@ interface SendError {
  * Kontaktformular mit echtem Versand (POST /api/kontakt → Resend, src/lib/contact-server.ts).
  *
  * - Natives <form method="dialog"> (FUN1): ohne JS bzw. vor der Hydration verlässt nichts den
- *   Browser und nichts landet in der URL. Mit JS sendet onSubmit JSON per fetch.
+ *   Browser und nichts landet in der URL. Mit JS sendet onSubmit JSON per fetch. Ohne JS fehlt
+ *   das Formular ganz (yb-js-only), ein <noscript>-Hinweis nennt LinkedIn (Rest-Feinschliff REG1).
  * - Gerendert nur, wenn das Formular beim Build freigeschaltet ist (NEXT_PUBLIC_CONTACT_FORM,
  *   contact-block.tsx, DES6). Beim Laden fragt es GET /api/kontakt: Ist der Versand
  *   konfiguriert, kommt ein signiertes Token zurück (Mindest-Ausfüllzeit). Fehlen die
@@ -252,11 +253,23 @@ export function ContactForm({ lang }: { lang: Lang }) {
 
   return (
     <VStack gap={4}>
-      {/* Ohne JavaScript: Hinweis VOR dem Formular, nicht erst unter dem Senden-Button (FUN4) */}
+      {/* Ohne JavaScript (Rest-Feinschliff REG1): Das Formular fehlt (yb-js-only) – vorher ließ es
+          sich ausfüllen, „Nachricht senden“ tat aber nichts. An seiner Stelle der ehrliche Stand
+          mit dem LinkedIn-Weg, gestaltet wie der Zustand „Versand nicht verfügbar“. */}
       <noscript>
-        <Text color="secondary">{dict.formNoScript}</Text>
+        <Card>
+          <VStack gap={3}>
+            <Text weight="semibold" size="lg">
+              {dict.contactNoScriptTitle}
+            </Text>
+            <Text color="secondary" textWrap="pretty">
+              {dict.contactNoScriptText}
+            </Text>
+            <HStack>{linkedIn}</HStack>
+          </VStack>
+        </Card>
       </noscript>
-      <div className={styles.wrap} data-unavailable={unavailable ? 'true' : undefined}>
+      <div className={`${styles.wrap} yb-js-only`} data-unavailable={unavailable ? 'true' : undefined}>
         <form
           ref={formRef}
           method="dialog"
@@ -364,7 +377,7 @@ export function ContactForm({ lang }: { lang: Lang }) {
         </div>
       </div>
       {/* Ergebnis: der Banner trägt die Live-Rolle selbst (A123) */}
-      <VStack ref={resultRef} className={styles.result}>
+      <VStack ref={resultRef} className={`${styles.result} yb-js-only`}>
         {phase === 'done' ? <Banner status="success" title={dict.contactOkTitle} description={dict.contactOkText} /> : null}
         {phase === 'error' && error ? (
           <Banner

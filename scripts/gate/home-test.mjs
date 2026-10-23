@@ -27,7 +27,12 @@
  * - Fähigkeits-Chip einer Projektseite → /#skill-rag per Client-Navigation: Fokus auf der Kachel
  *   (REG3)
  * - Ohne JavaScript: Theme-Schalter, Menü, Filter-Pillen und „Karte umdrehen“ fehlen, die Textliste
- *   der Fähigkeiten ist sichtbar (Feinschliff)
+ *   der Fähigkeiten ist sichtbar (Feinschliff); Raster inert ohne Detailfeld, beide Projekte offen
+ *   ohne Kopf-Buttons, keine wirkungslosen Tab-Stopps (Rest-Feinschliff REG1/GES2)
+ * - Vor der Hydration (Skripte blockiert): gleiches Layout wie danach, kein erreichbarer Link im
+ *   geschlossenen Akkordeon-Inhalt (REG1, useHydrated)
+ * - Pillenleiste @390: Auslauf nur an der Seite mit weiteren Pillen, fokussierte Pille nie darin
+ *   (GES7); geschlossener Akkordeon-Streifen antwortet auf Hover (GES3)
  * - Reduced Motion: 0 laufende Animationen nach Laden, Filter, Akkordeon, Werdegang, Karte
  *
  * Exit-Code 1 bei einem Fehlschlag; Ergebnis als JSON in [outDir]/home-test.json.
@@ -251,6 +256,60 @@ test('Navigation @390: fokussierte letzte Pille ganz im Scroller (A114)', ['de',
   await ctx.close();
   assert(m.cutLeft === 0 && m.cutRight === 0, 'Pille nicht abgeschnitten', m);
   return m;
+});
+
+test('Navigation @390: Auslauf nur an der Seite mit weiteren Pillen, fokussierte Pille nie im Auslauf (GES7)', ['de', 'en'], async (lang) => {
+  const { page, ctx } = await open(lang, { width: 390 });
+  const state = () =>
+    page.evaluate(() => {
+      const l = document.querySelector('.yb-section-nav ul');
+      const cs = getComputedStyle(l);
+      return { start: l.hasAttribute('data-more-start'), end: l.hasAttribute('data-more-end'), mask: cs.maskImage !== 'none', left: Math.round(l.scrollLeft), max: l.scrollWidth - l.clientWidth };
+    });
+  await page.evaluate(() => document.querySelector('.yb-section-nav ul').scrollTo({ left: 0, behavior: 'instant' }));
+  await page.waitForTimeout(150);
+  const atStart = await state();
+  await page.evaluate(() => {
+    const l = document.querySelector('.yb-section-nav ul');
+    l.scrollTo({ left: l.scrollWidth, behavior: 'instant' });
+  });
+  await page.waitForTimeout(150);
+  const atEnd = await state();
+  // Jede Pille per Tastatur: samt Ring (Abstand + Breite) außerhalb des Auslaufs
+  await page.focus('.yb-section-nav a');
+  const n = await page.evaluate(() => document.querySelectorAll('.yb-section-nav a').length);
+  const inFade = [];
+  for (let i = 0; i < n; i++) {
+    if (i > 0) {
+      await page.keyboard.press('ArrowRight');
+    }
+    await page.waitForTimeout(500);
+    const m = await page.evaluate(() => {
+      const a = document.activeElement;
+      const l = a.closest('ul');
+      const fade = parseFloat(getComputedStyle(l).getPropertyValue('--more-fade'));
+      const cs = getComputedStyle(a);
+      const ring = parseFloat(cs.outlineOffset) + parseFloat(cs.outlineWidth);
+      const r = a.getBoundingClientRect();
+      const b = l.getBoundingClientRect();
+      const startOver = l.hasAttribute('data-more-start') ? Math.round(b.left + fade - (r.left - ring)) : 0;
+      const endOver = l.hasAttribute('data-more-end') ? Math.round(r.right + ring - (b.right - fade)) : 0;
+      return { text: a.textContent.trim(), fade, startOver, endOver };
+    });
+    if (m.startOver > 0 || m.endOver > 0) {
+      inFade.push(m);
+    }
+  }
+  // Breit: alles passt, kein Auslauf
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(300);
+  const wide = await state();
+  await ctx.close();
+  assert(atStart.max > 0 && !atStart.start && atStart.end && atStart.mask, 'am Anfang: Auslauf nur rechts', atStart);
+  assert(atEnd.start && !atEnd.end && atEnd.mask, 'am Ende: Auslauf nur links', atEnd);
+  assert(inFade.length === 0, 'fokussierte Pille samt Ring nie im Auslauf', inFade);
+  assert(wide.max <= 0 && !wide.start && !wide.end && !wide.mask, '1440 px: kein Überlauf, kein Auslauf', wide);
+  return { atStart, atEnd, wide, pills: n };
 });
 
 test('Einstieg: Pille „Projekte“ setzt den Fokus in den Abschnitt (A111)', ['de', 'en'], async (lang) => {
@@ -781,7 +840,7 @@ test('Fähigkeits-Chip einer Projektseite → /#skill-rag per Client-Navigation:
 });
 
 for (const width of [1440, 390]) {
-  test(`Ohne JavaScript @${width}: wirkungslose Bedienelemente fehlen, Textliste der Fähigkeiten sichtbar`, ['de', 'en'], async (lang) => {
+  test(`Ohne JavaScript @${width}: keine wirkungslosen Bedienelemente, Textliste sichtbar, beide Projekte offen`, ['de', 'en'], async (lang) => {
     const ctx = await browser.newContext({ viewport: { width, height: width <= 400 ? 844 : 900 }, javaScriptEnabled: false, colorScheme: 'light' });
     const page = await ctx.newPage();
     await page.goto(`${BASE}${HOME[lang]}`, { waitUntil: 'load' });
@@ -801,14 +860,104 @@ for (const width of [1440, 390]) {
         listVisible: shown(list),
         listItems: list ? list.parentElement.querySelectorAll('li').length : 0,
         tiles: all('[role="tab"][data-skill]').length,
+        // Rest-Feinschliff REG1/GES2: Raster nur Übersicht (inert), Detailfeld fehlt, keine Kachel
+        // hervorgehoben; Akkordeon: beide Projekte offen, Köpfe ohne Button
+        gridInert: all('[role="tablist"]')[0]?.hasAttribute('inert') ?? null,
+        detailShown: shown(all('[role="tabpanel"]')[0]),
+        selectedBg: (() => {
+          const sel = all('[role="tab"][aria-selected="true"]')[0];
+          const other = all('[role="tab"][aria-selected="false"]').find((t) => t.dataset.category === sel?.dataset.category);
+          return sel && other ? getComputedStyle(sel).backgroundColor === getComputedStyle(other).backgroundColor : null;
+        })(),
+        accButtons: all('[data-acc-trigger], li[data-open] h3 button').length,
+        accPanelsOpen: all('li[data-open] [role="region"]').map((r) => Math.round(r.getBoundingClientRect().height) > 100 && getComputedStyle(r).visibility === 'visible' && !r.closest('[inert]')),
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     });
+    // Tab-Folge: kein Stopp ohne Wirkung (Buttons, Rollen, tabindex)
+    const dead = [];
+    const seen = new Set();
+    for (let i = 0; i < 200; i++) {
+      await page.keyboard.press('Tab');
+      const st = await page.evaluate(() => {
+        const a = document.activeElement;
+        if (!a || a === document.body) return null;
+        const r = a.getBoundingClientRect();
+        const ok = (a.tagName === 'A' && a.hasAttribute('href')) || a.tagName === 'SUMMARY' || a.id === 'main';
+        return { id: `${a.tagName}|${a.textContent.trim().slice(0, 40)}|${Math.round(r.left)}|${Math.round(r.top + scrollY)}`, ok, label: `${a.tagName}${a.getAttribute('role') ? `[${a.getAttribute('role')}]` : ''} ${a.textContent.trim().slice(0, 40)}` };
+      });
+      if (!st || seen.has(st.id)) break;
+      seen.add(st.id);
+      if (!st.ok) dead.push(st.label);
+    }
     await ctx.close();
     assert(r.theme === 0 && r.menu === 0 && r.pills === 0 && r.flip === 0, 'Bedienelemente ohne Wirkung fehlen', r);
     assert(r.listVisible && r.listItems === r.tiles && r.tiles > 0, 'Textliste sichtbar, alle Kacheln', r);
+    assert(r.gridInert === true && !r.detailShown && r.selectedBg === true, 'Raster als Übersicht: inert, ohne Detailfeld, keine Kachel hervorgehoben', r);
+    assert(r.accButtons === 0 && r.accPanelsOpen.length === 2 && r.accPanelsOpen.every(Boolean), 'Akkordeon: beide Projekte offen, keine Kopf-Buttons', r);
+    assert(dead.length === 0, 'keine wirkungslosen Tab-Stopps', dead);
     assert(r.overflow <= 0, 'kein Überlauf', r);
-    return r;
+    return { ...r, tabStops: seen.size };
+  });
+}
+
+test('Akkordeon @1440: geschlossener Streifen antwortet auf Hover (GES3)', ['de'], async (lang) => {
+  const { page, ctx } = await open(lang);
+  await page.evaluate(() => document.querySelector('li[data-open="false"]').scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await page.waitForTimeout(200);
+  const look = () =>
+    page.evaluate(() => {
+      const li = document.querySelector('li[data-open="false"]');
+      const cs = getComputedStyle(li);
+      return { bg: cs.backgroundColor, shadow: cs.boxShadow, plus: getComputedStyle(li.querySelector('.yb-acc-plus')).scale };
+    });
+  const before = await look();
+  const box = await page.locator('li[data-open="false"]').boundingBox();
+  await page.mouse.move(box.x + box.width / 2, Math.min(box.y + box.height / 2, 850));
+  await page.waitForTimeout(400);
+  const after = await look();
+  await ctx.close();
+  assert(before.bg !== after.bg && before.shadow !== after.shadow, 'Fläche und Ring ändern sich', { before, after });
+  assert(after.plus === '1.06', 'Plus wächst leicht (no-preference)', { before, after });
+  return { before, after };
+});
+
+for (const width of [1440, 390]) {
+  test(`Vor der Hydration @${width} (Skripte blockiert): gleiches Layout, keine Tab-Stopps in Unsichtbarem (REG1)`, ['de'], async (lang) => {
+    const measure = async (block) => {
+      const ctx = await browser.newContext({ viewport: { width, height: width <= 400 ? 844 : 900 }, colorScheme: 'light' });
+      const page = await ctx.newPage();
+      if (block) await page.route(/\/_next\/static\/.*\.js(\?.*)?$/, (r) => r.abort());
+      await page.goto(`${BASE}${HOME[lang]}`, { waitUntil: 'load' });
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(block ? 400 : 1200);
+      const m = await page.evaluate(() => {
+        const rect = (sel) => {
+          const r = document.querySelector(sel)?.getBoundingClientRect();
+          return r ? [Math.round(r.top + scrollY), Math.round(r.height), Math.round(r.width)] : null;
+        };
+        const closed = document.querySelector('li[data-open="false"] [role="region"]');
+        const focusables = closed ? [...closed.querySelectorAll('a[href], button')].filter((el) => getComputedStyle(el).visibility === 'visible' && !el.closest('[inert]')).length : -1;
+        return {
+          skills: rect('#faehigkeiten'),
+          projects: rect('#projekte'),
+          tiles: [...document.querySelectorAll('[role="tab"][data-skill]')].slice(0, 3).map((t) => { const r = t.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top + scrollY), Math.round(r.width)]; }),
+          heads: [...document.querySelectorAll('li[data-open] h3')].map((h) => { const r = h.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top + scrollY), Math.round(r.width), Math.round(r.height)]; }),
+          docH: document.documentElement.scrollHeight,
+          closedFocusables: focusables,
+          gridInert: document.querySelector('[role="tablist"]').hasAttribute('inert'),
+        };
+      });
+      await ctx.close();
+      return m;
+    };
+    const pre = await measure(true);
+    const post = await measure(false);
+    const same = JSON.stringify([pre.skills, pre.projects, pre.tiles, pre.heads, pre.docH]) === JSON.stringify([post.skills, post.projects, post.tiles, post.heads, post.docH]);
+    assert(same, 'Lage und Größe von Raster, Akkordeon und Seite gleich', { pre, post });
+    assert(pre.gridInert && !post.gridInert, 'Raster vor der Hydration inert, danach bedienbar', { pre: pre.gridInert, post: post.gridInert });
+    assert(pre.closedFocusables === 0 && post.closedFocusables === 0, 'geschlossener Inhalt ohne erreichbare Links', { pre: pre.closedFocusables, post: post.closedFocusables });
+    return { docH: post.docH };
   });
 }
 

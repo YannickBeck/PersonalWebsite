@@ -104,7 +104,6 @@ export function ProjectsSection({ id, number, lang }: { id: string; number: stri
     period: p.period.status === 'belegt' ? p.period.value[lang] : null,
     title: p.title[lang],
     shortTitle: p.shortTitle[lang],
-    href: projectHref(p, lang),
     metaExtra: p.period.status === 'offen' ? <Gap id={p.period.gap} lang={lang} /> : null,
     panel: <ProjectPanel project={p} lang={lang} />,
   }));

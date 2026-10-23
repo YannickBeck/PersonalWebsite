@@ -321,19 +321,54 @@
 
 /* Polster mit gleich großem negativem Rand (Fix-Runde 3): Der Scroller (overflow-x) beschneidet
    auch senkrecht – vom Fokusring der Pillen blieben sonst nur zwei Klammern. 4px Polster =
-   Innenabstand der Leiste; Ring 2px Abstand + 2px Breite passt genau hinein (konzentrisch). */
+   Innenabstand der Leiste; Ring 2px Abstand + 2px Breite passt genau hinein (konzentrisch).
+   scroll-padding-inline = Breite des Auslaufs (GES7, unten) + Ring (4px): Die fokussierte Pille
+   rückt so weit herein, dass sie samt Ring nicht im verblassten Rand liegt (section-nav.tsx
+   onFocus). */
 .sectionNavList {
+  --more-fade: var(--spacing-8);
   display: flex;
   gap: var(--spacing-1);
   min-width: 0;
   margin: calc(-1 * var(--spacing-1));
   padding: var(--spacing-1);
-  scroll-padding-inline: var(--spacing-1);
+  scroll-padding-inline: calc(var(--more-fade) + var(--spacing-1));
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
   border-radius: var(--radius-full);
+}
+
+/* Weitere Pillen außerhalb (Rest-Feinschliff GES7): Auslauf nur an der Seite mit Überlauf
+   (section-nav.tsx setzt data-more-start/-end). Vorher endeten die Pillen mobil hart mitten im
+   Wort („Werd“), ohne Hinweis aufs Weiterscrollen. Maske statt Verlauf in Papierfarbe: Die
+   Leiste ist halbtransparent, ein Farbverlauf passte nicht in jedem Untergrund. */
+.sectionNavList[data-more-end] {
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - var(--more-fade)), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - var(--more-fade)), transparent);
+}
+
+.sectionNavList[data-more-start] {
+  -webkit-mask-image: linear-gradient(to right, transparent, black var(--more-fade));
+  mask-image: linear-gradient(to right, transparent, black var(--more-fade));
+}
+
+.sectionNavList[data-more-start][data-more-end] {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--more-fade),
+    black calc(100% - var(--more-fade)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--more-fade),
+    black calc(100% - var(--more-fade)),
+    transparent
+  );
 }
 
 .sectionNavList::-webkit-scrollbar {

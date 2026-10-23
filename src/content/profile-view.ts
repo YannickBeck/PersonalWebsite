@@ -195,7 +195,11 @@ export interface SkillTileData {
   same: boolean;
   category: SkillCategory;
   evidence: HomeEvidence[];
-  /** Quelle; leer, wenn alle Belege LinkedIn-Profilstellen sind (steht dann schon im Beleg, DES8). */
+  /**
+   * Quelle; leer, wenn sie schon aus den Belegen folgt (DES8): alle Belege sind Profilstellen,
+   * oder die Quelle ist LinkedIn und eine Belegzeile heißt schon „LinkedIn-Profil: …“
+   * (Rest-Feinschliff GES4 – vorher stand dann darunter noch „Quelle: LinkedIn-Profil“).
+   */
   source: string;
   logo?: { src: string; credit: string; license: string; licenseUrl: string };
 }
@@ -227,6 +231,12 @@ export function englishOnGerman(value: L, lang: Lang): Lang | undefined {
   return lang === 'de' && value.de.replace(/\u00AD/g, '').toLowerCase() === value.en.replace(/\u00AD/g, '').toLowerCase() ? 'en' : undefined;
 }
 
+/** Nennen die Belege die Quelle schon (Belegart „LinkedIn-Profil“)? Dann keine Zeile „Quelle“ (DES8). */
+function sourceInEvidence(s: Skill): boolean {
+  const hasProfile = s.evidence.some((ev) => ev.kind === 'profile');
+  return s.evidence.every((ev) => ev.kind === 'profile') || (s.quelle === 'linkedin' && hasProfile);
+}
+
 export function skillTiles(lang: Lang): SkillTileData[] {
   return orderedSkills().map((s, i) => ({
     id: s.id,
@@ -240,7 +250,7 @@ export function skillTiles(lang: Lang): SkillTileData[] {
     same: (s.tile ?? s.name)[lang].replace(/\u00AD/g, '') === s.name[lang],
     category: s.category,
     evidence: groupProfileEvidence(s.evidence, lang),
-    source: s.evidence.every((ev) => ev.kind === 'profile') ? '' : sourceName(s.quelle, lang),
+    source: sourceInEvidence(s) ? '' : sourceName(s.quelle, lang),
     logo: s.logo
       ? {
           src: `/logos/${s.logo}.svg`,

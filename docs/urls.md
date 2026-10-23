@@ -71,8 +71,9 @@ Bekannt und hingenommen (Fix-Runde 1):
   `identity`, `ai`, `consulting`. Nur `#consulting` trifft zufällig, die übrigen öffnen die Seite
   oben (200). Alias-Anker nur, falls alte Links von außen bekannt werden.
 - **Unbekannte Blog-Slugs (FUN1, seit dem Feinschliff behoben):** `/blog/<unbekannt>` und
-  `/en/blog/<unknown>` liefern die statische globale 404 (Status 404, `no-store`, Text und CSS
-  auch ohne JavaScript) wie unbekannte Projekt-Slugs. `src/proxy.ts` prüft den Slug gegen die
+  `/en/blog/<unknown>` liefern die globale 404 (Status 404, `no-store`, Text und CSS auch ohne
+  JavaScript, unter /en seit dem Rest-Feinschliff mit `lang="en"` im Server-HTML) wie unbekannte
+  Projekt-Slugs. `src/proxy.ts` prüft den Slug gegen die
   Ghost-Liste; neue Beiträge erscheinen weiter ohne Neubau (spätestens nach 10 s). Vorher (auch
   live, `2d636c6`): leere `__next_error__`-Hülle. Details: `docs/blog-404.md`. Agenten bekommen
   weiter die Markdown-404.

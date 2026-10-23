@@ -477,7 +477,12 @@
 /* ---------- Textliste aller Fähigkeiten (skills-section.tsx) ----------
    Mit JavaScript nur für Screenreader (wie .yb-sr-only). Ohne JavaScript sichtbar: Dann wählt
    keine Kachel ein anderes Detailfeld, die Liste trägt alle Kacheln mit ihren Belegen
-   (Feinschliff). Filter und Hinweis fehlen dann (yb-js-only, globals.css). */
+   (Feinschliff). Filter, Hinweis und Detailfeld fehlen dann (yb-js-only, globals.css), das
+   Raster bleibt als Übersicht (skill-table.tsx: im Server-HTML inert, ohne Bedienung).
+   Rest-Feinschliff GES2: vorher liefen die Einträge mit ~165 Zeichen über die volle Breite in
+   13px, Belegart und Fundstelle nur durch ein Leerzeichen getrennt. Jetzt Name und Belege je
+   eine Zeile, Lesebreite über zwei Spalten (je ≥ 20rem, schmaler eine), Farbpunkt der
+   Kategorie wie an den Filter-Pillen. */
 .textList {
   position: absolute;
   width: 1px;
@@ -501,7 +506,7 @@
     white-space: normal;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-4);
+    gap: var(--spacing-5);
   }
 
   .textList h3 {
@@ -511,8 +516,22 @@
     line-height: 1.3;
   }
 
+  .textListGroups {
+    columns: 2 20rem;
+    column-gap: var(--spacing-10);
+  }
+
+  /* Bereich bleibt in einer Spalte beisammen */
+  .textListGroup {
+    break-inside: avoid;
+    padding-block-end: var(--spacing-6);
+  }
+
   .textList h4 {
-    margin: 0 0 var(--spacing-1);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin: 0 0 var(--spacing-2);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-secondary);
@@ -521,15 +540,59 @@
   .textList ul {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-1);
+    gap: var(--spacing-3);
     margin: 0;
-    padding-inline-start: 1.1em;
-    font-size: var(--font-size-sm);
-    line-height: 1.5;
+    padding: 0;
+    list-style: none;
   }
 
-  /* Kacheln wählen ohne JavaScript nichts aus */
-  .tile {
+  .textList li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-0-5);
+  }
+
+  .textListName {
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.35;
+  }
+
+  .textListEvidence {
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+
+  .textListNote {
+    white-space: nowrap;
+  }
+
+  /* Raster ohne Detailfeld über die ganze Breite: als kompakte Übersicht in 12 Spalten
+     (drei Reihen) statt der sechs neben dem Detailfeld */
+  .table {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Ohne Bedienung keine hervorgehobene Kachel und kein Zeiger */
+  .tile,
+  .tile[aria-selected='true'] {
+    background-color: var(--yb-cat);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
+    outline: none;
     cursor: default;
+  }
+
+  .tile[aria-selected='true'] .tileNum {
+    color: var(--color-text-secondary);
+  }
+}
+
+@container (min-width: 880px) {
+  @media (scripting: none) {
+    .table {
+      --cols: 12;
+    }
   }
 }

@@ -110,8 +110,10 @@ Region drumherum – A123) und in Sicht gescrollt wird. OFFEN: mit echtem Screen
   `X-Forwarded-For`, sonst aus `X-Real-IP`. Diese Kopfzeilen sind nur hinter einem Proxy
   vertrauenswürdig, der sie setzt (Cloudflare → Coolify/Traefik). Das Rate-Limit ist deshalb
   eine Bremse und kein Schutzwall. Die globale Obergrenze fängt den Rest ab.
-- Ohne JavaScript sendet das Formular nichts (`<form method="dialog">`). Ein `<noscript>`-Hinweis
-  über dem Formular sagt das (seit Fix-Runde 1 vor den Feldern, FUN4).
+- Ohne JavaScript sendet das Formular nichts (`<form method="dialog">`). Seit dem Rest-Feinschliff
+  (REG1) fehlt es dann ganz (`yb-js-only`); an seiner Stelle steht eine `<noscript>`-Karte
+  „Formular nur mit JavaScript“ mit dem LinkedIn-Weg. Vorher ließen sich die Felder ausfüllen,
+  „Nachricht senden“ tat nichts (der Hinweis stand seit Fix-Runde 1 vor den Feldern, FUN4).
 
 ## Einrichten (Produktion) – vor der Freigabe, macht Yannick
 

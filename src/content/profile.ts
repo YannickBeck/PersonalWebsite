@@ -300,7 +300,11 @@ export { LINKEDIN_URL };
 export const PERSON = {
   name: 'Yannick Beck',
   firstName: 'Yannick',
-  /** Rolle laut Headline („IT Consultant“); Stationstitel schreibt „IT-Consultant“. */
+  /**
+   * Rolle laut Headline („IT Consultant“). Eine Schreibweise auf der ganzen Website (Rest-
+   * Feinschliff GES5): Die Station heißt auf LinkedIn „IT-Consultant“, Headline und
+   * Junior-Station schreiben ohne Bindestrich – siehe STATIONS (bechtle-consultant).
+   */
   role: li<L>({ de: 'IT Consultant', en: 'IT Consultant' }, 'Headline'),
   /** Headline im Wortlaut. */
   headline: li(
@@ -318,7 +322,7 @@ export const PERSON = {
   ),
   address: li({ locality: 'Sandhausen', region: 'Baden-Württemberg', country: 'DE' }, 'Kopf'),
   linkedin: li(LINKEDIN_URL, 'Kopf'),
-  /** Aktueller Arbeitgeber (Station „IT-Consultant“, seit Oktober 2026). */
+  /** Aktueller Arbeitgeber (Station „IT Consultant“, seit Oktober 2026). */
   employer: li('Bechtle Mannheim', 'Berufserfahrung'),
   /** „Seit 2020 bin ich im IT-Systemhaus-Umfeld tätig.“ */
   inIndustrySince: li(2020, 'Zusammenfassung'),
@@ -494,10 +498,13 @@ export const STATIONS: Station[] = [
     id: 'bechtle-consultant',
     quelle: 'linkedin',
     status: 'belegt',
-    fundstelle: 'Berufserfahrung',
+    // Schreibweise wie die Headline und die Junior-Station („IT Consultant“, Rest-Feinschliff
+    // GES5): In derselben Liste wirkten „IT-Consultant“ und „Junior IT Consultant“ wie ein
+    // Tippfehler. Nur die Schreibung weicht ab, die Angabe nicht – Wortlaut in der Fundstelle.
+    fundstelle: 'Berufserfahrung („IT-Consultant“)',
     org: 'Bechtle Mannheim',
-    role: { de: 'IT-Consultant', en: 'IT Consultant' },
-    short: { de: 'IT-Consultant', en: 'IT Consultant' },
+    role: { de: 'IT Consultant', en: 'IT Consultant' },
+    short: { de: 'IT Consultant', en: 'IT Consultant' },
     start: '2026-10',
     end: null,
     place: MANNHEIM,

@@ -11,7 +11,8 @@
  * Drawer wegnavigieren, Browser-Zurück. Erwartet: dieselbe Scroll-Position wie beim Verlassen
  * (±2 px), auch wenn ein Anker in der URL steht (REG1: vorher sprang Zurück dann zum Abschnitt),
  * danach Vorwärts und wieder Zurück. Läuft standardmäßig unter no-preference UND reduce
- * (unter reduce fängt route-transition.tsx popstate nicht ab – Nexts Standardweg).
+ * (unter reduce fängt route-transition.tsx popstate ebenfalls ab: derselbe Weg ohne Animation,
+ * Typ nav-none – Feinschliff REG1; vorher Nexts Standardweg, Chrome suchte dabei den Anker).
  * Klicks per Koordinaten (Maus bzw. Touch): Playwrights click() scrollt klebende Elemente vorher.
  * Exit 1 bei einer Abweichung oder einem Konsolen-/Seitenfehler.
  *

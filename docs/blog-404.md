@@ -1,6 +1,7 @@
-# Unbekannte Blog-Slugs: statische 404 ohne Neubau für neue Beiträge
+# Unbekannte Blog-Slugs: echte 404 ohne Neubau für neue Beiträge
 
-Stand: Feinschliff (2026-10-22), Next 16.3.6.
+Stand: Feinschliff (2026-10-22), Next 16.3.6; Abschnitt „Englische 404“: Rest-Feinschliff
+(2026-10-23).
 
 ## Ausgangslage
 
@@ -39,9 +40,9 @@ nur für `/blog/:slug` und `/en/blog/:slug`:
   Fehlt ein Slug darin, wird höchstens alle 10 s neu geladen. Im Vorschau-Build zählen die
   Demo-Artikel als bekannt.
 - Unbekannter Slug → Rewrite auf `<pfad>/_404`, einen Pfad ohne Route. Next antwortet dann mit
-  der statischen globalen 404 (`src/app/global-not-found.tsx`): Status 404, `no-store`, Seite
-  mit Stylesheets und Text auch ohne JavaScript. Unter `/en` setzt das Boot-Script `lang="en"`
-  und zeigt den englischen Text, wie bei allen anderen 404 der Website.
+  der globalen 404 (`src/app/global-not-found.tsx`): Status 404, `no-store`, Seite mit
+  Stylesheets und Text auch ohne JavaScript. Unter `/en` kommt sie seit dem Rest-Feinschliff mit
+  `lang="en"` und englischem Text schon im Server-HTML (Abschnitt „Englische 404“ unten).
 - Bekannter Slug → unverändert weiter in `/blog/[slug]` (ISR, Webhook).
 - Ghost nicht erreichbar oder nicht konfiguriert → Anfrage geht durch, die Seite entscheidet wie
   vorher. Kein neuer Ausfallweg.
@@ -78,6 +79,54 @@ für gemeinsamen Zustand; ohne ihn lädt der Proxy bei jedem Abruf neu, das Erge
 
 - Client-Navigation auf einen unbekannten Slug (Link innerhalb der Website): Der RSC-Abruf
   bekommt 404, der Browser lädt die Adresse dann vollständig und zeigt die globale 404.
-- Die globale 404 ist ein einziges statisches HTML mit `lang="de"` im Server-HTML; `lang="en"`
-  setzt unter `/en` das Boot-Script (wie bisher bei allen unbekannten Pfaden).
 - Ein CDN vor der Website ist nicht betroffen: Die 404 hat `no-store`.
+
+## Englische 404: `lang` im Server-HTML (Rest-Feinschliff, 2026-10-23)
+
+Ausgangslage: Die globale 404 war ein einziges statisches HTML mit `lang="de"`. Unter `/en`
+setzte erst ihr Boot-Script `lang="en"` und `data-yb-404="en"`. Agenten und Browser ohne
+JavaScript bekamen unter `/en/<unbekannt>` und `/en/blog/<unbekannt>` die deutsche Fassung
+(gemessen am Stand `4221b3f`: Server-HTML `lang="de"`, ohne JavaScript H1 „Seite nicht
+gefunden“).
+
+Bedingung: kein Textaustausch per Script (React #418), Seiten mit Route bleiben statisch.
+
+Geprüft, jeweils mit eigenem Build gegen den Ghost-Mock:
+
+1. **Fallback-Rewrite** (`rewrites().fallback`: `/en/:path*` → eine EN-Seite, die `notFound()`
+   aufruft). Next wendet ihn nur an, wenn keine Route passt, auch bei `/en/projekte/<unbekannt>`.
+   Die Zielseite ruft `notFound()` aber beim Vorrendern auf, und Next liefert dann wieder die leere
+   `__next_error__`-Hülle mit `s-maxage=31536000`, auch beim direkten Abruf. **Verworfen.**
+2. **Sprache per Proxy-Header** (umgesetzt): `src/proxy.ts` läuft zusätzlich für `/en/:path*` und
+   setzt den Anfrage-Header `x-yb-lang: en` (`src/lib/not-found-lang.ts`). `global-not-found.tsx`
+   liest ihn mit `headers()` und setzt `lang` und `data-yb-404` im Server-HTML. Der Text bleibt
+   in beiden Sprachen im Dokument, CSS zeigt die Fassung wie vorher. Seiten mit Route lesen den
+   Header nicht und bleiben statisch (`/en` weiter `s-maxage=31536000`).
+
+Kosten von Variante 2:
+
+- `/_not-found` ist jetzt dynamisch (ƒ) und wird je Abruf gerendert. Gecacht wurde die 404 auch
+  vorher nie (`private, no-cache, no-store`). `scripts/gate/build.sh` lässt diese eine Seite
+  als dynamisch zu.
+- Lokal gemessen (Standalone-Server, je 40 Abrufe, Median): 404 unter `/en` 2,5 → 5,1 ms,
+  unter DE 2,5 → 3,9 ms; EN-Seiten mit Route (`/en/cv`) 4,1 → 4,6 ms durch den Proxy.
+- Ein Client, der den Header auf einem DE-Pfad selbst mitschickt, bekommt dort die englische
+  404. Das betrifft nur seine eigene Antwort (`no-store`). Unter `/blog/<slug>` entfernt der Proxy
+  den Header.
+
+Ergebnis (Gate-Proben, Server-HTML und ohne JavaScript):
+
+| Pfad | vorher `lang` / sichtbare H1 ohne JS | nachher |
+| --- | --- | --- |
+| `/en/gibt-es-nicht-404` | `de` / „Seite nicht gefunden“ | `en` / „Page not found“ |
+| `/en/blog/unbekannt-404` | `de` / „Seite nicht gefunden“ | `en` / „Page not found“ |
+| `/en/projekte/unbekannt-404` | `de` / „Seite nicht gefunden“ | `en` / „Page not found“ |
+| `/gibt-es-nicht-404`, `/blog/unbekannt-404`, `/projekte/unbekannt-404` | `de` / „Seite nicht gefunden“ | unverändert |
+
+Mit JavaScript zeigten alle drei EN-Pfade schon vorher „Page not found“ (Boot-Script).
+
+Status 404, `no-store`, Stylesheets und H1 bleiben wie vorher. Mit JavaScript gibt es keinen
+Hydration-Fehler (0 Konsolenfehler außer der 404-Ressourcenmeldung der Seite selbst). Das
+Boot-Script setzt `lang` und `data-yb-404` weiter, mit demselben Wert, als Rückfall ohne Proxy.
+Das Gate prüft seitdem `lang` auch im Server-HTML der 404-Proben und ohne JavaScript die Sprache
+der sichtbaren H1 (`scripts/gate/shoot.mjs`).

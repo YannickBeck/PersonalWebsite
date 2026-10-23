@@ -639,7 +639,20 @@ html[data-yb-instant] *::details-content {
   .yb-acc-item {
     transition:
       flex-basis var(--duration-medium) var(--yb-ease-move),
-      background-color var(--yb-motion-micro) var(--ease-standard);
+      background-color var(--yb-motion-micro) var(--ease-standard),
+      box-shadow var(--yb-motion-micro) var(--ease-standard);
+  }
+
+  /* Hover auf dem geschlossenen Streifen (Rest-Feinschliff GES3): Fläche und Ring wechseln in
+     projects.module.css (auch unter reduce, ohne Übergang); das Plus wächst nur hier leicht */
+  .yb-acc-plus {
+    transition: scale var(--yb-motion-micro) var(--ease-standard);
+  }
+
+  @media (hover: hover) {
+    .yb-acc-item[data-open='false']:hover .yb-acc-plus {
+      scale: 1.06;
+    }
   }
 
   @container (max-width: 899px) {

@@ -10,7 +10,8 @@
 # Ablauf: Ghost-Mock prüfen bzw. starten (scripts/ghost-mock/server.mjs, Port 2368, Fake-Key),
 # .next/cache/fetch-cache beiseiteschieben (sonst liefert der Build alte Mock-Antworten),
 # `pnpm build` im Quellordner, Routentabelle prüfen (alle Seiten statisch, dynamisch nur
-# Route-Handler), Standalone-Kopie mit .next/static und public in einen eigenen Ordner
+# Route-Handler und die globale 404 /_not-found – sie liest die Sprache aus dem Proxy-Header,
+# Rest-Feinschliff, docs/blog-404.md), Standalone-Kopie mit .next/static und public in einen eigenen Ordner
 # (<out>/standalone) – so überschreibt der nächste Build sie nicht. Startet keinen Server
 # (dafür scripts/gate/serve.sh).
 #
@@ -100,9 +101,10 @@ if [ $status -ne 0 ]; then
   exit $status
 fi
 
-# 4) Routentabelle: ƒ (dynamisch) nur für Route-Handler
+# 4) Routentabelle: ƒ (dynamisch) nur für Route-Handler und die globale 404 (Sprache aus dem
+#    Proxy-Header x-yb-lang, no-store wie vorher)
 dynamic="$(grep -E '^[^/]*ƒ /' "$out/build.log" | sed -E 's|^[^/]*ƒ /|/|; s/ .*//' || true)"
-unexpected="$(printf '%s\n' "$dynamic" | grep -vE '^(/api/|/rss\.xml$|/en/rss\.xml$)' | grep -v '^$' || true)"
+unexpected="$(printf '%s\n' "$dynamic" | grep -vE '^(/api/|/rss\.xml$|/en/rss\.xml$|/_not-found$)' | grep -v '^$' || true)"
 static_count="$(grep -cE '^[^/]*(○|●) /' "$out/build.log" || true)"
 echo "› Routen: $static_count statisch/SSG, dynamisch: $(printf '%s' "$dynamic" | tr '\n' ' ')"
 if [ -n "$unexpected" ]; then

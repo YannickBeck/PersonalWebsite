@@ -25,6 +25,8 @@ export interface SectionNavItem {
  *   fokussierte Pille rückt waagerecht ganz in den Scroller, samt Fokusring (Abschluss-Fixes
  *   A114: Chrome scrollte den Scroller beim Fokus nicht – bei 390px blieb von „04 Werdegang“
  *   bzw. „05 Contact“ nur ein Bogen des Rings sichtbar). Nur der Scroller, nie die Seite.
+ * - Passen nicht alle Pillen hinein, läuft die Leiste an der Seite mit weiteren Pillen weich aus
+ *   (Rest-Feinschliff GES7, Maske nur bei Überlauf; ohne JavaScript ohne Auslauf).
  * - Ab 768px steht „Auf dieser Seite“ vor den Pillen (DES14): Header und Leiste nennen teils
  *   dieselben Begriffe („Über mich“, „Projekte“, „Kontakt“), führen aber oben auf Unterseiten
  *   und hier zu Abschnitten. Für Screenreader sagt das aria-label der Navigation dasselbe.
@@ -104,6 +106,44 @@ export function SectionNav({ items, label, hint }: { items: SectionNavItem[]; la
     };
   }, [items]);
 
+  // Hinweis aufs Weiterscrollen (Rest-Feinschliff GES7): Liegen Pillen außerhalb des Scrollers,
+  // läuft die Leiste an dieser Seite weich aus (data-more-start/-end → Maske in
+  // home.module.css). Vorher endeten die Pillen mobil hart mitten im Wort („Werd“), ohne
+  // Hinweis, dass dahinter mehr kommt. Gemessen bei Scrollen, Größenänderung und Schriftwechsel
+  // (Breite der Pillen); Attribute direkt am Element – kein Re-Render je Scroll-Schritt.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) {
+      return;
+    }
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const max = list.scrollWidth - list.clientWidth;
+      list.toggleAttribute('data-more-start', max > 1 && list.scrollLeft > 1);
+      list.toggleAttribute('data-more-end', max > 1 && list.scrollLeft < max - 1);
+    };
+    const schedule = () => {
+      if (!frame) {
+        frame = window.requestAnimationFrame(update);
+      }
+    };
+    update();
+    list.addEventListener('scroll', schedule, { passive: true });
+    const ro = new ResizeObserver(schedule);
+    ro.observe(list);
+    for (const item of Array.from(list.children)) {
+      ro.observe(item);
+    }
+    return () => {
+      list.removeEventListener('scroll', schedule);
+      ro.disconnect();
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+    };
+  }, []);
+
   // Aktive Pille horizontal in Sicht halten (nur der Scroller, nie die Seite)
   useEffect(() => {
     const list = listRef.current;
@@ -134,7 +174,8 @@ export function SectionNav({ items, label, hint }: { items: SectionNavItem[]; la
     setActive(id);
   };
 
-  // Fokussierte Pille samt Ring (Polster = scroll-padding-inline) waagerecht in Sicht (A114)
+  // Fokussierte Pille samt Ring waagerecht in Sicht (A114) – mit Abstand scroll-padding-inline,
+  // so breit wie der Auslauf am Rand (GES7): Pille und Ring liegen nie im verblassten Bereich
   const onFocus = (event: FocusEvent<HTMLUListElement>) => {
     const list = listRef.current;
     const link = event.target;

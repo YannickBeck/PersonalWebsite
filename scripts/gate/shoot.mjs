@@ -21,7 +21,8 @@
  *   und Übergänge sind dafür neutralisiert (erst nach der CLS-Messung)
  * Dazu einmal je Basis-URL die Agenten-Prüfungen per HTTP (lang, JSON-LD, og:*, llms.txt,
  * Markdown-Weiche, 308 des Ghost-Testprojekts, Sitemap/llms.txt ohne Testprojekt, noindex) und
- * im Browser (404-Proben ohne JavaScript, Titel der Bachelorarbeit im Barrierefreiheitsbaum).
+ * im Browser (404-Proben ohne JavaScript, keine wirkungslosen Tab-Stopps ohne JavaScript auf allen
+ * Seiten, Titel der Bachelorarbeit im Barrierefreiheitsbaum).
  *
  * Seitenliste: PUBLIC_ROUTES + NOINDEX_ROUTES aus src/lib/routes.ts (DE und /en), Detailseiten
  * aus den Links von /projekte, /en/projekte, /blog, /en/blog (ohne „demo-“-Slugs, sonst hätte der
@@ -161,7 +162,8 @@ async function sitemapPaths() {
 }
 
 // 404-Proben: global (Pfad ohne Route), Projekt-Slug (dynamicParams = false) und Blog-Slug
-// (src/proxy.ts → globale 404, docs/blog-404.md) – alle liefern die statische globale 404.
+// (src/proxy.ts → globale 404, docs/blog-404.md) – alle liefern die globale 404 (Sprache aus dem
+// Proxy-Header, je Abruf gerendert).
 const NOT_FOUND = [
   '/gibt-es-nicht-404',
   '/en/gibt-es-nicht-404',
@@ -557,11 +559,12 @@ async function agentChecks(pages, routes) {
   }
   const isEn = (p) => p === '/en' || p.startsWith('/en/');
 
-  // lang im Server-HTML (200-Seiten; die globale 404 ist EIN statisches HTML, ihr Boot-Script
-  // setzt lang unter /en vor dem ersten Paint – das prüft der Browser-Lauf, Befund „langDom“)
+  // lang im Server-HTML, auch der 404-Proben (Rest-Feinschliff: die globale 404 bekommt die
+  // Sprache vom Proxy-Header; vorher war sie EIN statisches HTML mit lang="de", und nur der
+  // Browser-Lauf prüfte lang unter /en – Befund „langDom“)
   const wrongLang = [];
   for (const [p, r] of htmlOf) {
-    if (r.status !== 200) {
+    if (r.status !== 200 && r.status !== 404) {
       continue;
     }
     const lang = /<html[^>]*\slang="([^"]+)"/.exec(r.text)?.[1] ?? null;
@@ -569,7 +572,7 @@ async function agentChecks(pages, routes) {
       wrongLang.push(`${p}: ${lang}`);
     }
   }
-  add('lang je Sprache im Server-HTML (200-Seiten)', wrongLang.length === 0, wrongLang.length ? wrongLang : `${[...htmlOf.values()].filter((r) => r.status === 200).length} Seiten`);
+  add('lang je Sprache im Server-HTML (200-Seiten und 404-Proben)', wrongLang.length === 0, wrongLang.length ? wrongLang : `${[...htmlOf.values()].filter((r) => r.status === 200 || r.status === 404).length} Seiten`);
 
   // JSON-LD Person + WebSite auf / und /en
   for (const p of ['/', '/en']) {
@@ -697,8 +700,8 @@ async function agentChecks(pages, routes) {
 
   // 404-Proben im Server-HTML (Feinschliff): Status 404, echtes Dokument statt der leeren
   // __next_error__-Hülle eines Laufzeit-notFound(), lang gesetzt, H1 mit Text, Stylesheets
-  // abrufbar, nicht im Cache abgelegt. lang je Sprache prüft der Browser-Lauf (Boot-Script der
-  // globalen 404), den Inhalt ohne JavaScript noJsChecks().
+  // abrufbar, nicht im Cache abgelegt. lang je Sprache prüft die Prüfung oben, den Inhalt ohne
+  // JavaScript noJsChecks().
   const bad404 = [];
   for (const p of NOT_FOUND) {
     const r = htmlOf.get(p) ?? (await fetchText(`${BASE}${p}`));
@@ -739,7 +742,9 @@ async function agentChecks(pages, routes) {
 
 /**
  * 404-Proben ohne JavaScript im Browser (Feinschliff): H1 sichtbar und mit Text, Stylesheets
- * geladen und angewendet (Schrift der Seite statt Browser-Standard).
+ * geladen und angewendet (Schrift der Seite statt Browser-Standard). Rest-Feinschliff: Sprache
+ * der sichtbaren Fassung (lang am Dokument und an der sichtbaren H1) passt zum Pfad – vorher
+ * zeigten /en-Pfade ohne JavaScript die deutsche Fassung.
  */
 async function noJsChecks(browser) {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
@@ -757,6 +762,11 @@ async function noJsChecks(browser) {
           sheets: document.styleSheets.length,
           font: getComputedStyle(document.body).fontFamily,
           lang: document.documentElement.lang,
+          // sichtbare Fassung der H1 (global-not-found.tsx: ein Span je Sprache)
+          h1Lang:
+            [...(h1?.querySelectorAll('[lang]') ?? [])].find((el) => el.getBoundingClientRect().width > 0)?.getAttribute('lang') ??
+            h1?.closest('[lang]')?.getAttribute('lang') ??
+            null,
         };
       });
       const problems = [];
@@ -769,6 +779,10 @@ async function noJsChecks(browser) {
       if (!info.sheets || /^(times|serif|"?Times New Roman"?)/i.test(info.font)) {
         problems.push(`CSS nicht angewendet (${info.sheets} Stylesheets, Schrift ${info.font})`);
       }
+      const want = p === '/en' || p.startsWith('/en/') ? 'en' : 'de';
+      if (info.lang !== want || info.h1Lang !== want) {
+        problems.push(`Sprache ${info.lang}/${info.h1Lang} statt ${want}`);
+      }
       if (problems.length) {
         bad.push(`${p}: ${problems.join(', ')}`);
       }
@@ -779,7 +793,7 @@ async function noJsChecks(browser) {
     }
   }
   await context.close();
-  return [{ name: '404-Proben ohne JavaScript: H1 sichtbar, CSS angewendet', ok: bad.length === 0, detail: bad.length ? bad : `${NOT_FOUND.length} Pfade` }];
+  return [{ name: '404-Proben ohne JavaScript: H1 sichtbar, CSS angewendet, Sprache wie der Pfad', ok: bad.length === 0, detail: bad.length ? bad : `${NOT_FOUND.length} Pfade` }];
 }
 
 /** Voller Titel der Bachelorarbeit (THESIS.title in src/content/profile.ts), je Sprache. */
@@ -787,6 +801,85 @@ function thesisTitleFromRepo() {
   const src = fs.readFileSync(path.join(REPO, 'src', 'content', 'profile.ts'), 'utf8');
   const m = /export const THESIS[^=]*=\s*\{\s*title:\s*\{\s*de:\s*'([^']+)',\s*en:\s*'([^']+)'/.exec(src);
   return m ? { de: m[1], en: m[2] } : null;
+}
+
+/**
+ * Ohne JavaScript keine wirkungslosen Bedienelemente (Rest-Feinschliff REG1): Auf jeder Seite
+ * (390 und 1440 px, javaScriptEnabled: false) die Tab-Folge ablaufen und jeden Stopp zählen,
+ * der ohne Script nichts tut – Buttons (außer Absenden eines Formulars, das ohne Script
+ * wirklich absendet), Rollen wie tab/switch/checkbox/menuitem, Felder in einem
+ * <form method="dialog"> (dessen Absenden ohne Script nichts tut) und sonstige Elemente mit
+ * tabindex. Links, <summary>, Felder echter Formulare und Scroll-Container mit tabindex (scrollen
+ * per Tastatur, mit und ohne Script gleich) zählen nicht. Vorher (4221b3f): Kachel
+ * des Periodensystems (Tab), zwei Kopf-Buttons des Akkordeons, „Drucken“ auf /cv; im
+ * Formular-Build die Felder und „Nachricht senden“.
+ */
+async function noJsControlChecks(browser) {
+  const targets = pages.filter((p) => expectedStatus(p) === 200);
+  const bad = [];
+  for (const width of [390, 1440]) {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width, height: width === 390 ? 844 : 900 } });
+    for (const p of targets) {
+      const page = await context.newPage();
+      try {
+        await page.goto(`${BASE}${p}`, { waitUntil: 'load', timeout: 30000 });
+        const dead = [];
+        const seen = new Set();
+        for (let i = 0; i < 250; i++) {
+          await page.keyboard.press('Tab');
+          const stop = await page.evaluate(() => {
+            const a = document.activeElement;
+            if (!a || a === document.body) {
+              return null;
+            }
+            const tag = a.tagName;
+            const role = a.getAttribute('role');
+            const form = a.closest('form');
+            const dialogForm = form && (form.getAttribute('method') ?? '').toLowerCase() === 'dialog';
+            const name = (a.getAttribute('aria-label') || a.textContent || a.getAttribute('name') || '').replace(/\s+/g, ' ').trim().slice(0, 50);
+            const r = a.getBoundingClientRect();
+            const id = `${tag}|${name}|${Math.round(r.left)}|${Math.round(r.top + scrollY)}`;
+            let deadReason = null;
+            if (tag === 'A' && a.hasAttribute('href')) {
+              deadReason = null;
+            } else if (tag === 'SUMMARY') {
+              deadReason = null;
+            } else if (/^(INPUT|SELECT|TEXTAREA)$/.test(tag)) {
+              deadReason = dialogForm || !form ? 'Feld ohne absendbares Formular' : null;
+            } else if (tag === 'BUTTON') {
+              const type = (a.getAttribute('type') ?? 'submit').toLowerCase();
+              deadReason = type === 'submit' && form && !dialogForm ? null : 'Button';
+            } else if (role) {
+              deadReason = `Rolle ${role}`;
+            } else if (a.hasAttribute('tabindex') && a.tabIndex >= 0 && a.id !== 'main') {
+              // Scroll-Container mit tabindex (Karussell, Tabellen, Code) scrollen per Tastatur –
+              // mit und ohne JavaScript gleich, kein Befund dieser Prüfung
+              const cs = getComputedStyle(a);
+              const scroller = /auto|scroll/.test(cs.overflowX) || /auto|scroll/.test(cs.overflowY);
+              deadReason = scroller ? null : 'tabindex';
+            }
+            return { id, label: `${tag}${role ? `[${role}]` : ''} ${name}`, deadReason };
+          });
+          if (!stop || seen.has(stop.id)) {
+            break;
+          }
+          seen.add(stop.id);
+          if (stop.deadReason) {
+            dead.push(`${stop.label} (${stop.deadReason})`);
+          }
+        }
+        if (dead.length) {
+          bad.push(`${p} @${width}: ${dead.join('; ')}`);
+        }
+      } catch (e) {
+        bad.push(`${p} @${width}: ${String(e).slice(0, 120)}`);
+      } finally {
+        await page.close();
+      }
+    }
+    await context.close();
+  }
+  return [{ name: 'Ohne JavaScript keine wirkungslosen Tab-Stopps (390/1440)', ok: bad.length === 0, detail: bad.length ? bad : `${targets.length} Seiten` }];
 }
 
 /**
@@ -857,7 +950,7 @@ await Promise.all(
     }
   }),
 );
-const noJs = flag('no-agent') ? [] : [...(await noJsChecks(browser)), ...(await a11yTextChecks(browser))];
+const noJs = flag('no-agent') ? [] : [...(await noJsChecks(browser)), ...(await noJsControlChecks(browser)), ...(await a11yTextChecks(browser))];
 await browser.close();
 results.sort((a, b) => pages.indexOf(a.path) - pages.indexOf(b.path) || a.width - b.width || a.scheme.localeCompare(b.scheme));
 

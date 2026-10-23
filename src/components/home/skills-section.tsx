@@ -14,8 +14,10 @@ import styles from './skills.module.css';
  *
  * Darunter dieselben Angaben als reine Textliste für Screenreader (ohne Links, damit keine
  * unsichtbaren Tab-Stopps entstehen) – auch für Agenten im HTML. Ohne JavaScript ist sie
- * sichtbar (skills.module.css `.textList`): Dann wechselt das Detailfeld nicht, die Liste
- * enthält alle Kacheln mit Belegen (Feinschliff).
+ * sichtbar (skills.module.css `.textList`): Das Raster bleibt als Übersicht ohne Bedienung, das
+ * Detailfeld fehlt, die Liste enthält alle Kacheln mit Belegen (Feinschliff; Rest-Feinschliff
+ * GES2: Lesebreite, Name und Belege je eine Zeile, Belegart mit Doppelpunkt, Farbpunkt der
+ * Kategorie wie an den Filter-Pillen).
  */
 export function SkillsSection({ id, number, lang }: { id: string; number: string; lang: Lang }) {
   const dict = getDictionary(lang);
@@ -49,28 +51,45 @@ export function SkillsSection({ id, number, lang }: { id: string; number: string
       />
       <div className={styles.textList}>
         <h3>{h.skillsListTitle}</h3>
-        {categories.map((c) => (
-          <div key={c.id}>
-            <h4>{c.label}</h4>
-            <ul>
-              {tiles
-                .filter((t) => t.category === c.id)
-                .map((t) => (
-                  <li key={t.id}>
-                    <span lang={t.nameLang}>{t.name}</span> ({t.symbol}). {h.skillsEvidence}:{' '}
-                    {t.evidence.map((ev, i) => (
-                      <span key={`${ev.kind}-${ev.label}`}>
-                        {i > 0 ? '; ' : ''}
-                        {h.evidenceKinds[ev.kind]} <span lang={ev.lang}>{ev.label}</span>
-                        {ev.note ? ` (${ev.note})` : ''}
+        <div className={styles.textListGroups}>
+          {categories.map((c) => (
+            <div key={c.id} className={styles.textListGroup}>
+              <h4 className="yb-cat" data-category={c.id}>
+                <span className={styles.swatch} aria-hidden="true" />
+                {c.label}
+              </h4>
+              <ul>
+                {tiles
+                  .filter((t) => t.category === c.id)
+                  .map((t) => (
+                    <li key={t.id}>
+                      {/* Name und Belege je eine Zeile (ohne JavaScript sichtbar); Screenreader
+                          hören „Name (Kürzel). Belegt durch: Art: Fundstelle; …“ */}
+                      <span className={styles.textListName}>
+                        <span lang={t.nameLang}>{t.name}</span> ({t.symbol})
                       </span>
-                    ))}
-                    .
-                  </li>
-                ))}
-            </ul>
-          </div>
-        ))}
+                      <span className="yb-sr-only">. {h.skillsEvidence}: </span>
+                      <span className={styles.textListEvidence}>
+                        {t.evidence.map((ev, i) => (
+                          <span key={`${ev.kind}-${ev.label}`}>
+                            {i > 0 ? '; ' : ''}
+                            {h.evidenceKinds[ev.kind]}: <span lang={ev.lang}>{ev.label}</span>
+                            {/* Zeitraum ohne Umbruch („(2020 – 2023)“ wie im Detailfeld) */}
+                            {ev.note ? (
+                              <>
+                                {' '}
+                                <span className={styles.textListNote}>({ev.note})</span>
+                              </>
+                            ) : null}
+                          </span>
+                        ))}
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
     </HomeSection>
   );

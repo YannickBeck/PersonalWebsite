@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { holdPosition } from '@/lib/hold-position';
+import { useHydrated } from '@/lib/use-hydrated';
 import { onJump } from './home-jump';
 import styles from './projects.module.css';
 
@@ -14,8 +15,6 @@ export interface AccordionItem {
   period: string | null;
   title: string;
   shortTitle: string;
-  /** Detailseite – ohne JavaScript führt der geschlossene Eintrag dorthin (FUN4). */
-  href: string;
   /** Vorschau-Platzhalter neben der Meta-Zeile (nur mit NEXT_PUBLIC_SHOW_GAPS, sonst null). */
   metaExtra?: ReactNode;
   /** Inhalt (serverseitig gerendert: Cover, Ausgangslage, Beitrag, Ergebnis, Kacheln, Links). */
@@ -32,9 +31,15 @@ export interface AccordionItem {
  * Button der schmale Streifen mit senkrechtem Titel (ab 900px ist seine Box nur so breit wie der
  * Streifen, Feinschliff; Trefferfläche der ganze Streifen bzw. schmaler die ganze Karte); der
  * Fokus bleibt beim Öffnen auf ihm. ←/→ (und ↑/↓) wechseln zwischen den Köpfen, Pos1/Ende.
- * Der Inhalt des geschlossenen Eintrags ist `inert`. Ohne JavaScript lässt sich nichts
- * aufklappen: Ein <noscript>-Link über dem geschlossenen Eintrag führt dann zur Detailseite
- * (FUN4) – sonst wäre das zweite Projekt auf der Startseite unerreichbar.
+ * Der Inhalt des geschlossenen Eintrags ist `inert`.
+ *
+ * Ohne JavaScript (Rest-Feinschliff REG1; vorher ein <noscript>-Link über dem geschlossenen
+ * Eintrag, FUN4, dazu zwei Kopf-Buttons ohne Wirkung): Beide Projekte stehen offen untereinander
+ * (projects.module.css, `scripting: none`), die Köpfe sind schlichte Überschriften. Das
+ * Server-HTML rendert deshalb keinen Button und kein `inert` – beides setzt React direkt nach der
+ * Hydration (useHydrated). Mit JavaScript ist der Inhalt des geschlossenen Eintrags bis dahin per
+ * CSS verborgen (`visibility: hidden`, kein Tab-Stopp in unsichtbaren Links); der Kopf ist ein
+ * gleich gestaltetes Element ohne Bedienung, der Wechsel zum Button verschiebt nichts.
  *
  * Layout (projects.module.css): Ab 900px Breite nebeneinander; beide Inhalte sind immer in
  * voller Breite gesetzt, der geschlossene Eintrag beschneidet nur – die Höhe der Reihe ist
@@ -59,6 +64,7 @@ function namePrefix(it: AccordionItem): string {
 
 export function ProjectAccordion({ items, label }: { items: AccordionItem[]; label: string }) {
   const [open, setOpen] = useState(items[0]?.id);
+  const hydrated = useHydrated();
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(
@@ -108,11 +114,27 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
 
   return (
     <div className={styles.accordion}>
-      <ul ref={listRef} className={styles.list} aria-label={label} onKeyDown={onKeyDown}>
+      <ul
+        ref={listRef}
+        className={styles.list}
+        aria-label={label}
+        // Bedienbar erst nach der Hydration (vorher verbirgt CSS den geschlossenen Inhalt)
+        data-ready={hydrated ? '' : undefined}
+        onKeyDown={onKeyDown}
+      >
         {items.map((it) => {
           const isOpen = it.id === open;
           const buttonId = `${it.anchor}-button`;
           const panelId = `${it.anchor}-panel`;
+          const headText = (
+            <>
+              <span className="yb-sr-only">{namePrefix(it)}</span>
+              {/* eigener Span: geschlossen ≥ 900px behält der Titel die Kopfbreite, der
+                  Button nur die des Streifens (projects.module.css) */}
+              <span className={styles.triggerText}>{it.title}</span>
+              <span className={styles.chevron} aria-hidden="true" />
+            </>
+          );
           return (
             <li key={it.id} id={it.anchor} className={`${styles.item} yb-acc-item`} data-open={isOpen}>
               <div className={`${styles.inner} yb-acc-inner`}>
@@ -126,23 +148,26 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
                     {it.metaExtra}
                   </p>
                   <h3 className={styles.title}>
-                    <button
-                      id={buttonId}
-                      type="button"
-                      className={styles.trigger}
-                      aria-expanded={isOpen}
-                      aria-controls={panelId}
-                      aria-disabled={isOpen || undefined}
-                      data-acc-trigger=""
-                      data-jump-focus=""
-                      onClick={(event) => select(event, it.id)}
-                    >
-                      <span className="yb-sr-only">{namePrefix(it)}</span>
-                      {/* eigener Span: geschlossen ≥ 900px behält der Titel die Kopfbreite, der
-                          Button nur die des Streifens (projects.module.css) */}
-                      <span className={styles.triggerText}>{it.title}</span>
-                      <span className={styles.chevron} aria-hidden="true" />
-                    </button>
+                    {hydrated ? (
+                      <button
+                        id={buttonId}
+                        type="button"
+                        className={styles.trigger}
+                        aria-expanded={isOpen}
+                        aria-controls={panelId}
+                        aria-disabled={isOpen || undefined}
+                        data-acc-trigger=""
+                        data-jump-focus=""
+                        onClick={(event) => select(event, it.id)}
+                      >
+                        {headText}
+                      </button>
+                    ) : (
+                      // Server-HTML und ohne JavaScript: Überschrift ohne Schalter (gleich gestaltet)
+                      <span id={buttonId} className={styles.trigger}>
+                        {headText}
+                      </span>
+                    )}
                   </h3>
                 </div>
                 <div
@@ -150,27 +175,17 @@ export function ProjectAccordion({ items, label }: { items: AccordionItem[]; lab
                   role="region"
                   aria-labelledby={buttonId}
                   className={`${styles.panel} yb-acc-panel`}
-                  inert={!isOpen}
+                  inert={hydrated && !isOpen}
                 >
                   <div className={`${styles.panelInner} yb-acc-fade`}>{it.panel}</div>
                 </div>
               </div>
-              {isOpen ? null : (
-                <noscript>
-                  <a href={it.href} className={styles.noscriptLink}>
-                    <span className="yb-sr-only">
-                      {namePrefix(it)}
-                      {it.title}
-                    </span>
-                  </a>
-                </noscript>
-              )}
               <span className={`${styles.strip} yb-acc-strip`} aria-hidden="true">
                 <span className={`${styles.stripNumber} yb-display`}>{it.number}</span>
                 <span className={styles.stripTitle}>{it.shortTitle}</span>
                 <span className={styles.stripEnd}>
                   {it.kind !== it.shortTitle ? <span className={styles.stripKind}>{it.kind}</span> : null}
-                  <span className={styles.stripPlus} />
+                  <span className={`${styles.stripPlus} yb-acc-plus`} />
                 </span>
               </span>
             </li>

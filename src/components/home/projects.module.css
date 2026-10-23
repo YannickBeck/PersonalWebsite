@@ -5,7 +5,8 @@
  * (cqi, Streifenbreite) erlaubt. Übergänge: motion.css §7.
  *
  * Container = Akkordeon. < 900px: untereinander (Kopf immer sichtbar, Inhalt klappt auf; ab 640px
- * Grafik und Text nebeneinander). ≥ 900px: nebeneinander (Fix-Runde 3: vorher ab 640px). Beide
+ * Grafik und Text nebeneinander). ≥ 900px: nebeneinander (Fix-Runde 3: vorher ab 640px; nur mit
+ * JavaScript – ohne stehen beide Projekte offen untereinander, Rest-Feinschliff REG1). Beide
  * Inhalte haben IMMER die Breite des offenen Eintrags
  * (--open-w); der geschlossene Eintrag ist ein Streifen (--strip) und beschneidet nur. So hat
  * die Reihe die Höhe des längeren Projekts und springt beim Wechsel nicht.
@@ -132,25 +133,13 @@
   border-radius: var(--radius-inner);
 }
 
-/* Geschlossen: die ganze Karte bzw. der ganze Streifen ist die Trefferfläche */
-.item[data-open='false'] .trigger::after {
+/* Geschlossen: die ganze Karte bzw. der ganze Streifen ist die Trefferfläche (nur der Button –
+   vor der Hydration und ohne JavaScript ist der Kopf ein <span>, project-accordion.tsx) */
+.item[data-open='false'] button.trigger::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 2;
-}
-
-/* Ohne JavaScript (project-accordion.tsx, FUN4): der geschlossene Eintrag führt zur Detailseite */
-.noscriptLink {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: inherit;
-}
-
-.noscriptLink:focus-visible {
-  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
-  outline-offset: var(--spacing-0-5);
 }
 
 .item[data-open='false'] .trigger:focus-visible {
@@ -192,7 +181,8 @@
   rotate: 0deg;
 }
 
-@media (hover: hover) {
+/* Hover nur, wo der Eintrag bedienbar ist (ohne JavaScript stehen beide offen) */
+@media (hover: hover) and (scripting: enabled) {
   .item[data-open='false']:hover {
     background-color: var(--color-background-muted);
   }
@@ -292,169 +282,212 @@
 }
 
 /* ---------- nebeneinander (ab 900px) ---------- */
-@container (min-width: 900px) {
-  .list {
-    --strip: 5.5rem;
-    --open-w: calc(100cqi - var(--strip) - var(--gap));
-    flex-direction: row;
-    align-items: stretch;
-  }
+/* Nur mit JavaScript (Rest-Feinschliff REG1): Ohne lässt sich der Streifen nicht öffnen – dann
+   stehen beide Projekte offen untereinander (Block „ohne JavaScript“ unten). `scripting` gilt
+   vor dem ersten Paint und ändert sich bei der Hydration nicht (kein Layout-Shift). */
+@media (scripting: enabled) {
+  @container (min-width: 900px) {
+    .list {
+      --strip: 5.5rem;
+      --open-w: calc(100cqi - var(--strip) - var(--gap));
+      flex-direction: row;
+      align-items: stretch;
+    }
 
-  .item {
-    flex: 0 0 var(--strip);
-  }
+    .item {
+      flex: 0 0 var(--strip);
+    }
 
-  .item[data-open='true'] {
-    flex-basis: var(--open-w);
-  }
+    .item[data-open='true'] {
+      flex-basis: var(--open-w);
+    }
 
-  .item[data-open='false'] {
-    background-color: var(--color-background-muted);
-    box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
-  }
+    .item[data-open='false'] {
+      background-color: var(--color-background-muted);
+      box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color);
+    }
 
-  /* Inhalt füllt die Reihe (Fix-Runde 3): Die Reihe ist so hoch wie das längere Projekt; beim
-     kürzeren wächst die Projekt-Grafik mit (Titelblatt bzw. Ablauf, .cover), statt dass unten
-     ein leerer Streifen bleibt. Die Prozenthöhe löst sich gegen die gestreckte Flex-Reihe auf
-     (definit, Flexbox §9.8) – keine Schleife, die Reihenhöhe bleibt beim Umschalten gleich. */
-  .inner,
-  .item[data-open='true'] .inner {
-    display: flex;
-    flex-direction: column;
-    width: var(--open-w);
-    height: 100%;
-  }
+    /* Inhalt füllt die Reihe (Fix-Runde 3): Die Reihe ist so hoch wie das längere Projekt; beim
+       kürzeren wächst die Projekt-Grafik mit (Titelblatt bzw. Ablauf, .cover), statt dass unten
+       ein leerer Streifen bleibt. Die Prozenthöhe löst sich gegen die gestreckte Flex-Reihe auf
+       (definit, Flexbox §9.8) – keine Schleife, die Reihenhöhe bleibt beim Umschalten gleich. */
+    .inner,
+    .item[data-open='true'] .inner {
+      display: flex;
+      flex-direction: column;
+      width: var(--open-w);
+      height: 100%;
+    }
 
-  .panel {
-    flex: 1 1 auto;
-    overflow: visible;
-  }
+    .panel {
+      flex: 1 1 auto;
+      overflow: visible;
+    }
 
-  .panelInner {
-    height: 100%;
-  }
+    .panelInner {
+      height: 100%;
+    }
 
-  .panelGrid {
-    height: 100%;
-  }
+    .panelGrid {
+      height: 100%;
+    }
 
-  .cover > :first-child {
-    flex-grow: 1;
-  }
+    .cover > :first-child {
+      flex-grow: 1;
+    }
 
-  .head {
-    padding: var(--spacing-7) var(--spacing-8) var(--spacing-5);
-  }
+    .head {
+      padding: var(--spacing-7) var(--spacing-8) var(--spacing-5);
+    }
 
-  .panelInner {
-    padding: 0 var(--spacing-8) var(--spacing-8);
+    .panelInner {
+      padding: 0 var(--spacing-8) var(--spacing-8);
+    }
+
+    .chevron {
+      display: none;
+    }
+
+    .item[data-open='false'] .head,
+    .item[data-open='false'] .panelInner {
+      opacity: 0;
+    }
+
+    /* Geschlossen ist der Kopf-Button nur so breit wie der Streifen (Feinschliff): Vorher war er so
+       breit wie der unsichtbare Inhalt (--open-w) und ragte bei 1440px von x 1208 bis 2132 aus dem
+       Bild – VoiceOver-Cursor, Lupe und Sprachsteuerungs-Overlays zeigten dorthin. Er bleibt in
+       der Titelzeile (Höhe wie offen) und rückt an die Kante des Streifens; der Titel darin behält
+       die Breite des Kopfs (.triggerText) und bricht deshalb gleich um – Kopf, Inhalt und
+       Reihenhöhe bleiben gleich, nichts springt. Der Text ragt unsichtbar (Kopf opacity 0) über den
+       Button hinaus. Trefferfläche bleibt ::after über dem ganzen Streifen. Eine Box über die volle
+       Streifenhöhe war höher als der Bildschirm unter den Leisten: Chrome zentrierte sie beim
+       Fokus, ihr oberes Ende lag unter der Abschnittsnavigation (Gate, 1024 × 768). */
+    .item[data-open='false'] .trigger {
+      width: var(--strip);
+      margin-inline-start: calc(-1 * var(--spacing-8));
+    }
+
+    .item[data-open='false'] .triggerText {
+      flex: none;
+      width: calc(var(--open-w) - 2 * var(--spacing-8));
+    }
+
+    .strip {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-4);
+      padding: var(--spacing-6) 0 var(--spacing-5);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .item[data-open='false'] .strip {
+      opacity: 1;
+    }
+
+    .stripNumber {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+
+    /* Senkrecht von unten nach oben; sideways dreht auch Satzzeichen (’) mit */
+    .stripTitle,
+    .stripKind {
+      writing-mode: vertical-rl;
+      text-orientation: sideways;
+      rotate: 180deg;
+      white-space: nowrap;
+    }
+
+    .stripTitle {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: var(--yb-heading-tracking);
+    }
+
+    .stripEnd {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+
+    .stripKind {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .stripPlus {
+      position: relative;
+      flex: none;
+      width: var(--size-element-md);
+      height: var(--size-element-md);
+      border-radius: var(--radius-full);
+      background-color: var(--color-background-inverted);
+    }
+
+    .stripPlus::before,
+    .stripPlus::after {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 38%;
+      height: var(--yb-stroke-icon);
+      border-radius: var(--radius-full);
+      background-color: var(--color-background-body);
+      translate: -50% -50%;
+    }
+
+    .stripPlus::after {
+      rotate: 90deg;
+    }
+
+    /* Hover auf dem geschlossenen Streifen (Rest-Feinschliff GES3): Vorher blieb er gleich –
+       die allgemeine Hover-Regel setzt dieselbe gedämpfte Fläche, die der Streifen hier schon
+       hat. Jetzt einen Ton tiefer und mit kräftigerem Ring; das Plus wächst leicht (nur
+       no-preference, motion.css §7). Nur mit Maus (hover: hover). Mischung in sRGB: in oklch
+       verlor der Papierton seinen Farbton (Chrome rechnete mit Farbton „none“ → rosa). */
+    @media (hover: hover) {
+      .item[data-open='false']:hover {
+        background-color: color-mix(in srgb, var(--color-background-muted) 94%, var(--color-text-primary));
+        box-shadow: 0 0 0 var(--border-width) var(--yb-ring-color-hover);
+      }
+    }
+  }
+}
+
+/* ---------- ohne JavaScript (Rest-Feinschliff REG1) ----------
+   Beide Projekte offen untereinander, Köpfe als Überschriften ohne Plus/Minus (der Kopf ist dann
+   ein <span>, project-accordion.tsx). Vorher blieben ein geschlossener Kopf-Button und ein
+   <noscript>-Link mit gleichem Namen als doppelter Tab-Stopp. */
+@media (scripting: none) {
+  .item[data-open='false'] .inner {
+    grid-template-rows: auto 1fr;
   }
 
   .chevron {
     display: none;
   }
 
-  .item[data-open='false'] .head,
-  .item[data-open='false'] .panelInner {
-    opacity: 0;
+  .trigger {
+    cursor: auto;
   }
+}
 
-  /* Geschlossen ist der Kopf-Button nur so breit wie der Streifen (Feinschliff): Vorher war er so
-     breit wie der unsichtbare Inhalt (--open-w) und ragte bei 1440px von x 1208 bis 2132 aus dem
-     Bild – VoiceOver-Cursor, Lupe und Sprachsteuerungs-Overlays zeigten dorthin. Er bleibt in
-     der Titelzeile (Höhe wie offen) und rückt an die Kante des Streifens; der Titel darin behält
-     die Breite des Kopfs (.triggerText) und bricht deshalb gleich um – Kopf, Inhalt und
-     Reihenhöhe bleiben gleich, nichts springt. Der Text ragt unsichtbar (Kopf opacity 0) über den
-     Button hinaus. Trefferfläche bleibt ::after über dem ganzen Streifen. Eine Box über die volle
-     Streifenhöhe war höher als der Bildschirm unter den Leisten: Chrome zentrierte sie beim
-     Fokus, ihr oberes Ende lag unter der Abschnittsnavigation (Gate, 1024 × 768). */
-  .item[data-open='false'] .trigger {
-    width: var(--strip);
-    margin-inline-start: calc(-1 * var(--spacing-8));
+/* Mit JavaScript bis zur Hydration: Der Inhalt des geschlossenen Eintrags ist noch nicht inert
+   (das Server-HTML gilt auch ohne JavaScript) – unsichtbar ist er ohnehin, so bekommt er auch
+   keinen Tab-Stopp und steht nicht im Barrierefreiheitsbaum. */
+@media (scripting: enabled) {
+  .list:not([data-ready]) .item[data-open='false'] .panel {
+    visibility: hidden;
   }
-
-  .item[data-open='false'] .triggerText {
-    flex: none;
-    width: calc(var(--open-w) - 2 * var(--spacing-8));
-  }
-
-  .strip {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-4);
-    padding: var(--spacing-6) 0 var(--spacing-5);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .item[data-open='false'] .strip {
-    opacity: 1;
-  }
-
-  .stripNumber {
-    font-size: var(--font-size-xl);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: 0.02em;
-  }
-
-  /* Senkrecht von unten nach oben; sideways dreht auch Satzzeichen (’) mit */
-  .stripTitle,
-  .stripKind {
-    writing-mode: vertical-rl;
-    text-orientation: sideways;
-    rotate: 180deg;
-    white-space: nowrap;
-  }
-
-  .stripTitle {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: var(--yb-heading-tracking);
-  }
-
-  .stripEnd {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-4);
-  }
-
-  .stripKind {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
-  }
-
-  .stripPlus {
-    position: relative;
-    flex: none;
-    width: var(--size-element-md);
-    height: var(--size-element-md);
-    border-radius: var(--radius-full);
-    background-color: var(--color-background-inverted);
-  }
-
-  .stripPlus::before,
-  .stripPlus::after {
-    content: '';
-    position: absolute;
-    inset: 50% auto auto 50%;
-    width: 38%;
-    height: var(--yb-stroke-icon);
-    border-radius: var(--radius-full);
-    background-color: var(--color-background-body);
-    translate: -50% -50%;
-  }
-
-  .stripPlus::after {
-    rotate: 90deg;
-  }
-
 }
 
 /* ≥ 900: Grafik + Links links; Absatz, Stichpunkte und Fähigkeiten rechts (vorher standen die

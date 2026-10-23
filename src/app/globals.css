@@ -129,13 +129,18 @@ html:has(.yb-section-nav) .yb-vt-header {
 
 /*
  * Bedienelemente, die nur mit JavaScript etwas tun (Feinschliff): Theme-Schalter, Menü-Button,
- * Filter-Pillen und Hinweis des Periodensystems, „Karte umdrehen“. Ohne JavaScript fehlen sie
- * statt tot dazustehen. Media-Query statt Klasse aus einem Script: Sie gilt vor dem ersten
+ * Filter-Pillen, Hinweis und Detailfeld des Periodensystems, „Karte umdrehen“, seit dem
+ * Rest-Feinschliff auch „Drucken“ auf /cv, Kontaktformular und Newsletter-Demo (dort ein
+ * <noscript>-Hinweis) sowie Suche und Themenfilter der Beitragsliste. Ohne JavaScript fehlen sie statt tot dazustehen. Wo der Inhalt ohne
+ * JavaScript gebraucht wird (Raster, Akkordeon), rendert das Server-HTML ihn ohne Bedienung
+ * (src/lib/use-hydrated.ts). Media-Query statt Klasse aus einem Script: Sie gilt vor dem ersten
  * Paint und ändert sich bei der Hydration nicht (kein Flackern, kein CLS). `scripting` können
  * alle Browser der browserslist-Ziele (Chrome 120, Firefox 113, Safari 17).
  */
 @media (scripting: none) {
-  .yb-js-only {
+  .yb-js-only,
+  /* „Code kopieren“ im Astryx-CodeBlock (Demo-Artikel der Vorschau): Zwischenablage nur mit JS */
+  .astryx-code-block-copy-button {
     display: none !important;
   }
 }

@@ -38,6 +38,13 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
+  /* Spaltenköpfe auf einer Linie (Rest-Feinschliff GES6): „LinkedIn“ steht im Kartenpolster
+     (yb-theme.ts, card.base.padding = spacing-5), „Wer dir antwortet“ ohne Karte – vorher
+     20px höher. Dasselbe Polster oben, der Kopf rückt auf die Linie der Kartenüberschrift. */
+  .pending .who {
+    padding-block-start: var(--spacing-5);
+  }
+
   /* LinkedIn bleibt beim Ausfüllen in Sicht */
   .aside {
     position: sticky;

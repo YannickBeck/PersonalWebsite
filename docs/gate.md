@@ -119,8 +119,9 @@ Detailseite). `pages.json` ist leer, weil die Website keine Ghost-Seiten abruft.
 3. `pnpm build` mit `GHOST_URL`/`GHOST_CONTENT_KEY` auf den Mock. `NEXT_PUBLIC_SHOW_GAPS`,
    `NEXT_PUBLIC_CONTACT_FORM` und `NEXT_PUBLIC_CF_BEACON_TOKEN` werden vorher entfernt und nur je
    nach Variante gesetzt. Log: `<out>/build.log`.
-4. Routentabelle prüfen: Dynamisch (ƒ) dürfen nur `/api/*`, `/rss.xml` und `/en/rss.xml` sein,
-   sonst Exit 3.
+4. Routentabelle prüfen: Dynamisch (ƒ) dürfen nur `/api/*`, `/rss.xml`, `/en/rss.xml` und die
+   globale 404 `/_not-found` sein (sie liest ihre Sprache aus dem Proxy-Header, Rest-Feinschliff,
+   docs/blog-404.md), sonst Exit 3.
 5. `.next/standalone` samt `.next/static` und `public` nach `<out>/standalone` kopieren,
    `<out>/info.json` (Commit, Variante, Pfad zu `server.js`).
 
@@ -168,7 +169,7 @@ Je Lauf, in dieser Reihenfolge:
 
 Einmal je Basis-URL laufen die Agenten-Prüfungen, per HTTP bzw. (die letzten zwei) im Browser:
 
-- `lang` im Server-HTML der 200-Seiten
+- `lang` im Server-HTML der 200-Seiten und der 404-Proben
 - JSON-LD Person und WebSite auf `/` und `/en`
 - `og:image` und `og:type` auf allen 200-Seiten, Bild abrufbar
 - `/llms.txt`
@@ -180,15 +181,25 @@ Einmal je Basis-URL laufen die Agenten-Prüfungen, per HTTP bzw. (die letzten zw
 - `robots.txt` mit Sitemap-Zeile
 - 404-Proben im Server-HTML: Status 404, keine `__next_error__`-Hülle, `lang` gesetzt, H1 mit
   Text, alle Stylesheets abrufbar, kein langes `s-maxage` (Feinschliff)
-- 404-Proben im Browser ohne JavaScript (390 px): H1 sichtbar, Stylesheets angewendet
+- 404-Proben im Browser ohne JavaScript (390 px): H1 sichtbar, Stylesheets angewendet, Sprache
+  von `lang` und sichtbarer H1 wie der Pfad
 - Titel der Bachelorarbeit im Barrierefreiheitsbaum von `<main>` auf allen Projektseiten
   (`/projekte`, Detailseiten mit „Weiteres Projekt“, DE und EN; 1440 px, Playwright
   `ariaSnapshot`). Das Titelblatt ist in der Projektzeile `aria-hidden`, der Ersatzsatz steht
   `yb-sr-only` in der Zeile (Feinschliff-Nachbesserung GES1). Titel aus `THESIS` in profile.ts.
+- Ohne JavaScript keine wirkungslosen Tab-Stopps (Rest-Feinschliff REG1): jede 200-Seite bei 390
+  und 1440 px mit `javaScriptEnabled: false`, Tab-Folge bis zum ersten Wiederholen. Befund ist
+  jeder Stopp auf einem Button (außer Absenden eines Formulars, das ohne Script wirklich
+  absendet), einer Rolle wie `tab`, einem Feld in `<form method="dialog">` oder einem anderen
+  Element mit `tabindex`. Links, `<summary>` und Scroll-Container mit `tabindex` (Karussell,
+  Tabellen und Code in Beiträgen: scrollen per Tastatur, mit und ohne Script gleich) zählen nicht. Am Stand `4221b3f` schlägt sie an:
+  Kachel des Periodensystems, zwei Kopf-Buttons des Akkordeons, „Drucken“ auf /cv, im
+  Formular-Build „Nachricht senden“.
 
-Die globale 404 ist ein statisches HTML mit `lang="de"`. Unter `/en` setzt ihr Boot-Script `lang`
-vor dem ersten Paint. Deshalb prüft der Browser-Lauf `lang` für alle Seiten, das Server-HTML nur
-für die 200-Seiten.
+`lang` im Server-HTML prüft die erste Prüfung seit dem Rest-Feinschliff auch für die 404-Proben:
+Die globale 404 bekommt die Sprache vom Proxy (Header `x-yb-lang` für `/en/*`) statt erst vom
+Boot-Script. Die 404-Proben ohne JavaScript prüfen zusätzlich, dass `lang` und die sichtbare H1
+zur Sprache des Pfads passen (vorher unter `/en` „Seite nicht gefunden“).
 
 Abnahme (Exit 0): Ladefehler, `lang` im Browser, Status, Überlauf, CLS > 0, Konsolenfehler,
 Überschriften, Kantenspreizung > 1 px, unterbelegte Grids, unsichtbarer und verdeckter Fokus
@@ -222,6 +233,13 @@ Jeder Test lädt die Startseite neu (1440 px, falls nicht anders angegeben). Gep
 - **Band der Abschnittsnavigation:** Klicks aufs leere Papier (auch im Seitenrand) treffen das
   Band, keine verdeckte Kachel wird gewählt, kein Seitenüberlauf (A113).
 - **Reduced Motion:** 0 laufende Animationen nach Laden, Filter, Akkordeon, Werdegang und Karte.
+- **Rest-Feinschliff:** ohne JavaScript zusätzlich Raster `inert` ohne Detailfeld und ohne
+  hervorgehobene Kachel, beide Projekte offen ohne Kopf-Buttons, 0 wirkungslose Tab-Stopps; vor der
+  Hydration (Skripte per `page.route` blockiert) dieselbe Lage von Raster, Akkordeon-Köpfen und
+  Seitenhöhe wie danach, kein erreichbarer Link im geschlossenen Inhalt (1440/390); Pillenleiste
+  bei 390 px mit Auslauf nur an der Seite mit Überlauf, jede fokussierte Pille samt Ring außerhalb
+  des Auslaufs, bei 1440 px kein Auslauf (GES7); Hover auf dem geschlossenen Streifen ändert
+  Fläche, Ring und Plus (GES3). Diese neun Läufe schlagen auf `4221b3f` alle fehl.
 - **Feinschliff:** geschlossener Kopf-Button des Akkordeons bei 1440 und 1024 px nur so breit wie
   der Streifen (vorher bis x 2132 bei 1440 px); Fähigkeits-Chip einer Projektseite → `/#skill-rag`
   per Client-Navigation: Kachel gewählt, fokussiert, im Bild (REG3); ohne JavaScript (1440/390 px):
@@ -375,6 +393,46 @@ Betroffenenrechte, Aufsichtsbehörde, Hetzner und Cloudflare in `src/content/leg
   Datenschutz 11; der Punkt „Widerruf einer Einwilligung (Art. 7 Abs. 3)“ erscheint nur dort.
 - link-check: 0 Befunde. Druck (A4, Chromium): Impressum 1 Seite, Datenschutz DE und EN je 3 Seiten,
   Hinweis „Keine Rechtsberatung“ jetzt auch im Druck, keine Überschrift allein am Seitenende.
+
+## Referenzwerte Rest-Feinschliff (2026-10-23)
+
+Ohne JavaScript ohne tote Schalter, Hover des Akkordeon-Streifens, Schreibweise „IT Consultant“,
+Kontaktköpfe auf einer Linie, Auslauf der Pillenleiste, englische 404 mit `lang="en"` im
+Server-HTML. Gleiche Werkzeuge, gebaut aus dem Arbeitsstand vor dem Commit:
+
+| Build | Läufe | Abnahme-Metriken | Agenten | Kleine Fokusziele @390 | Rechtstext-Lücken |
+| --- | --- | --- | --- | --- | --- |
+| prod | 360 (36 Seiten) | alle 0 | 22/22 | 10 | Impressum 3, Datenschutz 8 (DE und EN) |
+| gaps | 360 | alle 0 | 22/22 | 66 | wie prod |
+| form | 360 | alle 0 | 22/22 | 10 | Impressum 3, Datenschutz 11 |
+
+- Neue Agenten-Prüfung „Ohne JavaScript keine wirkungslosen Tab-Stopps“; dazu prüfen die
+  404-Prüfungen `lang` jetzt auch im Server-HTML und ohne JavaScript die Sprache der sichtbaren
+  H1. Am Stand `4221b3f` (prod, Teilmenge `/`, `/en`, `/cv`, `/kontakt` und drei 404-Proben)
+  schlagen drei Prüfungen an, 18/21; nachher 21/21 (dieselben Seiten plus `/projekte/unbekannt-404`). Im ersten Lauf fand
+  die neue Prüfung im Vorschau-Build noch Suche und Themenfilter von `/blog` und `/en/blog`
+  (Demo-Artikel), seitdem `yb-js-only`.
+- home-test 57/57 in allen drei Builds (52 bisherige, davon die vier Läufe „Ohne JavaScript“
+  erweitert, und 5 neue). Die neun neuen bzw. erweiterten Läufe schlagen auf `4221b3f` alle fehl.
+- vt-probe 13/13 bei 1440 und 390 px, jeweils auch mit `--reduce`; backscroll 18/18 (Produktion
+  und Vorschau). In einem früheren Durchgang brach vt-probe `--width=390 --reduce` einmal ohne
+  Ergebnis ab (nur die Node-Versionszeile im Log); drei Wiederholungen und die Endläufe 13/13.
+- url-check 74/74 (Produktion, Vorschau, Formular), link-check 0 Befunde, contact-api-test 23/23.
+- Vor der Hydration (Skripte blockiert) gegen danach: Abschnitte 02 und 03 der Startseite
+  pixelgleich bei 390/768/1024/1440 px, hell und dunkel; Seitenhöhe gleich.
+- Ohne JavaScript alle 36 Seiten der Produktion sowie Formular- und Vorschau-Seiten (390/1440):
+  kein Überlauf, je eine H1, keine Bedienelemente ohne Wirkung. Übrig bleiben nur
+  Scroll-Container mit `tabindex` (Karussell, Tabelle, Code), die per Tastatur scrollen. In einem
+  Demo-Artikel der Vorschau fand sich noch „Code kopieren“ (Astryx-CodeBlock), seitdem ohne
+  JavaScript ausgeblendet (globals.css).
+- axe-core 4.13 mit JavaScript, 56 Läufe (Produktion: `/`, `/en`, `/cv`, `/projekte`, `/kontakt`,
+  drei 404; Formular: `/kontakt`, `/en/kontakt`, `/`; Vorschau: `/`, `/blog`, `/newsletter`;
+  390/1440, hell/dunkel): 0 Befunde außer den dokumentierten Ausnahmen (Namenszug, „404“). Ohne
+  JavaScript lässt sich axe nicht ausführen: Es braucht Timer, und die laufen bei
+  `javaScriptEnabled: false` auch für eingespeiste Skripte nicht (Lauf brach nach 60 s ab).
+- JS (jssize, `jsGzModule`, gegen `4221b3f`): `/` und `/en` +215 B, `/newsletter` +44 B, `/blog`
+  +39 B, `/cv` +9 B, übrige Seiten ±0. CSS gz +312 B auf `/` und `/en`, +190 B auf den Seiten im
+  Rahmen, +33 B auf Beiträgen und `/content-status`.
 
 ## Grenzen
 

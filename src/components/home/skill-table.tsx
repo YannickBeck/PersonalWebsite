@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react';
 import type { SkillCategory } from '@/content/profile';
 import type { HomeEvidence, SkillTileData } from '@/content/profile-view';
+import { useHydrated } from '@/lib/use-hydrated';
 import { onJump } from './home-jump';
 import styles from './skills.module.css';
 
@@ -52,10 +53,17 @@ const two = (n: number) => String(n).padStart(2, '0');
  * - Auswahl per Zeiger (Klick/Tippen), während das Detailfeld unter dem Raster außer Sicht
  *   liegt (schmale Breiten): das Feld rückt in Sicht (block: nearest, A118). Pfeiltasten
  *   scrollen nicht – dort wäre das bei jedem Schritt störend.
+ * - Ohne JavaScript (Rest-Feinschliff REG1/GES2): Das Raster ist eine Übersicht ohne Bedienung –
+ *   im Server-HTML `inert` (kein Tab-Stopp, keine „Registerkarte 1 von 35“, kein Klick), React
+ *   hebt das direkt nach der Hydration auf (useHydrated, nur ein Attribut: kein Layout-Shift).
+ *   Detailfeld, Filter und Hinweis fehlen (yb-js-only), die gewählte Kachel ist nicht
+ *   hervorgehoben (skills.module.css); alle Angaben trägt die sichtbare Textliste
+ *   (skills-section.tsx).
  */
 export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProps) {
   const [selected, setSelected] = useState(tiles[0]?.id);
   const [filter, setFilter] = useState<SkillCategory | null>(null);
+  const hydrated = useHydrated();
   const listRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const tableId = `${baseId}-table`;
@@ -206,6 +214,8 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
           aria-label={labels.table}
           aria-describedby={hintId}
           className={styles.grid}
+          // Server-HTML: Übersicht ohne Bedienung (ohne JavaScript bliebe sonst ein toter Tab-Stopp)
+          inert={!hydrated}
           onKeyDown={onKeyDown}
         >
           {tiles.map((t) => {
@@ -254,7 +264,8 @@ export function SkillTable({ baseId, tiles, categories, labels }: SkillTableProp
           role="tabpanel"
           id={panelId}
           aria-labelledby={current.anchor}
-          className={`${styles.detail} yb-cat`}
+          // Ohne JavaScript wechselt das Feld nicht – es fehlt, die Textliste trägt alle Belege
+          className={`${styles.detail} yb-cat yb-js-only`}
           data-category={current.category}
         >
           <div className={styles.element}>

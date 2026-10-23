@@ -71,10 +71,13 @@ export function NewsletterForm({ lang }: { lang: Lang }) {
   return (
     <VStack gap={6}>
       <Banner status="note" title={dict.newsletterInviteTitle} description={dict.newsletterInviteText} />
+      {/* Ohne JavaScript fehlen Formular und Zustands-Vorschau (yb-js-only, Rest-Feinschliff
+          REG1) – Absenden und Umschalten täten nichts; der Hinweis darunter sagt es */}
       <form
         ref={formRef}
         method="dialog"
         noValidate
+        className="yb-js-only"
         onSubmit={(e: FormEvent<HTMLFormElement>) => {
           e.preventDefault();
           submit();
@@ -121,6 +124,7 @@ export function NewsletterForm({ lang }: { lang: Lang }) {
       </noscript>
       {/* Zustands-Vorschau nur in der Vorschau-Umgebung (NEXT_PUBLIC_SHOW_GAPS=1) */}
       {SHOW_GAPS ? (
+      <div className="yb-js-only">
       <FormPreview
         lang={lang}
         value={preview}
@@ -131,6 +135,7 @@ export function NewsletterForm({ lang }: { lang: Lang }) {
           }
         }}
       />
+      </div>
       ) : null}
     </VStack>
   );

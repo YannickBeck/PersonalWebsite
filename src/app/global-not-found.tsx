@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { headers } from 'next/headers';
 import './globals.css';
 import { Section } from '@astryxdesign/core/Section';
 import { VStack } from '@astryxdesign/core/VStack';
@@ -9,6 +10,7 @@ import { Text } from '@astryxdesign/core/Text';
 import { BrandMark } from '@/components/brand-mark';
 import { THEME_BOOT } from '@/theme/theme-boot';
 import { getDictionary, withLang, type Lang } from '@/i18n/dictionaries';
+import { LANG_HEADER } from '@/lib/not-found-lang';
 import { FONT_VARIABLES } from './_shell/fonts';
 import styles from './global-not-found.module.css';
 import nf from '@/components/pages/not-found.module.css';
@@ -18,12 +20,19 @@ import nf from '@/components/pages/not-found.module.css';
  * weil es zwei Root-Layouts gibt ((de) und en, root-shell.tsx). notFound() innerhalb einer
  * Sprache rendert dagegen (de)/not-found.tsx bzw. en/not-found.tsx im normalen Rahmen.
  *
- * EIN statisches HTML für beide Sprachen: Jeder Text steht zweimal (Spans mit lang), CSS zeigt
- * die passende Fassung über html[data-yb-404="en"] – das Boot-Script setzt das Attribut und
- * lang="en" vor dem ersten Paint. Kein DOM-Austausch per Script: Next hydriert auch diese Seite,
- * geänderter Text ergäbe einen Hydration-Fehler (React #418, gemessen). Genau eine H1.
- * Ohne JS: deutsche Fassung plus eine englische Zeile mit Link. Status 404 setzt Next. Agenten
- * mit Accept: text/markdown bekommen eine Markdown-404 (next.config rewrites → /api/md).
+ * EIN HTML für beide Sprachen: Jeder Text steht zweimal (Spans mit lang), CSS zeigt die
+ * passende Fassung über html[data-yb-404="en"]. Kein DOM-Austausch per Script: Next hydriert
+ * auch diese Seite, geänderter Text ergäbe einen Hydration-Fehler (React #418, gemessen). Genau
+ * eine H1. Status 404 setzt Next. Agenten mit Accept: text/markdown bekommen eine Markdown-404
+ * (next.config rewrites → /api/md).
+ *
+ * Sprache (Rest-Feinschliff): Next ruft diese Seite ohne Pfad auf; src/proxy.ts setzt für /en/*
+ * den Anfrage-Header x-yb-lang (src/lib/not-found-lang.ts). Daraus kommen lang und
+ * data-yb-404 schon im Server-HTML – auch ohne JavaScript die englische Fassung, Agenten lesen
+ * lang="en". Dafür wird die Seite je Abruf gerendert (ƒ, ~5 statt ~2,5 ms lokal gemessen);
+ * gecacht wurde sie auch statisch nie (no-store). Vorher: statisches HTML mit lang="de", das
+ * Boot-Script schaltete unter /en vor dem ersten Paint um; ohne JavaScript blieb sie deutsch.
+ * Das Boot-Script setzt beides weiter (gleicher Wert, Rückfall ohne Proxy).
  *
  * Fix-Runde 1: Marke im <header>, Gegensprache und Rechtliches im <footer> (A125: nichts
  * außerhalb von Landmarks); die englische Fassung bekommt die Spiegelzeile zur deutschen
@@ -75,11 +84,18 @@ function label(href: (typeof LINKS)[number], lang: Lang): string {
         : dict.pages.kontakt.title;
 }
 
-export default function GlobalNotFound() {
+export default async function GlobalNotFound() {
   const de = getDictionary('de');
   const en = getDictionary('en');
+  const lang: Lang = (await headers()).get(LANG_HEADER) === 'en' ? 'en' : 'de';
   return (
-    <html lang="de" data-astryx-theme="yb" suppressHydrationWarning className={FONT_VARIABLES}>
+    <html
+      lang={lang}
+      data-yb-404={lang === 'en' ? 'en' : undefined}
+      data-astryx-theme="yb"
+      suppressHydrationWarning
+      className={FONT_VARIABLES}
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: NOT_FOUND_BOOT }} />
       </head>

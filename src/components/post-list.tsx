@@ -73,8 +73,11 @@ export function PostList({
 
   return (
     <VStack gap={6}>
+      {/* Suche und Themen filtern nur mit JavaScript – ohne fehlen sie, die Liste zeigt alle
+          Beiträge (yb-js-only, Rest-Feinschliff REG1; bisher nur im Vorschau-Build mit
+          Demo-Artikeln sichtbar) */}
       {hasTools ? (
-      <VStack gap={4}>
+      <VStack gap={4} className="yb-js-only">
       <VStack maxWidth={480}>
         <TextInput
           label={dict.searchLabel}
